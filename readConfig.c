@@ -1995,17 +1995,7 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	}
 	if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
 
-	/*************************** SAVE SYNTHESIS PROFILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->SaveSynthesisAdjusted,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Save Synthesis Profile Adjusted. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
+
 
 	return 1;
 
@@ -2027,8 +2017,10 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	fReadParameters = fopen(fileParameters, "r");
 	if (fReadParameters == NULL)
 	{
-		printf("Error opening the file of parameters, it's possible that the file doesn't exist. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		if(printLog){
+			printf("Error opening the file of parameters, it's possible that the file doesn't exist. Please verify it. \n");
+			printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		}
 		return 0;
 	}
 	int rfscanf; 
@@ -2206,6 +2198,18 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	if(printLog) printf("t2 to apply: %d\n", trolConfig->t2);
+
+	/*************************** SAVE SYNTHESIS PROFILE ********************************************/
+	
+	returnLine = fgets(LINE,4096,fReadParameters);
+	if(returnLine == NULL) return 0;						
+	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->SaveSynthesisAdjusted,comment);
+	if(rfscanf ==0 || rfscanf == EOF){
+		printf("Error reading the file of parameters, param Save Synthesis Profile Adjusted. Please verify it. \n");
+		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		return 0;		
+	}
+	if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
 
 	return 1;
 }

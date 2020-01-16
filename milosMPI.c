@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 	int numProcs, idProc;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &idProc);
+   MPI_Comm_rank(MPI_COMM_WORLD, &idProc);
 
 	/** DEFINE MPI TYPE TO SEND MODELS **/
 	MPI_Datatype mpiInitModel;
@@ -202,19 +202,27 @@ int main(int argc, char **argv)
 
 	loadInitialValues(&configCrontrolFile);
 	//readParametersFileInput(argv[1],&configCrontrolFile,(idProc==root));
-	readInitFile(argv[1],&configCrontrolFile,(idProc==root));
+	if(!readInitFile(argv[1],&configCrontrolFile,(idProc==root))){
+		if(idProc==root)
+			printf("\n\n ¡¡¡ ERROR READING INIT FILE !!! \n\n");
+		exit(EXIT_FAILURE);
+	}
+	
 	// check if type of file is FITS, in other case exit 
 	if(strcmp(configCrontrolFile.typeInputStokes,"fits")!=0){
-		printf("\n ERROR, the files in parallel version must be in FITS file only.\n");
+		if(idProc==root)
+			printf("\n ERROR, the files in parallel version must be in FITS file only.\n");
 		exit(EXIT_FAILURE);
 	}
 
 	// CHECK IF ONLY RECEIVED ONE FILE AND THE EXTENSION IS .FITS 
 	if(configCrontrolFile.t1 == 0 && configCrontrolFile.t2 ==0){ // then process only one file
-		if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),"fits")!=0){ 
-			printf("\n**********************************************************\n");
-			printf("\nERROR, without specify timeseries the value of control parameter 'Observed Profiles' must be a fits file\n");
-			printf("\n**********************************************************\n");
+		if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)!=0){ 
+			if(idProc==root){
+				printf("\n**********************************************************\n");
+				printf("\nERROR, without specify timeseries the value of control parameter 'Observed Profiles' must be a fits file\n");
+				printf("\n**********************************************************\n");
+			}
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -223,7 +231,10 @@ int main(int argc, char **argv)
 	FWHM = configCrontrolFile.FWHM;
 
 	/***************** READ INIT MODEL ********************************/
-	readInitialModel(&INITIAL_MODEL,configCrontrolFile.InitialGuessModel);	
+	if(!readInitialModel(&INITIAL_MODEL,configCrontrolFile.InitialGuessModel)){
+		printf("\n\n ¡¡¡ ERROR READING INIT MODEL !!! \n\n");
+		exit(EXIT_FAILURE);
+	}
 
 	/***************** READ WAVELENGHT FROM GRID OR FITS ********************************/
 	PRECISION * vGlobalLambda;
@@ -304,7 +315,11 @@ int main(int argc, char **argv)
 
 	// ********************************************* IF PSF HAS BEEN SELECTEC IN TROL READ PSF FILE OR CREATE GAUSSIAN FILTER ***********//
 	if(configCrontrolFile.ConvolveWithPSF){
-		if(access(nameInputFilePSF,F_OK) != -1){
+
+		if(configCrontrolFile.FWHM > 0){
+			G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
+		}
+		else if(access(nameInputFilePSF,F_OK) != -1){
 			// read the number of lines 
 				FILE *fp;
 				char ch;
@@ -338,10 +353,7 @@ int main(int argc, char **argv)
 					//PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambda0, PRECISION lambdaCentral, int nLambda, int * sizeG)
 					G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
 				}
-		}else{
-			G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
 		}
-
 
 		
 		//PSF FILTER PLANS 

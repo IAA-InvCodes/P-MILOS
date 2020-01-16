@@ -392,9 +392,9 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 	}
 
-	/*if(!macApplied && filter){
+	if(!macApplied && filter){
 		spectral_synthesis_convolution(&nlambda);
-	}*/
+	}
 
 	return 1;
 }
