@@ -1,0 +1,42 @@
+Number of cycles          (*):10          		! 0 = synthesis, n= max num of iterations, -1 = use classical estimates
+Observed profiles         (*):/home/mcabrera/SolarImages/fits_CRISP_spot/2014.09.28_09_18_00_t0   !
+Stray light file             :    				! (none=no stray light contam)
+PSF file                     :    				! si fichero .psf leer la psf numerica, si es un numero será la FWHM del filtro gaussiano, si es vacio no se tiene en cuenta
+Wavelength grid file      (s):run/malla.grid 	! (automatic selection, grid, or wavelength file)
+Atomic parameters file       :run/LINES      	! 
+Abundances file		         : 					! not used
+Initial guess model 1     (*):run/initModel.mod !
+Initial guess model 2        :					! not used for the moment
+Weight for Stokes I          :1               	! (DEFAULT=1; 0=not inverted)
+Weight for Stokes Q          :1                 ! (DEFAULT=1; 0=not inverted)
+Weight for Stokes U          :1                 ! (DEFAULT=1; 0=not inverted)
+Weight for Stokes V          :1                 ! (DEFAULT=1; 0=not inverted)
+AUTOMATIC SELECT. OF NODES?  :					! not used for the moment
+Nodes for S_0 1     	     :1              	! (0 or blank=no, 1=yes)
+Nodes for S_1 1		  	     :1                 ! (0 or blank=no, 1=yes)
+Nodes for eta0 1             :1                 ! (0 or blank=no, 1=yes)
+Nodes for magnetic field 1   :1					! (0 or blank=no, 1=yes)
+Nodes for LOS velocity 1     :1              	! (0 or blank=no, 1=yes)
+Nodes for gamma 1            :1             	! (0 or blank=no, 1=yes)
+Nodes for phi 1              :1              	! (0 or blank=no, 1=yes)
+Nodes for lambda_doppler 1   :1					! (0 or blank=no, 1=yes)
+Nodes for damping 1	     	 :1					! (0 or blank=no, 1=yes)
+Invert macroturbulence 1     :0                	! (0 or blank=no, 1=yes)
+Nodes for S_0 2     	     :0                 ! not used for the moment
+Nodes for S_1 2  	         :0                 ! not used for the moment                     
+Nodes for eta0 2             :0                 ! not used for the moment
+Nodes for magnetic field 2   :0					! not used for the moment
+Nodes for LOS velocity 2     :0              	! not used for the moment
+Nodes for gamma 2            :0              	! not used for the moment
+Nodes for phi 2              :0              	! not used for the moment
+Nodes for lambda_doppler 2   :0		  			! not used for the moment
+Nodes for damping 2	         :0					! not used for the moment
+Invert macroturbulence 2?    :0                 ! not used for the moment
+Invert filling factor?       :0                 ! not used for the moment
+Invert stray light factor?   :0                 ! (0 or blank=no, 1=yes)
+mu=cos (theta)               :1                 ! (DEFAULT: mu=1. mu<0 => West)
+Estimated S/N for I          :1000              ! 
+Continuum contrast           :1e-12             ! Not used for the moment
+Tolerance for SVD            :1e-3              ! (DEFAULT value: 1e-3)
+Initial diagonal element     :0.1               ! (DEFAULT value: 1.e-1)
+Save Synthesis Adjusted      :1                 ! (0 or blank = don't save file with adjusted stokes during inversion, 1 save it. Default value is 1)
