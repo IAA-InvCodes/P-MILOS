@@ -669,9 +669,9 @@ int main(int argc, char **argv)
 					//imageStokesAdjust->vLambdaImagen = calloc(imageStokesAdjust->numPixels*imageStokesAdjust->nLambdas, sizeof(PRECISION));
 					//imageStokesAdjust->spectroImagen = calloc(imageStokesAdjust->numPixels*imageStokesAdjust->nLambdas*imageStokesAdjust->numStokes, sizeof(PRECISION));
 					for( i=0;i<imageStokesAdjust->numPixels;i++){
-						imageStokesAdjust->pixels[i].spectro = calloc ((imageStokesAdjust->numStokes*imageStokesAdjust->nLambdas),sizeof(PRECISION));
-						imageStokesAdjust->pixels[i].vLambda = calloc (imageStokesAdjust->nLambdas, sizeof(PRECISION));
-						imageStokesAdjust->pixels[i].nLambda = imageStokesAdjust->nLambdas;
+						imageStokesAdjust->pixels[i].spectro = calloc ((imageStokesAdjust->numStokes*imageStokesAdjust->nLambdas),sizeof(float));
+						//imageStokesAdjust->pixels[i].vLambda = calloc (imageStokesAdjust->nLambdas, sizeof(PRECISION));
+						//imageStokesAdjust->pixels[i].nLambda = imageStokesAdjust->nLambdas;
 					}
 				}				
 				// check if read stray light
@@ -757,6 +757,8 @@ int main(int argc, char **argv)
 						printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",nameOutputFilePerfiles);
 					}
 				}
+				if(configCrontrolFile.SaveSynthesisAdjusted)
+					free(imageStokesAdjust);
 			}
 			else{
 				printf("\n\n ***************************** FITS FILE WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************\n");

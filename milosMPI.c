@@ -552,6 +552,8 @@ int main(int argc, char **argv)
 			printf("\n************************************************************************************************************************");
 
 			if(fitsImage!=NULL){
+
+				// FITS IMAGE TO STORE OUTPUT PROFILES ADJUSTED
 				FitsImage * imageStokesAdjust = NULL;
 				if(configCrontrolFile.SaveSynthesisAdjusted){
 					imageStokesAdjust = malloc(sizeof(FitsImage));
@@ -565,29 +567,11 @@ int main(int argc, char **argv)
 					imageStokesAdjust->pos_stokes_parameters = fitsImage->pos_stokes_parameters;
 					imageStokesAdjust->numPixels = fitsImage->numPixels;
 					imageStokesAdjust->pixels = calloc(imageStokesAdjust->numPixels, sizeof(vpixels));
-					//imageStokesAdjust->vLambdaImagen = calloc(imageStokesAdjust->numPixels*imageStokesAdjust->nLambdas, sizeof(PRECISION));
-					//imageStokesAdjust->spectroImagen = calloc(imageStokesAdjust->numPixels*imageStokesAdjust->nLambdas*imageStokesAdjust->numStokes, sizeof(PRECISION));
 					for( i=0;i<imageStokesAdjust->numPixels;i++){
 						imageStokesAdjust->pixels[i].spectro = calloc (nlambda*NPARMS,sizeof(float));
-						//imageStokesAdjust->pixels[i].vLambda = calloc (nlambda, sizeof(PRECISION));
 						imageStokesAdjust->pixels[i].nLambda = nlambda;
 					}
 				}
-
-
-				// INTERPOLATE PSF WITH ARRAY OF LAMBDA READ
-				/****************************************************************************************************/	
-				// THE NUMBER OF LAMBDAS IS READ FROM INPUT FILES 
-				//nlambda = fitsImage->nLambdas;
-				// check if read stray light
-				// COPY LAMBDA READ IN THE TOP OF FILE 
-				int contLambda = 0;
-				/*for( i=0;i<fitsImage->numPixels;i++){
-					for( j=0;j<nlambda;j++){
-						fitsImage->pixels[i].vLambda[j]=vGlobalLambda[j];
-						fitsImage->vLambdaImagen[contLambda++] = vGlobalLambda[j];
-					}
-				}*/
 
 				//***************************************** INIT MEMORY WITH SIZE OF LAMBDA ****************************************************//
 				InitializePointerShareCalculation();
@@ -742,15 +726,6 @@ int main(int argc, char **argv)
 				t = clock() - t;
 				PRECISION timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
 				printf("\n TIME TO READ FITS IMAGE %s:  %f seconds to execute . NUMBER OF PIXELS READ: %d \n",vInputFileSpectraParalell[indexInputFits].name, timeReadImage,fitsImage->numPixels); 
-				
-				// COPY LAMBDA READ IN THE TOP OF FILE 
-				int contLambda = 0;
-				/*for( i=0;i<fitsImage->numPixels;i++){
-					for( j=0;j<nlambda;j++){
-						fitsImage->pixels[i].vLambda[j]=vGlobalLambda[j];
-						fitsImage->vLambdaImagen[contLambda++] = vGlobalLambda[j];
-					}
-				}*/
 				numPixels = fitsImage->numPixels;
 			}
 			
@@ -805,7 +780,6 @@ int main(int argc, char **argv)
 
 			// SCATTER VPIXELS 
 			vSpectraSplit = calloc(sendcountsSpectro[idProc],sizeof(float));
-			//vLambdaSplit = calloc(sendcountsLambda[idProc],sizeof(PRECISION));
 			if(configCrontrolFile.SaveSynthesisAdjusted)
 				vSpectraAdjustedSplit = calloc(sendcountsSpectro[idProc],sizeof(float));
 			
@@ -813,11 +787,9 @@ int main(int argc, char **argv)
 			
 			if( root == idProc){
 				MPI_Scatterv(fitsImage->spectroImagen, sendcountsSpectro, displsSpectro, MPI_FLOAT, vSpectraSplit, sendcountsSpectro[idProc], MPI_FLOAT, root, MPI_COMM_WORLD);
-				//MPI_Scatterv(fitsImage->vLambdaImagen, sendcountsLambda, displsLambda, MPI_DOUBLE,vLambdaSplit, sendcountsLambda[idProc], MPI_DOUBLE, root, MPI_COMM_WORLD);
 			}
 			else{
 				MPI_Scatterv(NULL, NULL,NULL, MPI_DOUBLE, vSpectraSplit, sendcountsSpectro[idProc], MPI_DOUBLE, root, MPI_COMM_WORLD);
-				//MPI_Scatterv(NULL, NULL,NULL, MPI_DOUBLE, vLambdaSplit, sendcountsLambda[idProc], MPI_DOUBLE, root, MPI_COMM_WORLD);
 			}		
 			local_finish_scatter = MPI_Wtime();
 

@@ -296,7 +296,8 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 				//printf("\n ***********************************************");
 				for( i=0;i<image->numPixels;i++){
 					image->pixels[i].spectro = calloc ((image->numStokes*image->nLambdas),sizeof(float));
-					image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+					//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+					image->pixels[i].vLambda = NULL;
 					//image->pixels[i].vLambda = calloc (32, sizeof(PRECISION));
 					image->pixels[i].nLambda = image->nLambdas;
 				}
