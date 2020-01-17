@@ -56,6 +56,21 @@ sudo apt-get install libgsl*
 
 #### .per
 
+It's used to specify one profile. We will use it and input for inversion one pixel and as output for synthesis of one model.
+It contains 6 columns:
+
+* The first is the index of the spectral line used in the spectral lines file.
+* The second is the offset of wavelenght respect the central wavelenght. 
+* Value of I
+* Value of Q
+* Value of U
+* Value of V
+
+This is an example of one line: 
+
+```
+1	-0.350000	8.480462e-01	2.081567e-05	-3.810591e-05	-2.589682e-04
+```
 
 
 #### .fits 
