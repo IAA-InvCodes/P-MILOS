@@ -97,6 +97,24 @@ CTYPE4  = 'HPLT-TAN'
 
 If the observed spectra of all pixels use the same wavelength grid, the FITS file must contain a single, 2D array with dimension number of wavelength-points×2. The first column must contain the index with which the spectral line is identified according to the atomic parameter file.
 
+* Output Models 
+
+For save the output models of invert one image, the program use FITS. The data is saved in FLOAT precision and the dimensiones of image will be: numberOfRows X numberOfCols X 13. The number 13 comes from the eleven parameters of the model, the number of interations used by the algorithm to found the solution in that pixel and the value of Chisqr calculated for the result model of that pixel respect the input profile. Therefor, the order of the third dimension of the file will be: 
+
+  1. eta0 = line-to-continuum absorption coefficient ratio         
+  2. B = magnetic field strength       [Gauss]
+  3. vlos = line-of-sight velocity     [km/s]         
+  4. dopp = Doppler width              [Angstroms]
+  5. aa = damping parameter
+  6. gm = magnetic field inclination   [deg]
+  7. az = magnetic field azimuth       [deg]
+  8. S0 = source function constant
+  9. S1 = source function gradient
+  10. mac = macroturbulent velocity     [km/s]
+  11. alpha = filling factor of the magnetic component [0->1]
+  12. Number of iterations needed. 
+  13. Value of Chisqr. 
+
 #### .grid
 
 This is the file where you can specify the number of line from your file with spectral lines to use and the range of wavelenghts to use. This range will be specify with an initial lambda, a step between each wavelenght and the final lambda of the range. 
