@@ -82,10 +82,42 @@ If the observed spectra of all pixels use the same wavelength grid, the FITS fil
 
 #### .grid
 
+This is the file where you can specify the number of line from your file with spectral lines to use and the range of wavelenghts to use. This range will be specify with an initial lambda, a step between each wavelenght and the final lambda of the range. 
+
+Look this example:
+
+```
+Line indices            :   Initial lambda     Step     Final lambda
+(in this order)                    (mA)          (mA)         (mA) 
+-----------------------------------------------------------------------
+1                       :        -350            35           665
+```
+In the file [malla.grid](run/malla.grid) you can find an extended example. 
 
 
 #### .mod 
 
+These files will be used for three purposes:
+
+  1. For specify the initial model of a synthesis.  
+  2. For specify the initial model of a inversion. 
+  3. For save output model when we are doing the inversion of a profile stored in a .per file. 
+
+The order of parameters in the file must be always the same. This is an example: 
+
+```
+INITIAL_MODEL_ETHA0         :20
+INITIAL_MODEL_B             :1100
+INITIAL_MODEL_VLOS          :0.2
+INITIAL_MODEL_LAMBDADOPP    :0.03
+INITIAL_MODEL_AA            :0.05
+INITIAL_MODEL_GM            :120
+INITIAL_MODEL_AZI           :150
+INITIAL_MODEL_S0            :0.35
+INITIAL_MODEL_S1            :0.5
+INITIAL_MODEL_MAC           :0
+INITIAL_MODEL_ALFA          :1
+```
 
 
 ## Instalation
