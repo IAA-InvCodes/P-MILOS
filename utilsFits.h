@@ -21,7 +21,7 @@ void freeVpixels(vpixels * image, int numPixels);
  * @param fitsFileSpectra --> name of the fits file to read 
  * Return the image read or NULL if something was wrong during the lecture. 
  */
-FitsImage * readFitsSpectroImage (const char * fitsFileSpectra);
+FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel);
 
 
 
@@ -30,7 +30,7 @@ FitsImage * readFitsSpectroImage (const char * fitsFileSpectra);
  * @param fitsFileSpectra --> name of the fits file to read 
  * Return the image read or NULL if something was wrong during the lecture. 
  */
-FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, ConfigControl * configCrontrolFile);
+FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, ConfigControl * configCrontrolFile, int forParallel);
 
 /**
  * This function read the lambda values for the image from the file "fitsFileLambda" and store it into a struct of FitsImage. The file of spectro must

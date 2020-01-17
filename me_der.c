@@ -54,6 +54,8 @@ extern fftw_plan planFilterMAC, planFilterMAC_DERIV;
 extern fftw_complex * fftw_G_PSF, * fftw_G_MAC_PSF, * fftw_G_MAC_DERIV_PSF;
 extern fftw_complex * inPSF_MAC, * inMulMacPSF, * inPSF_MAC_DERIV, *inMulMacPSFDeriv, *outConvFilters, * outConvFiltersDeriv;
 extern fftw_plan planForwardPSF_MAC, planForwardPSF_MAC_DERIV,planBackwardPSF_MAC, planBackwardPSF_MAC_DERIV;
+extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
+extern fftw_plan planForwardPSF, planBackwardPSF;
 
 int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,PRECISION *d_spectra,PRECISION *spectra, PRECISION * spectra_slight, PRECISION ah,PRECISION * slight,int calcSpectra, int filter)
 {
@@ -65,7 +67,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 //	PRECISION *etai,*etaq,*etau,*etav,*rhoq,*rhou,*rhov;
 
 	PRECISION E00,LD,A,B1,MC,ALF;
-	int il,i,j;
+	int il,i,j,k;
 	PRECISION E0;	
 //	PRECISION ulos,*nubB,*nupB,*nurB;
 
@@ -668,7 +670,37 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		}*/
 	}
 	if(!macApplied && filter){
-		response_functions_convolution(&nlambda);
+		int h;
+		int odd=(numl%2);
+		int startShift = (numl)/2;
+		if(odd) startShift+=1;
+
+		for (j = 0; j < NPARMS; j++)
+		{
+			for (i = 0; i < NTERMS; i++)
+			{
+				if (i != 7)	{																														 //no convolucionamos S0
+					// copy to inSpectra
+					for(k=0;k<(numl);k++){
+						inSpectraFwPSF[k] = d_spectra[(numl * i + numl * NTERMS * j) + k] + 0 * _Complex_I;
+					}
+					fftw_execute(planForwardPSF);
+					for(h=0;h<numl;h++){
+						inSpectraBwPSF[h] = (outSpectraFwPSF[h]/numl) * fftw_G_PSF[h];
+					}
+					fftw_execute(planBackwardPSF);   			
+					//shift 
+					for(h=0,ishift=startShift;h<numl/2;h++,ishift++){
+						d_spectra[ishift+ numl * i + numl * NTERMS * j]=creal(outSpectraBwPSF[h])*numl;
+					}
+					for(h=(numl/2),ishift=0;h<numl;h++,ishift++){
+						d_spectra[ishift+numl * i + numl * NTERMS * j]=creal(outSpectraBwPSF[h])*numl;
+					}
+				}
+			}
+		}
+
+		//response_functions_convolution(&nlambda);
 	}
 	ResetPointerShareCalculation();
 	

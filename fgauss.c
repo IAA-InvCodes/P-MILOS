@@ -197,8 +197,8 @@ PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambd
 	//ild = (landa * MC) / 2.99792458e5; //Sigma
 
 	///Conversion from FWHM to Gaussian sigma (1./(2*sqrt(2*alog2)))
-	//PRECISION sigma=FWHM*0.42466090/1000.0; // in Angstroms
-	PRECISION sigma = FWHM / (2 * sqrt(2 * log(2)));
+	PRECISION sigma=FWHM*0.42466090/1000.0; // in Angstroms
+	//PRECISION sigma = FWHM * (2 * sqrt(2 * log(2)))/1000;
 
 	//printf("lambda0-> %f  ...sigma %lf\n",lambda0,sigma);
 

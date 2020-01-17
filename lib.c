@@ -30,7 +30,7 @@ return
 
 */
 
-int covarm(PRECISION *w,PRECISION *sig,PRECISION *spectro,int nspectro,PRECISION *spectra,PRECISION  *d_spectra,
+int covarm(PRECISION *w,PRECISION *sig,float *spectro,int nspectro,PRECISION *spectra,PRECISION  *d_spectra,
 		PRECISION *beta,PRECISION *alpha){	
 	
 	int j,i,bt_nf,bt_nc,aux_nf,aux_nc;
@@ -75,7 +75,7 @@ int covarm(PRECISION *w,PRECISION *sig,PRECISION *spectro,int nspectro,PRECISION
 
 
 
-PRECISION fchisqr(PRECISION * spectra,int nspectro,PRECISION *spectro,PRECISION *w,PRECISION *sig,PRECISION nfree){
+PRECISION fchisqr(PRECISION * spectra,int nspectro,float *spectro,PRECISION *w,PRECISION *sig,PRECISION nfree){
 	
 	PRECISION TOT,dif;	
 	PRECISION opa;

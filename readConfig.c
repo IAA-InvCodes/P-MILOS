@@ -717,12 +717,12 @@ void loadInitialValues(ConfigControl * configControlFile){
 
 	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
 	int i;
-	for(i=0;i<10;i++){
-		configControlFile->fix[i]= 1;
-		configControlFile->fix2[i]= 1;
+	for(i=0;i<11;i++){
+		configControlFile->fix[i]= 0;
+		configControlFile->fix2[i]= 0;
 	}
-	configControlFile->fix[10] = 0;
-	configControlFile->fix2[10]= 0;
+	/*configControlFile->fix[10] = 0;
+	configControlFile->fix2[10]= 0;*/
 
 	configControlFile->noise = NOISE_SIGMA;
 	configControlFile->sigma[0] = NOISE_SIGMA;

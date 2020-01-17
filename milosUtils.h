@@ -56,7 +56,7 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise);
 * @Date:  Nov. 2011
 *
 */
-void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, PRECISION *spectro, Init_Model *initModel);
+void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel);
 
 /**
  * 
@@ -71,7 +71,7 @@ void AplicaSlight(PRECISION * d_spectra, int numl, PRECISION ALFA, PRECISION * s
 			longitud nlambda
  * spectra : IQUV por filas, longitud ny=nlambda
  */
-int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, PRECISION *spectro, int nspectro,
+int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
 				Init_Model *initModel, PRECISION *spectra, PRECISION *chisqrf,
 				PRECISION * slight, PRECISION toplim, int miter, PRECISION *weight, int *fix,
 				PRECISION *sigma, PRECISION ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter);

@@ -188,7 +188,7 @@ int fvoigt(PRECISION damp,PRECISION *vv,int nvv,PRECISION *h, PRECISION *f);
  */
 struct VPIXEL {
 	PRECISION * vLambda;
-	PRECISION * spectro;
+	float * spectro;
 	int nLambda;
 };
 
@@ -221,7 +221,7 @@ struct FITS_IMAGE{
 	int numPixels;
 	vpixels * pixels;
 	PRECISION * vLambdaImagen;
-	PRECISION * spectroImagen;
+	float * spectroImagen;
 };
 
 typedef struct FITS_IMAGE FitsImage;

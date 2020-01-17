@@ -58,6 +58,8 @@ extern fftw_plan planFilterMAC, planFilterMAC_DERIV;
 extern fftw_complex * fftw_G_PSF, * fftw_G_MAC_PSF, * fftw_G_MAC_DERIV_PSF;
 extern fftw_complex * inPSF_MAC, * inMulMacPSF, * inPSF_MAC_DERIV, *inMulMacPSFDeriv, *outConvFilters, * outConvFiltersDeriv;
 extern fftw_plan planForwardPSF_MAC, planForwardPSF_MAC_DERIV,planBackwardPSF_MAC, planBackwardPSF_MAC_DERIV;
+extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
+extern fftw_plan planForwardPSF, planBackwardPSF;
 
 int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,PRECISION *spectra,
 			PRECISION ah,PRECISION * slight, PRECISION * spectra_mc, int filter)
@@ -393,7 +395,34 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 	}
 
 	if(!macApplied && filter){
-		spectral_synthesis_convolution(&nlambda);
+
+		
+	//int nlambda = NLAMBDA;
+	//convolucionamos los perfiles IQUV (spectra)			
+		odd=(numl%2);
+		
+		int startShift = numl/2;
+		if(odd) startShift+=1;
+
+		for (i = 0; i < NPARMS; i++){
+			for(j=0;j<numl;j++){
+				inSpectraFwPSF[j] = spectra[(numl*i)+j] + 0 * _Complex_I;
+			}
+			fftw_execute(planForwardPSF);
+			// multiplication fft results 
+			for(j=0;j<numl;j++){
+				inSpectraBwPSF[j] = (outSpectraFwPSF[j]/(numl)) * fftw_G_PSF[j];						
+			}
+			fftw_execute(planBackwardPSF);
+			//shift: -numln/2
+			for(j=0,ishift=startShift;j<(numl)/2;j++,ishift++){
+				spectra[ishift+i*(numl)]=creal(outSpectraBwPSF[j])*(numl);
+			}
+			for(j=(numl)/2,ishift=0;j<(numl);j++,ishift++){
+				spectra[ishift+i*(numl)]=creal(outSpectraBwPSF[j])*(numl);
+			}
+		}
+		//spectral_synthesis_convolution(&nlambda);
 	}
 
 	return 1;
