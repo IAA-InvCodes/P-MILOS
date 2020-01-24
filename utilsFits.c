@@ -171,14 +171,14 @@ void freeVpixels(vpixels * image, int numPixels){
  * fitsFileSpectra --> name of the fits file to read 
  * Return the image read or NULL if something was wrong during the lecture. 
  */
-FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel){
-   fitsfile *fptr;   /* FITS file pointer, defined in fitsio.h */
+/*FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel){
+   fitsfile *fptr;   
    FitsImage * image =  malloc(sizeof(FitsImage));
-   int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
+   int status = 0;   
 	PRECISION nulval = 0.; // define null value to 0 because the performance to read from fits file is better doing this. 
    int bitpix, naxis, anynul, numPixelsFitsFile;
-   long naxes [4] = {1,1,1,1}; /* The maximun number of dimension that we will read is 4*/
-	char comment[FLEN_CARD];   /* Standard string lengths defined in fitsio.h */
+   long naxes [4] = {1,1,1,1}; 
+	char comment[FLEN_CARD];   
 	
 	int i, j, k, h;
    // OPEN THE FITS FILE TO READ THE DEPTH OF EACH DIMENSION
@@ -194,9 +194,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 			if(fits_read_key(fptr, TSTRING, CTYPE2, image->ctype_2, comment, &status)) return 0;
 			if(fits_read_key(fptr, TSTRING, CTYPE3, image->ctype_3, comment, &status)) return 0;
 			if(fits_read_key(fptr, TSTRING, CTYPE4, image->ctype_4, comment, &status)) return 0;
-			/* if(fits_read_card(fptr, CUNIT1, image->cunit_1, &status)) return 0;
-			if(fits_read_card(fptr, CUNIT2, image->cunit_2, &status)) return 0;
-			if(fits_read_card(fptr, CUNIT3, image->cunit_3, &status)) return 0;*/
+
 
 			// GET THE CURRENT POSITION OF EVERY PARAMETER
 			int pos_lambda; 
@@ -230,24 +228,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 			// READ IMAGE AND STORAGE IN STRUCTURE IMAGE 
 			if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
 
-				/*int datatype = 0;
-				switch(bitpix) {
-              case BYTE_IMG:
-                  datatype = TBYTE;
-                  break;
-              case SHORT_IMG:
-                  datatype = TSHORT;
-                  break;
-              case LONG_IMG:
-                  datatype = TINT;
-                  break;
-              case FLOAT_IMG:
-                  datatype = TFLOAT;
-                  break;
-              case DOUBLE_IMG:
-                  datatype = TDOUBLE;
-                  break;
-          		}*/
+
 				image->rows=naxes[pos_row];
 				image->cols=naxes[pos_col];
 				image->nLambdas=naxes[pos_lambda];
@@ -412,6 +393,185 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 						}
 					}
 				}
+
+				free(imageTemp);
+				fits_close_file(fptr, &status);
+				if (status){
+					fits_report_error(stderr, status);
+					return NULL;
+				}				
+			}
+		}
+		else{
+			return NULL;  // we are interested only in FITS image
+		}
+	}
+   else{ // IN CASE AN ERROR OPENING THE FILE RETURN THE ERROR CODE
+      if (status) fits_report_error(stderr, status); 
+      return NULL;
+   }
+	
+	return image; 
+}*/
+
+FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel){
+   fitsfile *fptr;   /* FITS file pointer, defined in fitsio.h */
+   FitsImage * image =  malloc(sizeof(FitsImage));
+   int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
+	PRECISION nulval = 0.; // define null value to 0 because the performance to read from fits file is better doing this. 
+   int bitpix, naxis, anynul, numPixelsFitsFile;
+   long naxes [4] = {1,1,1,1}; /* The maximun number of dimension that we will read is 4*/
+	char comment[FLEN_CARD];   /* Standard string lengths defined in fitsio.h */
+	
+	int i, j, k, h;
+   // OPEN THE FITS FILE TO READ THE DEPTH OF EACH DIMENSION
+   if (!fits_open_file(&fptr, fitsFileSpectra, READONLY, &status)){
+      // READ THE HDU PARAMETER FROM THE FITS FILE
+      int hdutype;
+      fits_get_hdu_type(fptr, &hdutype, &status);
+
+		// We want only fits image 
+		if(hdutype==IMAGE_HDU){
+			// We assume that we have only on HDU as primary 
+			if(fits_read_key(fptr, TSTRING, CTYPE1, image->ctype_1, comment, &status)) return 0;
+			if(fits_read_key(fptr, TSTRING, CTYPE2, image->ctype_2, comment, &status)) return 0;
+			if(fits_read_key(fptr, TSTRING, CTYPE3, image->ctype_3, comment, &status)) return 0;
+			if(fits_read_key(fptr, TSTRING, CTYPE4, image->ctype_4, comment, &status)) return 0;
+			// ORDER MUST BE CTYPE1->'HPLN-TAN',CTYPE2->'HPLT-TAN',CTYPE3->'WAVE-GRI',CTYPE4->'STOKES'
+
+			/*if(strcmp(image->ctype_1,CTYPE_HPLN_TAN)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+			if(strcmp(image->ctype_2,CTYPE_HPLT_TAN)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+			if(strcmp(image->ctype_3,CTYPE_WAVE)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+			if(strcmp(image->ctype_4,CTYPE_STOKES)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}*/
+
+			// GET THE CURRENT POSITION OF EVERY PARAMETER
+			int pos_row = 2;
+			int pos_col = 3;
+			int pos_lambda = 0; 
+			int pos_stokes_parameters = 1;
+
+			// READ IMAGE AND STORAGE IN STRUCTURE IMAGE 
+			if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
+
+				/*int datatype = 0;
+				switch(bitpix) {
+              case BYTE_IMG:
+                  datatype = TBYTE;
+                  break;
+              case SHORT_IMG:
+                  datatype = TSHORT;
+                  break;
+              case LONG_IMG:
+                  datatype = TINT;
+                  break;
+              case FLOAT_IMG:
+                  datatype = TFLOAT;
+                  break;
+              case DOUBLE_IMG:
+                  datatype = TDOUBLE;
+                  break;
+          		}*/
+				image->rows=naxes[pos_row];
+				image->cols=naxes[pos_col];
+				image->nLambdas=naxes[pos_lambda];
+				image->numStokes=naxes[pos_stokes_parameters];
+				image->numPixels = naxes[pos_col] * naxes[pos_row]; // we will read the image by columns 
+				image->pos_lambda = pos_lambda;
+				image->pos_col = pos_col;
+				image->pos_row = pos_row;
+				image->pos_stokes_parameters = pos_stokes_parameters;
+				numPixelsFitsFile = naxes[pos_row]*naxes[pos_col]*naxes[pos_lambda]*naxes[pos_stokes_parameters];
+				//printf("\n NÚMERO DE PIXELES EN LA IMAGEN %d", numPixelsFitsFile);
+				//printf("\n**********************");
+				// allocate memory to read all pixels in the same array 
+				float * imageTemp = calloc(numPixelsFitsFile, sizeof(float));
+				if (!imageTemp)  {
+					printf("ERROR ALLOCATION MEMORY FOR TEMP IMAGE");
+					return NULL;
+          	}
+				
+				
+				long fpixel [4] = {1,1,1,1}; 
+				//double time2ReadPixels;
+				//clock_t t;
+				//t = clock();
+				fits_read_pix(fptr, TFLOAT, fpixel, numPixelsFitsFile, &nulval, imageTemp, &anynul, &status);
+				//t = clock() - t;
+				//time2ReadPixels = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+				//printf("\n TIME TO READ PIXELS:  %f seconds to execute \n", time2ReadPixels);				
+				if(status){
+					fits_report_error(stderr, status);
+               return NULL;	
+				}
+
+				// allocate memory for reorder the image
+				
+				if(forParallel){
+					//image->vLambdaImagen = calloc(image->numPixels*image->nLambdas, sizeof(PRECISION));
+					image->vLambdaImagen = NULL;
+					image->spectroImagen = calloc(image->numPixels*image->nLambdas*image->numStokes, sizeof(float));
+				}
+				else{
+					image->pixels = calloc(image->numPixels, sizeof(vpixels));
+					for( i=0;i<image->numPixels;i++){
+						image->pixels[i].spectro = calloc ((image->numStokes*image->nLambdas),sizeof(float));
+						//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+						image->pixels[i].vLambda = NULL;
+						image->pixels[i].nLambda = image->nLambdas;
+					}					
+					image->vLambdaImagen = NULL;
+					image->spectroImagen = NULL;
+				}
+				//printf("\n Número de pixeles: %d", image->numPixels);
+				//printf("\n ***********************************************");
+
+				
+				//PRECISION pixel;
+				if(naxis==4){ // image with 4 dimension 
+					
+					// i = stokes, j = lambda, k = cols, h = rows 		
+					/*for( i=0; i<naxes[3];i++){
+						for( j=0; j<naxes[2];j++){
+							for( k=0;k<naxes[1];k++){
+								for( h=0;h<naxes[0];h++){
+									image->pixels[(k*image->rows) + h].spectro[j + (image->nLambdas * i)] = imageTemp [(i*naxes[2]*naxes[1]*naxes[0]) + (j*naxes[1]*naxes[0]) + (k*naxes[0]) + h];  // I =0, Q = 1, U = 2, V = 3
+								}
+							}
+						}
+					}*/
+					// i = cols, j = rows, k = stokes, h = lambda
+					for( i=0; i<naxes[3];i++){
+						for( j=0; j<naxes[2];j++){
+							for( k=0;k<naxes[1];k++){
+								for( h=0;h<naxes[0];h++){
+									if(forParallel){
+										image->spectroImagen[ (((i*naxes[2]) + j)*(image->nLambdas*image->numStokes)) + (image->nLambdas * k) + h] = imageTemp [(i*naxes[2]*naxes[1]*naxes[0]) + (j*naxes[1]*naxes[0]) + (k*naxes[0]) + h];  // I =0, Q = 1, U = 2, V = 3
+									}
+									else{
+										image->pixels[(i*naxes[2]) + j].spectro[h + (image->nLambdas * k)] = imageTemp [(i*naxes[2]*naxes[1]*naxes[0]) + (j*naxes[1]*naxes[0]) + (k*naxes[0]) + h];  // I =0, Q = 1, U = 2, V = 3
+									}
+								}
+							}
+						}
+					}					
+					
+				}
+/*				if(forParallel){
+					int contSpectro = 0;
+					for( i=0;i<image->numPixels;i++){
+						for( j=0;j<(image->nLambdas*image->numStokes);j++){
+							image->spectroImagen[contSpectro++] = image->pixels[i].spectro[j];
+						}
+					}
+				}*/
 				/*printf("\n IMAGEN LEIDA size spectro %d ", contSpectro);
 				printf("**********");*/
 				free(imageTemp);
@@ -435,26 +595,24 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 }
 
 
+
 /**
  * @param fitsFileSpectra: name of file with FITS image. 
  * @param configControlFile: pointer to control structure with information relative to whole configuration of program. 
  * 
  * */
+/*
 FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, ConfigControl * configCrontrolFile, int forParallel){
 
-	/*myfile.fits[1:512:2, 2:512:2] - open a 256x256 pixel image
-		consisting of the odd numbered columns (1st axis) and
-		the even numbered rows (2nd axis) of the image in the
-		primary array of the file.
-	*/
 
-	fitsfile *fptr;   /* FITS file pointer, defined in fitsio.h */
+
+	fitsfile *fptr;   
 	FitsImage * image =  malloc(sizeof(FitsImage));
-   int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
+   int status = 0;   
 	PRECISION nulval = 0.; // define null value to 0 because the performance to read from fits file is better doing this. 
    int bitpix, naxis, anynul, numPixelsFitsFile;
-   long naxes [4] = {1,1,1,1}; /* The maximun number of dimension that we will read is 4*/
-	char comment[FLEN_CARD];   /* Standard string lengths defined in fitsio.h */
+   long naxes [4] = {1,1,1,1}; 
+	char comment[FLEN_CARD];   
 	
 	int i, j, k, h;
    // OPEN THE FITS FILE TO READ THE DEPTH OF EACH DIMENSION
@@ -470,9 +628,7 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 			if(fits_read_key(fptr, TSTRING, CTYPE2, image->ctype_2, comment, &status)) return 0;
 			if(fits_read_key(fptr, TSTRING, CTYPE3, image->ctype_3, comment, &status)) return 0;
 			if(fits_read_key(fptr, TSTRING, CTYPE4, image->ctype_4, comment, &status)) return 0;
-			/* if(fits_read_card(fptr, CUNIT1, image->cunit_1, &status)) return 0;
-			if(fits_read_card(fptr, CUNIT2, image->cunit_2, &status)) return 0;
-			if(fits_read_card(fptr, CUNIT3, image->cunit_3, &status)) return 0;*/
+
 
 			// GET THE CURRENT POSITION OF EVERY PARAMETER
 			int pos_lambda; 
@@ -506,24 +662,7 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 			// READ IMAGE AND STORAGE IN STRUCTURE IMAGE 
 			if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
 
-				/*int datatype = 0;
-				switch(bitpix) {
-              case BYTE_IMG:
-                  datatype = TBYTE;
-                  break;
-              case SHORT_IMG:
-                  datatype = TSHORT;
-                  break;
-              case LONG_IMG:
-                  datatype = TINT;
-                  break;
-              case FLOAT_IMG:
-                  datatype = TFLOAT;
-                  break;
-              case DOUBLE_IMG:
-                  datatype = TDOUBLE;
-                  break;
-          		}*/
+
 				//image->rows=naxes[pos_row];
 				image->rows=(configCrontrolFile->subx2-configCrontrolFile->subx1)+1;
 				//image->cols=naxes[pos_col];
@@ -559,9 +698,7 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 				fpixelEnd[pos_lambda] = naxes[pos_lambda];
 				fpixelEnd[pos_stokes_parameters] = naxes[pos_stokes_parameters];
 
-				/*for(i=0;i<4;i++){
-					printf("\n dim %d Position begin %lu position end %lu \n",i,fpixelBegin[i],fpixelEnd[i]);
-				}*/
+
 				//double time2ReadPixels;
 				//clock_t t;
 				//t = clock();
@@ -709,6 +846,208 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 						}
 					}
 				}
+
+				free(imageTemp);
+				fits_close_file(fptr, &status);
+				if (status){
+					fits_report_error(stderr, status);
+					return NULL;
+				}				
+			}
+		}
+		else{
+			return NULL;  // we are interested only in FITS image
+		}
+	}
+   else{ // IN CASE AN ERROR OPENING THE FILE RETURN THE ERROR CODE
+      if (status) fits_report_error(stderr, status); 
+      return NULL;
+   }
+	
+	return image; 
+}*/
+
+FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, ConfigControl * configCrontrolFile, int forParallel){
+
+
+
+	fitsfile *fptr;   /* FITS file pointer, defined in fitsio.h */
+	FitsImage * image =  malloc(sizeof(FitsImage));
+   int status = 0;   /* CFITSIO status value MUST be initialized to zero! */
+	PRECISION nulval = 0.; // define null value to 0 because the performance to read from fits file is better doing this. 
+   int bitpix, naxis, anynul, numPixelsFitsFile;
+   long naxes [4] = {1,1,1,1}; /* The maximun number of dimension that we will read is 4*/
+	char comment[FLEN_CARD];   /* Standard string lengths defined in fitsio.h */
+	
+	int i, j, k, h;
+   // OPEN THE FITS FILE TO READ THE DEPTH OF EACH DIMENSION
+   if (!fits_open_file(&fptr, fitsFileSpectra, READONLY, &status)){
+      // READ THE HDU PARAMETER FROM THE FITS FILE
+      int hdutype;
+      fits_get_hdu_type(fptr, &hdutype, &status);
+
+		// We want only fits image 
+		if(hdutype==IMAGE_HDU){
+			// We assume that we have only on HDU as primary 
+			if(fits_read_key(fptr, TSTRING, CTYPE1, image->ctype_1, comment, &status)) return 0;
+			if(fits_read_key(fptr, TSTRING, CTYPE2, image->ctype_2, comment, &status)) return 0;
+			if(fits_read_key(fptr, TSTRING, CTYPE3, image->ctype_3, comment, &status)) return 0;
+			if(fits_read_key(fptr, TSTRING, CTYPE4, image->ctype_4, comment, &status)) return 0;
+
+			// ORDER MUST BE CTYPE1->'HPLN-TAN',CTYPE2->'HPLT-TAN',CTYPE3->'WAVE-GRI',CTYPE4->'STOKES'
+
+			if(strcmp(image->ctype_1,CTYPE_HPLN_TAN)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+			if(strcmp(image->ctype_2,CTYPE_HPLT_TAN)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+			if(strcmp(image->ctype_3,CTYPE_WAVE)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+			if(strcmp(image->ctype_4,CTYPE_STOKES)!=0){
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+			}
+
+			// GET THE CURRENT POSITION OF EVERY PARAMETER
+			int pos_row = 0;
+			int pos_col = 1;
+			int pos_lambda = 2; 
+			int pos_stokes_parameters = 3;
+
+
+			// READ IMAGE AND STORAGE IN STRUCTURE IMAGE 
+			if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
+
+				/*int datatype = 0;
+				switch(bitpix) {
+              case BYTE_IMG:
+                  datatype = TBYTE;
+                  break;
+              case SHORT_IMG:
+                  datatype = TSHORT;
+                  break;
+              case LONG_IMG:
+                  datatype = TINT;
+                  break;
+              case FLOAT_IMG:
+                  datatype = TFLOAT;
+                  break;
+              case DOUBLE_IMG:
+                  datatype = TDOUBLE;
+                  break;
+          		}*/
+				//image->rows=naxes[pos_row];
+				if(configCrontrolFile->subx2==0 && configCrontrolFile->subx1==0){
+					image->rows = naxes[0];
+					configCrontrolFile->subx1 = 1;
+					configCrontrolFile->subx2 = naxes[0];
+				}
+				else			
+					image->rows=(configCrontrolFile->subx2-configCrontrolFile->subx1)+1;
+				
+				if(configCrontrolFile->suby2==0 && configCrontrolFile->suby1==0){
+					image->cols = naxes[1];
+					configCrontrolFile->suby1 = 1;
+					configCrontrolFile->suby2 = naxes[1];
+				}
+				else
+					image->cols= (configCrontrolFile->suby2-configCrontrolFile->suby1)+1;
+
+				image->nLambdas=naxes[2];
+				image->numStokes=naxes[3];
+
+				image->numPixels = image->cols * image->rows ; // we will read the image by columns 
+				image->pos_row = 0;
+				image->pos_col = 1;
+				image->pos_lambda = 2;
+				image->pos_stokes_parameters = 3;
+				numPixelsFitsFile = image->rows*image->rows*image->nLambdas*image->numStokes;
+				
+				
+				// allocate memory to read all pixels in the same array 
+				float * imageTemp = calloc(numPixelsFitsFile, sizeof(float));
+				if (!imageTemp)  {
+					printf("ERROR ALLOCATION MEMORY FOR TEMP IMAGE");
+					return NULL;
+          	}
+				
+				
+				long fpixelBegin [4] = {1,1,1,1}; 
+				long fpixelEnd [4] = {1,1,1,1}; 
+				long inc [4] = {1,1,1,1};
+				fpixelBegin[pos_row] = configCrontrolFile->subx1;
+				fpixelEnd[pos_row] = configCrontrolFile->subx2;
+
+				fpixelBegin[pos_col] = configCrontrolFile->suby1;
+				fpixelEnd[pos_col] = configCrontrolFile->suby2;
+
+				fpixelEnd[pos_lambda] = naxes[pos_lambda];
+				fpixelEnd[pos_stokes_parameters] = naxes[pos_stokes_parameters];
+
+				/*for(i=0;i<4;i++){
+					printf("\n dim %d Position begin %lu position end %lu \n",i,fpixelBegin[i],fpixelEnd[i]);
+				}*/
+				//double time2ReadPixels;
+				//clock_t t;
+				//t = clock();
+				fits_read_subset(fptr, TFLOAT, fpixelBegin, fpixelEnd, inc, &nulval, imageTemp, &anynul, &status);
+				//fits_read_pix(fptr, TDOUBLE, fpixel, numPixelsFitsFile, &nulval, imageTemp, &anynul, &status);
+				//t = clock() - t;
+				//time2ReadPixels = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+				//printf("\n TIME TO READ PIXELS:  %f seconds to execute \n", time2ReadPixels);				
+				if(status){
+					fits_report_error(stderr, status);
+               return NULL;	
+				}
+
+				// allocate memory for reorder the image
+				image->pixels = calloc(image->numPixels, sizeof(vpixels));
+				if(forParallel){
+					image->vLambdaImagen = calloc(image->numPixels*image->nLambdas, sizeof(float));
+					image->spectroImagen = calloc(image->numPixels*image->nLambdas*image->numStokes, sizeof(float));
+				}
+				else{
+					image->vLambdaImagen = NULL;
+					image->spectroImagen = NULL;
+				}
+				//printf("\n Número de pixeles: %d", image->numPixels);
+				//printf("\n ***********************************************");
+				for( i=0;i<image->numPixels;i++){
+					image->pixels[i].spectro = calloc ((image->numStokes*image->nLambdas),sizeof(float));
+					image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+					image->pixels[i].nLambda = image->nLambdas;
+				}
+				int currentLambda = 0, currentRow = 0, currentStokeParameter=0, currentCol = 0, currentPixel;
+				//PRECISION pixel;
+				if(naxis==4){ // image with 4 dimension 
+					
+					int sizeDim0 = (fpixelEnd[0]-(fpixelBegin[0]-1));
+					int sizeDim1 = (fpixelEnd[1]-(fpixelBegin[1]-1));
+					int sizeDim2 = (fpixelEnd[2]-(fpixelBegin[2]-1));
+					int sizeDim3 = (fpixelEnd[3]-(fpixelBegin[3]-1));
+					
+
+					// i = stokes, j = lambda, k = cols, h = rows 
+					for( i=0; i<sizeDim3;i++){
+						for( j=0; j<sizeDim2;j++){
+							for( k=0;k<sizeDim1;k++){
+								for( h=0;h<sizeDim0;h++){
+									//currentPixel = (k*image->rows) + h;
+									image->pixels[(k*image->rows) + h].spectro[j + (image->nLambdas * i)] = imageTemp [(i*(fpixelEnd[2]-(fpixelBegin[2]-1))*(fpixelEnd[1]-(fpixelBegin[1]-1))*(fpixelEnd[0]-(fpixelBegin[0]-1))) + (j*(fpixelEnd[1]-(fpixelBegin[1]-1))*(fpixelEnd[0]-(fpixelBegin[0]-1))) + (k*(fpixelEnd[0]-(fpixelBegin[0]-1))) + h];
+								}
+							}
+						}
+					}
+				}
+				if(forParallel){
+					int contSpectro = 0;
+					for( i=0;i<image->numPixels;i++){
+						for( j=0;j<(image->nLambdas*image->numStokes);j++){
+							image->spectroImagen[contSpectro++] = image->pixels[i].spectro[j];
+						}
+					}
+				}
 				/*printf("\n IMAGEN LEIDA size spectro %d ", contSpectro);
 				printf("**********");*/
 				free(imageTemp);
@@ -730,6 +1069,9 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 	
 	return image; 
 }
+
+
+
 
 /**
  * This function read the lambda values for the image from the file "fitsFileLambda" and store it into a struct of FitsImage. The file of spectro must
@@ -1056,7 +1398,7 @@ void freeFitsImage(FitsImage * image){
  * fixed = array with positions to write in the file, Positions are in the following order: 
  * [Eta0,Strength,Vlos,Lambdadopp,Damp,Gamma,Azimuth,S0,S1,Macro,Alpha]
  * */
-int writeFitsImageModels(const char * fitsFile, int numRows, int numCols, Init_Model * vInitModel, PRECISION * vChisqrf, int * vNumIterPixel, int addChiqr){
+int writeFitsImageModels(const char * fitsFile, int numRows, int numCols, Init_Model * vInitModel, float * vChisqrf, int * vNumIterPixel, int addChiqr){
 
 	fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
    int status;
@@ -1499,7 +1841,7 @@ int writeFitsImageModelsWithArray(char * fitsFile, int numRows, int numCols, PRE
 		return 0;
 	}
 
-	PRECISION * vModel = malloc(numRows * numCols * NUMBER_PARAM_MODELS);
+	float * vModel = malloc(numRows * numCols * NUMBER_PARAM_MODELS);
 
 	int indexModel = 0;
 	for( i=0;i<NUMBER_PARAM_MODELS;i++){
@@ -1554,7 +1896,7 @@ int writeFitsImageModelsWithArray(char * fitsFile, int numRows, int numCols, PRE
    nelements = naxes[0] * naxes[1] * naxes[2];          /* number of pixels to write */
 
     /* write the array of unsigned integers to the FITS file */
-   if ( fits_write_img(fptr, TUSHORT, fpixel, nelements, vModel, &status) ){
+   if ( fits_write_img(fptr, TFLOAT, fpixel, nelements, vModel, &status) ){
 		printerror( status );
 		free(vModel);
 		return 0;

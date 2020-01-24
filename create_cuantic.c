@@ -1,6 +1,6 @@
 
 #include "defines.h"
-#include "slog.h"
+
 int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISION su, PRECISION lu, PRECISION ju, PRECISION fos,int log);
 
 //data -> [lines, sl,ll,jl,su,lu,ju, fos]  (fos only if lines>1)

@@ -737,12 +737,18 @@ void loadInitialValues(ConfigControl * configControlFile){
 	configControlFile->saveChisqr = 1;
 	configControlFile->SaveSynthesisAdjusted=1;
 
+	configControlFile->subx1 = 0;
+	configControlFile->subx2 = 0;
+	configControlFile->suby1 = 0;
+	configControlFile->suby2 = 0;
+
 }
 
 int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, int printLog){
 
 	// try open the file with the 
 	FILE * fReadParameters;
+	float aux;
 	char LINE [4096], * returnLine;
 	char comment[200], name[100];
 	fReadParameters = fopen(fileParameters, "r");
@@ -873,7 +879,8 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[0],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
+	trolConfig->WeightForStokes[0] = aux;
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes I. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -885,7 +892,8 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[1],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
+	trolConfig->WeightForStokes[1] = aux;
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes Q. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -897,7 +905,8 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[2],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
+	trolConfig->WeightForStokes[2] = aux;
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes U. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -909,7 +918,8 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[3],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
+	trolConfig->WeightForStokes[3] = aux;
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes V. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -980,7 +990,8 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->InitialDiagonalElement,comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux ,comment);
+	trolConfig->InitialDiagonalElement = aux;
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Initial diagonal element. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -1296,7 +1307,8 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->noise,comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
+	trolConfig->noise = aux;
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param NOISE. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -1423,6 +1435,7 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 
 	// try open the file with the 
 	FILE * fReadParameters;
+	float aux;
 	char LINE [4096], * returnLine;
 	char comment[200], name[100];
 	fReadParameters = fopen(fileParameters, "r");
@@ -1587,48 +1600,52 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[0],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes I. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
+	trolConfig->WeightForStokes[0] = aux;
 	if(printLog) printf("Weight for Stokes I to apply: %lf\n", trolConfig->WeightForStokes[0]);
 
 	/*************************** WEIGHT FOT STOKES Q ********************************************/
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[1],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes Q. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
+	trolConfig->WeightForStokes[1] = aux;
 	if(printLog) printf("Weight for Stokes Q to apply: %lf\n", trolConfig->WeightForStokes[1]);
 
 	/*************************** WEIGHT FOT STOKES U ********************************************/
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[2],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes U. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
+	trolConfig->WeightForStokes[2] = aux;
 	if(printLog) printf("Weight for Stokes U to apply: %lf\n", trolConfig->WeightForStokes[2]);
 
 	/*************************** WEIGHT FOT STOKES V ********************************************/
 
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->WeightForStokes[3],comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Weight for Stokes V. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
+	trolConfig->WeightForStokes[3] = aux;
 	if(printLog) printf("Weight for Stokes V to apply: %lf\n", trolConfig->WeightForStokes[3]);
 
 
@@ -1987,12 +2004,13 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->InitialDiagonalElement,comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Initial diagonal element. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
+	trolConfig->InitialDiagonalElement = aux;
 	if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
 
 

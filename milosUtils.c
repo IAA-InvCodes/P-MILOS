@@ -1,8 +1,6 @@
 #include "lib.h"
 #include "defines.h"
 #include "milosUtils.h"
-//#include "nrutil.h"
-//#include "svdcmp.h"
 #include "time.h"
 #include <complex.h>
 #include <fftw3.h> //siempre a continuacion de complex.h
@@ -13,33 +11,27 @@
 #include <gsl/gsl_eigen.h>
 #include "fftw.h"
 #include "convolution.h"
-//#include "mkl_vsl.h"
-//#include "mkl_lapacke.h"
-
-#define tiempo(ciclos) asm volatile("rdtsc \n\t" \
-												: "=A"(ciclos))
 
 
-
-extern long long int c1, c2, cd, semi, c1a, c2a, cda; //variables de 64 bits para leer ciclos de reloj
-extern long long int c1total, cdtotal;
 
 extern PRECISION **PUNTEROS_CALCULOS_COMPARTIDOS;
 extern int POSW_PUNTERO_CALCULOS_COMPARTIDOS;
 extern int POSR_PUNTERO_CALCULOS_COMPARTIDOS;
 
-extern PRECISION *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
+extern REAL *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
 
-extern PRECISION *gp1, *gp2, *dt, *dti, *gp3, *gp4, *gp5, *gp6, *etai_2;
-extern PRECISION *dgp1, *dgp2, *dgp3, *dgp4, *dgp5, *dgp6, *d_dt;
-extern PRECISION *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
-extern PRECISION *dfi, *dshi;
-extern PRECISION *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
-extern PRECISION *spectra, *d_spectra, *spectra_mac;
-extern PRECISION *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
-extern PRECISION *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
-extern PRECISION *parcial1, *parcial2, *parcial3;
-extern PRECISION *nubB, *nupB, *nurB;
+extern REAL *gp1, *gp2, *dt, *dti, *gp3, *gp4, *gp5, *gp6, *etai_2;
+extern REAL *dgp1, *dgp2, *dgp3, *dgp4, *dgp5, *dgp6, *d_dt;
+extern REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
+extern REAL *dfi, *dshi;
+extern REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
+//extern PRECISION *spectra, *d_spectra, *spectra_mac;
+
+extern REAL *spectra, *d_spectra, *spectra_mac;
+extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
+extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
+extern REAL *parcial1, *parcial2, *parcial3;
+extern REAL *nubB, *nupB, *nurB;
 extern PRECISION *G,*GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
 extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
 extern fftw_plan planForwardPSF, planBackwardPSF;
@@ -122,7 +114,7 @@ void response_functions_convolution(int * nlambda)
 
 }
 
-void AplicaSlight(PRECISION * d_spectra, int numl, PRECISION ALFA, PRECISION * slight){
+void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, PRECISION * slight){
 	int par, il, i;
 	// Response Functions 
 	for(par=0;par<NPARMS;par++){
@@ -284,7 +276,7 @@ int check(Init_Model *model)
 }
 
 
-void FijaACeroDerivadasNoNecesarias(PRECISION *d_spectra, int *fixed, int nlambda)
+void FijaACeroDerivadasNoNecesarias(REAL *d_spectra, int *fixed, int nlambda)
 {
 
 	int In, j, i;
@@ -312,13 +304,10 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	
 	PRECISION *v, *w;
 	int i, j;
-	//	static PRECISION aux2[NTERMS*NTERMS];
 	static PRECISION aux2[NTERMS];
 	int aux_nf, aux_nc;
 	
 	epsilon = 1e-12;
-	
-	/**/
 	
 	gsl_vector *eval = gsl_vector_alloc (NTERMS);
   	gsl_matrix *evec = gsl_matrix_alloc (NTERMS, NTERMS);
@@ -328,39 +317,6 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 		h1[j] = h[j];
 	}
 
-	
-	//********************* USING SVD 
-	//svdcmp(h1, NTERMS, NTERMS, w, v);
-
-	//******************** USING DIVIDE AND CONQUER
-	// TRY USE LAPACKE_dsyevd to calculate eigenvalues and eigenvectors 
-	/*MKL_INT n = NTERMS, lda = NTERMS, info;
-		// Solve eigenproblem 
-	info = LAPACKE_dsyevd( LAPACK_ROW_MAJOR, 'V', 'U', n, h1, lda, w );
-		// Check for convergence 
-	if( info > 0 ) {
-		printf( "The algorithm failed to compute eigenvalues.\n" );
-		exit( 1 );
-	}
-	*/
-
-	//******************** USING Relatively Robust Representations 
-	/*int LDA, LDZ , N;
-	LDA = LDZ = N = NTERMS;
-	MKL_INT n = N, il, iu, m, lda = LDA, ldz = LDZ, info;
-	PRECISION abstol, vl, vu;
-	MKL_INT isuppz [2*N];
-	PRECISION w3[N], z[LDZ*N];
-	abstol = -1.0;
-	printf("\n tamaños n %d, m %d , lda %d, ldz %d, abstol %lf \n",n,m,lda,ldz,abstol );
-	printf("\n ****\n");
-	LAPACKE_dsyevr( LAPACK_ROW_MAJOR, 'V', 'A', 'U', n, h1, lda, vl, vu, il, iu, abstol, &m, w3, z, ldz, isuppz );
-	//info = LAPACKE_dsyev( LAPACK_ROW_MAJOR, 'V', 'U', n, h1, lda, w );
-	printf("\n realizado\n");
-	printf("\n**************");*/
-
-
-	//********************* USING GSL ************************/
 	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h1, NTERMS, NTERMS);
 	gsl_eigen_symmv_workspace * workspace = gsl_eigen_symmv_alloc (NTERMS);
 	gsl_eigen_symmv(&gsl_h1.matrix, eval, evec, workspace);
@@ -368,30 +324,14 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	w = gsl_vector_ptr(eval,0);
 	v = gsl_matrix_ptr(evec,0,0);
 
-
-	static PRECISION vaux[NTERMS * NTERMS], waux[NTERMS];
-
-	for (j = 0; j < NTERMS * NTERMS; j++)
-	{
-		vaux[j] = v[j]; 
-	}
-
-	for (j = 0; j < NTERMS; j++)
-	{
-		waux[j] = w[j]; 
-	}
-
-	//multmatrixCblas(beta, 1, NTERMS, vaux, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
-	multmatrix(beta, 1, NTERMS, vaux, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
+	multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
 
 	for (i = 0; i < NTERMS; i++)
 	{
-      aux2[i]= aux2[i]*((fabs(waux[i]) > epsilon) ? (1/waux[i]): 0.0);
+		aux2[i]= aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
 	}
 
-	multmatrix(vaux, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
-	//multmatrixCblas(vaux, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
-
+	multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
 	
 	gsl_vector_free(eval);
 	gsl_matrix_free(evec);
@@ -474,7 +414,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	}
 
 	//Para evitar nan
-	if (fabs(y) > 1e-15)
+	if (FABS(y) > 1e-15)
 		LM_lambda_plus = x / y;
 	else
 		LM_lambda_plus = 0;
@@ -488,7 +428,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 		y = y + aux;
 	}
 
-	if (fabs(y) > 1e-15)
+	if (FABS(y) > 1e-15)
 		LM_lambda_minus = x / y;
 	else
 		LM_lambda_minus = 0;
@@ -518,19 +458,19 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	y = 0;
 	for (i = 0; i < nlambda - 1; i++)
 	{
-		L = fabs(sqrtf(spectroQ[i] * spectroQ[i] + spectroU[i] * spectroU[i]));
-		m = fabs((4 * (lambda_aux[i] - lambda_0) * L)); // / (3*C*Blos) ); //2*3*C*Blos mod abril 2016 (en test!)
+		L = FABS(SQRT(spectroQ[i] * spectroQ[i] + spectroU[i] * spectroU[i]));
+		m = FABS((4 * (lambda_aux[i] - lambda_0) * L)); // / (3*C*Blos) ); //2*3*C*Blos mod abril 2016 (en test!)
 
-		x = x + fabs(spectroV[i]) * m;
-		y = y + fabs(spectroV[i]) * fabs(spectroV[i]);
+		x = x + FABS(spectroV[i]) * m;
+		y = y + FABS(spectroV[i]) * FABS(spectroV[i]);
 
 	}
 
-	y = y * fabs((3 * C * Blos));
+	y = y * FABS((3 * C * Blos));
 
-	tan_gamma = fabs(sqrtf(x / y));
+	tan_gamma = FABS(SQRT(x / y));
 
-	gamma_rad = atan(tan_gamma); //gamma en radianes
+	gamma_rad = ATAN(tan_gamma); //gamma en radianes
 
 	gamma = gamma_rad * (180 / PI); //gamma en grados
 
@@ -553,7 +493,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	tan2phi = spectroU[muestra] / spectroQ[muestra];
 
-	phi = (atan(tan2phi) * 180 / PI) / 2; //atan con paso a grados
+	phi = (ATAN(tan2phi) * 180 / PI) / 2; //atan con paso a grados
 
 	if (spectroU[muestra] > 0 && spectroQ[muestra] > 0)
 		phi = phi;
@@ -566,7 +506,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	PRECISION B_aux;
 
-	B_aux = fabs(Blos / cos(gamma_rad)) * 2; // 2 factor de corrección
+	B_aux = FABS(Blos / COS(gamma_rad)) * 2; // 2 factor de corrección
 
 	//Vlos = Vlos * 1.5;
 	if (Vlos < (-20))
@@ -598,9 +538,9 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
  */
 
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
-				Init_Model *initModel, PRECISION *spectra, PRECISION *chisqrf,
-				PRECISION * slight, PRECISION toplim, int miter, PRECISION *weight, int *fix,
-				PRECISION *sigma, PRECISION ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter)
+				Init_Model *initModel, REAL *spectra, float *chisqrf,
+				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
+				REAL *sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter)
 {
 
 	
@@ -609,9 +549,9 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	static PRECISION delta[NTERMS];
 	
 	int iter_chisqr_same;
-	PRECISION flambda;
-	static PRECISION beta[NTERMS], alpha[NTERMS * NTERMS];
-	PRECISION chisqr, ochisqr;
+	REAL flambda;
+	static REAL beta[NTERMS], alpha[NTERMS * NTERMS];
+	REAL chisqr, ochisqr;
 	int clanda, ind;
 	Init_Model model;
 	//static PRECISION sigmaTemp[4] = {1.0, 1.0, 1.0, 1.0};
@@ -627,7 +567,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	if (fix == NULL)
 	{
-		fixed = calloc(NTERMS, sizeof(PRECISION));
+		static int fixed_static[NTERMS];
+		fixed  = fixed_static;
 		for (i = 0; i < NTERMS; i++)
 		{
 			fixed[i] = 1;
@@ -649,187 +590,57 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, AH,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
 	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra,AH, slight, 0,*INSTRUMENTAL_CONVOLUTION);
 
-	/*mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, AH,NULL,spectra_mac, 0);
-	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, AH, slight,0,0);	
-	if(*INSTRUMENTAL_CONVOLUTION){
-		spectral_synthesis_convolution(&nlambda);
-		response_functions_convolution(&nlambda);
-	}*/
-
-
-	/*if(slight!=NULL){
-		AplicaSlight(d_spectra,nlambda,initModel->alfa,slight);
-	}*/
-	//convolucionamos los perfiles IQUV (spectra) y convolucionamos las funciones respuesta ( d_spectra )
-	
-
-	/*printf("\nVALORES DE LAS FUNCIONES RESPUESTA MACROTURBULENCIA \n");
-	int number_parametros = 0;
-	for (number_parametros = 0; number_parametros < NTERMS; number_parametros++)
-	{
-		if(number_parametros==9){
-			printf("\n FUNCION RESPUESTA: %d \n",number_parametros);
-			for (int kk = 0; kk < nlambda; kk++)
-			{
-				printf("1\t%lf\t%le\t%le\t%le\t%le\n", lambda[kk],
-				d_spectra[kk + nlambda * number_parametros],
-				d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS],
-				d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS * 2],
-				d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS * 3]);
-			}
-		}
-	}
-	printf("\n");	
-
-	printf("\n valores de spectro sintetizado INICIAL\n");
-	for (int kk = 0; kk < nlambda; kk++)
-	{
-		printf("1\t%f\t%le\t%le\t%le\t%le\n", lambda[kk], spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
-	}*/
-
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
 	covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
-	//covarm(weight, sigmaTemp, spectro, nlambda, spectra, d_spectra, beta, alpha);
 
 	for (i = 0; i < NTERMS; i++)
 		betad[i] = beta[i];
 
-	//printf("\nALPHA: \n");
 	for (i = 0; i < NTERMS * NTERMS; i++){
 		covar[i] = alpha[i];
-		//printf("%f, ",alpha[i]);
 	}
-	//printf("\n");
-	/**************************************************************************/
+
 
 	ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
-	//ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigmaTemp, nfree);
-
-	//printf("\n OBJETIVED CHISQR: %0.10f\n",ochisqr);
-	//printf("\n FLAMBDA INICIAL: %lf\n",flambda);
-	chisqr_mem = (PRECISION)ochisqr;
+	chisqr_mem = (REAL)ochisqr;
 	iter_chisqr_same = 0;
 
 	model = *initModel;
 	
 	do
 	{
-
+		
+		// CHANGE VALUES OF DIAGONAL 
 		for (i = 0; i < NTERMS; i++)
 		{
 			ind = i * (NTERMS + 1);
 			covar[ind] = alpha[ind] * (1.0 + flambda);
 		}
 
-		/*printf("\n COVAR \n");
-		for (i = 0; i < NTERMS * NTERMS; i++){
-			printf("%f, ",covar[i]);
-		}
-		printf("\n");*/
-
 		mil_svd(covar, betad, delta);
-		/*printf("\n DELTA CALCULADO POR EL SVD: \n");
-		for( i =0; i< NTERMS;i++){
-			printf("%f,",delta[i]);
-		}*/
-		/*printf("\n BETAD CALCULADO POR EL SVD: \n");
-		for( i =0; i< NTERMS;i++){
-			printf("%f,",betad[i]);
-		}
-		printf("\n");*/
-
 		AplicaDelta(initModel, delta, fixed, &model);
 
 		check(&model);
-
-		
-		/**************************************************************************/
-		//=[Eta0,Strength,Vlos,Lambdadopp,Damp,Gamma,Azimuth,S0,S1,Macro,Alpha]
-		//printf("\n MODELO INICIAL FUNCIONES RESPUESTA: %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n",model.eta0,model.B,model.vlos,model.dopp,model.aa,model.gm,model.az,model.S0,model.S1,model.mac,model.alfa);
-
-
-		//mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, AH,NULL,spectra_mac,0);
 		mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, AH,slight,spectra_mac,*INSTRUMENTAL_CONVOLUTION);
-		/*printf("\n valores de spectro sintetizado con MIL_SINRF sin aplicar PSF %d\n", *iter);
-		for (int kk = 0; kk < nlambda; kk++)
-		{
-			printf("1\t%f\t%le\t%le\t%le\t%le\n", lambda[kk], spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
-		}*/
-			
-		
-		/*if(*INSTRUMENTAL_CONVOLUTION){			
-			spectral_synthesis_convolution(&nlambda);
-		}*/
-		/*printf("\n valores de spectro sintetizado con MIL_SINRF en la iteracion %d\n", *iter);
-		for (int kk = 0; kk < nlambda; kk++)
-		{
-			printf("1\t%f\t%le\t%le\t%le\t%le\n", lambda[kk], spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
-		}
-		*/
+	
 		chisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
-		//chisqr = fchisqr(spectra, nspectro, spectro, weight, sigmaTemp, nfree);
-		
 		
 		/**************************************************************************/
-		if(chisqr == chisqr_mem){
-			iter_chisqr_same++;
-			if(iter_chisqr_same>=3) // exit after 4 iterations with chisqr equal
-				clanda = 1;
-		}
-		else
-		{
-			chisqr_mem = chisqr;
-		}
 
 		//printf("\n CHISQR EN LA ITERACION %d,: %e",*iter,chisqr);
 		
 		/**************************************************************************/
-		if ((fabs((ochisqr-chisqr)*100/chisqr) < toplim) || (chisqr < 0.00001)) // condition to exit of the loop 
+		if ((FABS((ochisqr-chisqr)*100/chisqr) < toplim) || (chisqr < 0.0001)) // condition to exit of the loop 
 			clanda = 1;		
 		if (chisqr - ochisqr < 0.)
 		{
 
 			flambda = flambda / 10.0;
-
 			*initModel = model;
-
-			//printf("iteration=%d , chisqr = %e CONVERGE	- ilambda= %e \n",*iter,chisqr,flambda);
-
-
-			//me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, AH, slight,0,0);
 			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, AH, slight,0,*INSTRUMENTAL_CONVOLUTION);
-
-			//convolucionamos las funciones respuesta ( d_spectra )
-			
-			/*if(*INSTRUMENTAL_CONVOLUTION){
-				response_functions_convolution(&nlambda);
-			}*/
-
-			/*printf("\nVALORES DE LAS FUNCIONES RESPUESTA MACROTURBULENCIA \n");
-			int number_parametros = 0;
-			for (number_parametros = 0; number_parametros < NTERMS; number_parametros++)
-			{
-				if(number_parametros==9){
-					printf("\n FUNCION RESPUESTA: %d \n",number_parametros);
-					for (int kk = 0; kk < nlambda; kk++)
-					{
-						printf("1\t%lf\t%le\t%le\t%le\t%le\n", lambda[kk],
-						d_spectra[kk + nlambda * number_parametros],
-						d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS],
-						d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS * 2],
-						d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS * 3]);
-					}
-				}
-			}
-			printf("\n");
-
-			exit(1);*/
-
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
 			covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
-			//covarm(weight, sigmaTemp, spectro, nlambda, spectra, d_spectra, beta, alpha);
 			
-
 			for (i = 0; i < NTERMS; i++)
 				betad[i] = beta[i];
 
@@ -842,8 +653,6 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		else
 		{
 			flambda = flambda * 10; //10;
-
-			//printf("iteration=%d , chisqr = %e NOT CONVERGE	- lambda= %e \n",*iter,ochisqr,flambda);
 		}
 
 		if ((flambda > 1e+7) || (flambda < 1e-25)) 

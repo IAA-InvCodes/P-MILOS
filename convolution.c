@@ -25,16 +25,77 @@
 
 	_juanp
 */
+extern REAL *dirConvPar;
 
-void direct_convolution(PRECISION *x, int nx, PRECISION *h, int nh, PRECISION delta)
+void direct_convolution(REAL *x, int nx, REAL *h, int nh, PRECISION delta)
 {
 
-	PRECISION *x_aux;
+	
+	int nx_aux;
+	int k, j;
+
+	nx_aux = nx + nh - 1; // tamano de toda la convolucion
+	
+
+	int mitad_nh = nh / 2;
+   
+	// rellenamos el vector auxiliar
+	for (k = 0; k < nx_aux; k++)
+	{
+		dirConvPar[k] = 0;
+	}
+
+	for (k = 0; k < nx; k++)
+	{
+		dirConvPar[k + mitad_nh] = x[k];
+	}
+
+	// vamos a tomar solo la convolucion central
+	
+	for (k = 0; k < nx; k++)
+	{
+		x[k] = 0;
+		
+		for (j = 0; j < nh; j++)
+		{
+			x[k] += h[j] * dirConvPar[j + k];
+		}
+		//x[k] *= delta;
+	}
+
+}
+void convolve(REAL * Signal, size_t SignalLen, REAL * Kernel, size_t KernelLen)
+{
+  size_t n;
+
+  for (n = 0; n < SignalLen + KernelLen - 1; n++)
+  {
+    size_t kmin, kmax, k;
+
+    dirConvPar[n] = 0;
+
+    kmin = (n >= KernelLen - 1) ? n - (KernelLen - 1) : 0;
+    kmax = (n < SignalLen - 1) ? n : SignalLen - 1;
+
+    for (k = kmin; k <= kmax; k++)
+    {
+      dirConvPar[n] += Signal[k] * Kernel[n - k];
+    }
+  }
+  for(n=0; n<SignalLen;n++){
+	  Signal[n]=dirConvPar[n];
+  }
+}
+
+/*void direct_convolution(REAL *x, int nx, REAL *h, int nh, PRECISION delta)
+{
+
+	REAL *x_aux;
 	int nx_aux;
 	int k, j;
 
 	nx_aux = nx + nh - 1; //tamano de toda la convolucion
-	x_aux = calloc(nx_aux, sizeof(PRECISION));
+	x_aux = calloc(nx_aux, sizeof(REAL));
 
 	int mitad_nh = nh / 2;
    
@@ -64,5 +125,5 @@ void direct_convolution(PRECISION *x, int nx, PRECISION *h, int nh, PRECISION de
 	}
 
 	free(x_aux);
-}
+}*/
 

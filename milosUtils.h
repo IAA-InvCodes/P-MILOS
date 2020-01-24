@@ -24,7 +24,7 @@ int check(Init_Model *Model);
 /**
  * 
  */
-void FijaACeroDerivadasNoNecesarias(PRECISION *d_spectra, int *fixed, int nlambda);
+void FijaACeroDerivadasNoNecesarias(REAL *d_spectra, int *fixed, int nlambda);
 
 /**
  * 
@@ -61,7 +61,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 /**
  * 
  * */
-void AplicaSlight(PRECISION * d_spectra, int numl, PRECISION ALFA, PRECISION * slight);
+void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, PRECISION * slight);
 
 /*
  *
@@ -71,12 +71,11 @@ void AplicaSlight(PRECISION * d_spectra, int numl, PRECISION ALFA, PRECISION * s
 			longitud nlambda
  * spectra : IQUV por filas, longitud ny=nlambda
  */
+
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
-				Init_Model *initModel, PRECISION *spectra, PRECISION *chisqrf,
-				PRECISION * slight, PRECISION toplim, int miter, PRECISION *weight, int *fix,
-				PRECISION *sigma, PRECISION ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter);
-
-
+				Init_Model *initModel, REAL *spectra, float *chisqrf,
+				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
+				REAL *sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter);
 
 /**
  * Make the interpolation between deltaLambda and PSF where deltaLambda es x and PSF f(x)
