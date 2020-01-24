@@ -9,7 +9,8 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_eigen.h>
-#include "fftw.h"
+#include <complex.h>
+#include <fftw3.h> //siempre a continuacion de complex.h
 #include "convolution.h"
 
 
