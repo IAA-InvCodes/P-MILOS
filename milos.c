@@ -46,7 +46,7 @@
 #include <unistd.h>
 #include <complex.h>
 #include <fftw3.h> //siempre a continuacion de complex.h
-#include "fftw.h"
+
 
 Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
 
@@ -62,7 +62,7 @@ REAL *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
 REAL *dgp1, *dgp2, *dgp3, *dgp4, *dgp5, *dgp6, *d_dt;
 REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
 REAL *dfi, *dshi;
-PRECISION CC, CC_2, sin_gm, azi_2, sinis, cosis, cosis_2, cosi, sina, cosa, sinda, cosda, sindi, cosdi, sinis_cosa, sinis_sina;
+REAL CC, CC_2, sin_gm, azi_2, sinis, cosis, cosis_2, cosi, sina, cosa, sinda, cosda, sindi, cosdi, sinis_cosa, sinis_sina;
 REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
 REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 	   vLambda = calloc(nlambda,sizeof(PRECISION));
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(nameInputFileLines,dat,indexLine,1);
 		if(configCrontrolFile.CentralWaveLenght==0){
-			printf("\n CUANTIC LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVE LENGHT: %f",configCrontrolFile.CentralWaveLenght);
+			printf("\n QUANTUM LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVE LENGHT: %f",configCrontrolFile.CentralWaveLenght);
 			exit(1);
 		}
 		vLambda[0]=configCrontrolFile.CentralWaveLenght+(initialLambda);
@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 		}
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(nameInputFileLines,dat,indexLine,1);
 		if(configCrontrolFile.CentralWaveLenght==0){
-			printf("\n CUANTIC LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVE LENGHT: %f",configCrontrolFile.CentralWaveLenght);
+			printf("\n QUANTUM LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVE LENGHT: %f",configCrontrolFile.CentralWaveLenght);
 			exit(1);
 		}		
 	}

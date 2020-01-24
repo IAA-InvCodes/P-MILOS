@@ -37,10 +37,10 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 
 	int *m1, *m2, im, i, j;
 	int jj, n_pi, n_sig;
-	PRECISION g1, g2, geff;
-	PRECISION *pi, *sig1, *sig2, *mpi, *msig1, *msig2;
+	REAL g1, g2, geff;
+	REAL *pi, *sig1, *sig2, *mpi, *msig1, *msig2;
 	int ipi, isig1, isig2;
-	PRECISION sumpi, sumsig1, sumsig2;
+	REAL sumpi, sumsig1, sumsig2;
 
 	//lande factors (with 'if' because j could be cero)
 	if (jl != 0)
@@ -82,12 +82,12 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 	//RED COMPONENT => Mlo-Mup = -1
 	//CENTRAL COMPONENT => Mlo-Mup = 0
 
-	pi = calloc(n_pi, sizeof(PRECISION));
-	sig1 = calloc(n_sig, sizeof(PRECISION));
-	sig2 = calloc(n_sig, sizeof(PRECISION));
-	mpi = calloc(n_pi, sizeof(PRECISION));
-	msig1 = calloc(n_sig, sizeof(PRECISION));
-	msig2 = calloc(n_sig, sizeof(PRECISION));
+	pi = calloc(n_pi, sizeof(REAL));
+	sig1 = calloc(n_sig, sizeof(REAL));
+	sig2 = calloc(n_sig, sizeof(REAL));
+	mpi = calloc(n_pi, sizeof(REAL));
+	msig1 = calloc(n_sig, sizeof(REAL));
+	msig2 = calloc(n_sig, sizeof(REAL));
 
 	//counters for the components
 	ipi = 0;

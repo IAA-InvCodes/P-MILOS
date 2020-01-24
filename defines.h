@@ -114,7 +114,7 @@ struct INIT_MODEL{
 
 struct CUANTIC{  
 	
-	PRECISION N_PI;
+	/*PRECISION N_PI;
 	PRECISION N_SIG;
 	PRECISION * NUB;//size stored in  n_sig
 	PRECISION * NUP;//size stored in n_pi
@@ -125,7 +125,20 @@ struct CUANTIC{
 	PRECISION GL;
 	PRECISION GU;
 	PRECISION GEFF;
-	PRECISION FO;	
+	PRECISION FO;	*/
+
+	REAL N_PI;
+	REAL N_SIG;
+	REAL * NUB;//size stored in  n_sig
+	REAL * NUP;//size stored in n_pi
+	REAL * NUR;//size stored in n_sig
+	REAL * WEB;//size stored in n_sig
+	REAL * WEP;//size stored in n_pi
+	REAL * WER;//size stored in n_sig
+	REAL GL;
+	REAL GU;
+	REAL GEFF;
+	REAL FO;	
 	
 };
 

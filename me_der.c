@@ -1,12 +1,13 @@
 #include "defines.h"
 #include "lib.h"
 #include <string.h>
-#include "fftw.h"
 #include "milosUtils.h"
 #include "convolution.h"
+#include <complex.h>
+#include <fftw3.h> //siempre a continuacion de complex.h
 
 
-int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,PRECISION *wex,REAL *nuxB,REAL *dfi,REAL *dshi,PRECISION LD,PRECISION A,int desp);
+int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,REAL *wex,REAL *nuxB,REAL *dfi,REAL *dshi,PRECISION LD,PRECISION A,int desp);
 
 void Resetear_Valores_Intermedios(int nlambda);
 
@@ -33,7 +34,7 @@ extern REAL * gp1,*gp2,*dt,*dti,*gp3,*gp4,*gp5,*gp6,*etai_2;
 extern REAL *dgp1,*dgp2,*dgp3,*dgp4,*dgp5,*dgp6,*d_dt;
 extern REAL * d_ei,*d_eq,*d_eu,*d_ev,*d_rq,*d_ru,*d_rv;
 extern REAL *dfi,*dshi;
-extern PRECISION CC,CC_2,sin_gm,azi_2,sinis,cosis,cosis_2,cosi,sina,cosa,sinda,cosda,sindi,cosdi,sinis_cosa,sinis_sina;
+extern REAL CC,CC_2,sin_gm,azi_2,sinis,cosis,cosis_2,cosi,sina,cosa,sinda,cosda,sindi,cosdi,sinis_cosa,sinis_sina;
 extern REAL *fi_p,*fi_b,*fi_r,*shi_p,*shi_b,*shi_r;
 extern REAL *etain,*etaqn,*etaun,*etavn,*rhoqn,*rhoun,*rhovn;
 extern REAL *etai,*etaq,*etau,*etav,*rhoq,*rhou,*rhov;
@@ -522,7 +523,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 /*
  * 
  */
-int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,PRECISION *wex,REAL *nuxB,REAL *dfi,REAL *dshi,PRECISION LD,PRECISION A,int desp)
+int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,REAL *wex,REAL *nuxB,REAL *dfi,REAL *dshi,PRECISION LD,PRECISION A,int desp)
 {
 	REAL *uu;
 	int i,j;

@@ -3,11 +3,12 @@
 #include "lib.h"
 #include <string.h>
 #include "convolution.h"
-#include "fftw.h"
 #include "milosUtils.h"
+#include <complex.h>
+#include <fftw3.h> //siempre a continuacion de complex.h
 
 
-int funcionComponentFor_sinrf(PRECISION *u,int n_pi,int numl,PRECISION *wex,REAL *nuxB,REAL *fi_x,
+int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REAL *fi_x,
 												REAL *shi_x,PRECISION A,PRECISION MF);
 
 /*
@@ -26,10 +27,8 @@ int funcionComponentFor_sinrf(PRECISION *u,int n_pi,int numl,PRECISION *wex,REAL
 
 
 extern REAL * gp1,*gp2,*dt,*dti,*gp3,*gp4,*gp5,*gp6,*etai_2;
-
 extern REAL *gp4_gp2_rhoq,*gp5_gp2_rhou,*gp6_gp2_rhov;
-
-extern PRECISION CC,CC_2,sin_gm,azi_2,sinis,cosis,cosis_2,cosi,sina,cosa,sinda,cosda,sindi,cosdi,sinis_cosa,sinis_sina;
+extern REAL CC,CC_2,sin_gm,azi_2,sinis,cosis,cosis_2,cosi,sina,cosa,sinda,cosda,sindi,cosdi,sinis_cosa,sinis_sina;
 extern REAL *fi_p,*fi_b,*fi_r,*shi_p,*shi_b,*shi_r;
 extern REAL *etain,*etaqn,*etaun,*etavn,*rhoqn,*rhoun,*rhovn;
 extern REAL *etai,*etaq,*etau,*etav,*rhoq,*rhou,*rhov;
@@ -67,14 +66,14 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 	int il,i,j;
 	PRECISION E0;	
-	PRECISION ulos;
+	REAL ulos;
 	
-	PRECISION u[nlambda];
+	REAL u[nlambda];
 	   
    int odd,ishift;
    
 	  
-	PRECISION  parcial;
+	REAL  parcial;
 
 	offset= 0;//10.0;
 
@@ -433,7 +432,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 }
 
 
-int funcionComponentFor_sinrf(PRECISION *u,int n_pi,int numl,PRECISION *wex,REAL *nuxB,REAL *fi_x,
+int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REAL *fi_x,
 												REAL *shi_x,PRECISION A,PRECISION MF)
 {
 	REAL *uu,*F,*H;

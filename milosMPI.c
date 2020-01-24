@@ -41,17 +41,13 @@
 Cuantic *cuantic; // Global variable with cuantic information 
 
 
-PRECISION **PUNTEROS_CALCULOS_COMPARTIDOS;
-int POSW_PUNTERO_CALCULOS_COMPARTIDOS;
-int POSR_PUNTERO_CALCULOS_COMPARTIDOS;
-
 REAL *dtaux, *etai_gp3, *ext1, *ext2, *ext3, *ext4;
 REAL *gp1, *gp2, *dt, *dti, *gp3, *gp4, *gp5, *gp6, *etai_2;
 REAL *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
 REAL *dgp1, *dgp2, *dgp3, *dgp4, *dgp5, *dgp6, *d_dt;
 REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
 REAL *dfi, *dshi;
-PRECISION CC, CC_2, sin_gm, azi_2, sinis, cosis, cosis_2, cosi, sina, cosa, sinda, cosda, sindi, cosdi, sinis_cosa, sinis_sina;
+REAL CC, CC_2, sin_gm, azi_2, sinis, cosis, cosis_2, cosi, sina, cosa, sinda, cosda, sindi, cosdi, sinis_cosa, sinis_sina;
 REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
 REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
@@ -249,7 +245,7 @@ int main(int argc, char **argv)
 		vGlobalLambda = calloc(nlambda,sizeof(PRECISION));
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(configCrontrolFile.AtomicParametersFile,dat,indexLine,(idProc==root));
 		if(configCrontrolFile.CentralWaveLenght==0){
-			printf("\n CUANTIC LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVELENGHT: %f",configCrontrolFile.CentralWaveLenght);
+			printf("\n QUANTUM LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVELENGHT: %f",configCrontrolFile.CentralWaveLenght);
 			exit(1);
 		}
 		vGlobalLambda[0]=configCrontrolFile.CentralWaveLenght+(initialLambda);
@@ -266,7 +262,7 @@ int main(int argc, char **argv)
 		}
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(configCrontrolFile.AtomicParametersFile,dat,indexLine,(idProc==root));
 		if(configCrontrolFile.CentralWaveLenght==0){
-			printf("\n CUANTIC LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVE LENGHT: %f",configCrontrolFile.CentralWaveLenght);
+			printf("\n QUANTUM LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVE LENGHT: %f",configCrontrolFile.CentralWaveLenght);
 			exit(1);
 		}
 	}
