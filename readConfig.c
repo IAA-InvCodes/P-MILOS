@@ -482,7 +482,7 @@ PRECISION readFileCuanticLines(const char * inputLineFile, PRECISION * cuanticDa
 	
 	if(printLog){
 		printf("\n***********************************");
-		printf("\n\n CUANTIC NUMBERS READ FROM FILE, FOR CENTRAL WAVELENGTH %lf: \n",lambdaLine);
+		printf("\n\n QUANTUM NUMBERS READ FROM FILE, FOR CENTRAL WAVELENGTH %lf: \n",lambdaLine);
 		printf("\n\tSLOI: %fd",cuanticDat[1]);
 		printf("\n\tLLOI: %fd",cuanticDat[2]);
 		printf("\n\tJLOI: %fd",cuanticDat[3]);
@@ -506,7 +506,7 @@ int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel){
 	size_t len = 0;
    ssize_t read;
 	char comment[200], name[100];
-	int rfscanf;
+	
 	fReadInitModel = fopen(fileInitModel, "r");
 	if (fReadInitModel == NULL)
 	{
@@ -517,7 +517,7 @@ int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel){
 	
 	while ((read = getline(&line, &len, fReadInitModel)) != -1) {
 		double aux_value;
-		rfscanf = sscanf(line,"%99[^:]:%lf%99[^!]!",name, &aux_value,comment);
+		sscanf(line,"%99[^:]:%lf%99[^!]!",name, &aux_value,comment);
 		if(strstr(name,"INITIAL_MODEL_B")!=NULL){ // B
 			INIT_MODEL->B = aux_value;
 		}
@@ -637,14 +637,14 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 
    size_t len = 0;
    ssize_t read;
-	char atomo [2];
+	
 	fp = fopen(fileMallaGrid, "r");
    if(fp == NULL)	return 0;
 
-	int indexLine, indexLine2;
+	int indexLine;
 	int found = 0, dataRead = 0;;
-	double damping, potentialExcitation, logGf;
-	PRECISION lambdaLine;
+	
+	
 	char name[100];
 
 	while ((read = getline(&line, &len, fp)) != -1 && !dataRead){
@@ -1462,7 +1462,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("milos: Error in NumberOfCycles parameter. review it. Not accepted: %d\n", trolConfig->NumberOfCycles);
 		return 0;
 	}*/
-	if(printLog) printf("Number Of Cycles  read from control file: %i\n", trolConfig->NumberOfCycles);
+	//if(printLog) printf("Number Of Cycles  read from control file: %i\n", trolConfig->NumberOfCycles);
+	if(printLog) printf("%s", LINE);
 
 	/***************************  OBSERVED PROFILES  ********************************************/
 
@@ -1474,7 +1475,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Observed profiles file read from control file: %s\n", trolConfig->ObservedProfiles);
+	//if(printLog) printf("Observed profiles file read from control file: %s\n", trolConfig->ObservedProfiles);
+	if(printLog) printf("%s", LINE);
 
 	/***************************  STRAY LIGHT FILE ********************************************/
 
@@ -1486,8 +1488,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Stray light file read from control file: %s\n", trolConfig->StrayLightFile);
-
+	//if(printLog) printf("Stray light file read from control file: %s\n", trolConfig->StrayLightFile);
+	if(printLog) printf("%s", LINE);
 
 	/***************************  PSF FILE ********************************************/
 
@@ -1518,7 +1520,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 			trolConfig->ConvolveWithPSF = 1;
 		}
 	}
-	if(printLog) printf("PSF file read from control file: %s. Convolve with PSF? %d \n", trolConfig->PSFFile,trolConfig->ConvolveWithPSF);
+	//if(printLog) printf("PSF file read from control file: %s. Convolve with PSF? %d \n", trolConfig->PSFFile,trolConfig->ConvolveWithPSF);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** WAVELENGHT FILE ********************************************/
 
@@ -1546,7 +1549,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 			exit(EXIT_FAILURE);
 		}
 	}
-	if(printLog) printf("Wavelength grid file read from control file: %s\n", trolConfig->WavelengthFile);
+	//if(printLog) printf("Wavelength grid file read from control file: %s\n", trolConfig->WavelengthFile);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** ATOMIC PARAMETER  FILE ********************************************/
 
@@ -1558,7 +1562,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Atomic parameters file to apply: %s\n", trolConfig->AtomicParametersFile);
+	//if(printLog) printf("Atomic parameters file to apply: %s\n", trolConfig->AtomicParametersFile);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** ABUNDANCES FILE ********************************************/
 
@@ -1570,7 +1575,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Abundances file to apply: %s\n", trolConfig->AbundancesFile);
+	//if(printLog) printf("Abundances file to apply: %s\n", trolConfig->AbundancesFile);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** INITIAL GUESS MODEL   FILE ********************************************/
 
@@ -1582,7 +1588,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Initial guess model 1 to apply: %s\n", trolConfig->InitialGuessModel);
+	//if(printLog) printf("Initial guess model 1 to apply: %s\n", trolConfig->InitialGuessModel);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** INITIAL GUESS MODEL  2  FILE ********************************************/
 
@@ -1594,7 +1601,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Initial guess model 2 to apply: %s\n", trolConfig->InitialGuessModel_2);
+	//if(printLog) printf("Initial guess model 2 to apply: %s\n", trolConfig->InitialGuessModel_2);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES I ********************************************/
 
@@ -1607,7 +1615,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[0] = aux;
-	if(printLog) printf("Weight for Stokes I to apply: %lf\n", trolConfig->WeightForStokes[0]);
+	//if(printLog) printf("Weight for Stokes I to apply: %lf\n", trolConfig->WeightForStokes[0]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES Q ********************************************/
 
@@ -1620,7 +1629,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[1] = aux;
-	if(printLog) printf("Weight for Stokes Q to apply: %lf\n", trolConfig->WeightForStokes[1]);
+	//if(printLog) printf("Weight for Stokes Q to apply: %lf\n", trolConfig->WeightForStokes[1]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES U ********************************************/
 
@@ -1633,7 +1643,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[2] = aux;
-	if(printLog) printf("Weight for Stokes U to apply: %lf\n", trolConfig->WeightForStokes[2]);
+	//if(printLog) printf("Weight for Stokes U to apply: %lf\n", trolConfig->WeightForStokes[2]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES V ********************************************/
 
@@ -1646,7 +1657,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[3] = aux;
-	if(printLog) printf("Weight for Stokes V to apply: %lf\n", trolConfig->WeightForStokes[3]);
+	//if(printLog) printf("Weight for Stokes V to apply: %lf\n", trolConfig->WeightForStokes[3]);
+	if(printLog) printf("%s", LINE);
 
 
 	/*************************** AUTOMATIC SELECTED OF NODES **************************************/
@@ -1659,7 +1671,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Automatic Selected of Nodes to apply: %i\n", trolConfig->automaticSelectOfNodes);
+	//if(printLog) printf("Automatic Selected of Nodes to apply: %i\n", trolConfig->automaticSelectOfNodes);
+	if(printLog) printf("%s", LINE);
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1676,7 +1689,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for S_0 1 to apply: %d\n", trolConfig->fix[7]);
+	//if(printLog) printf("Nodes for S_0 1 to apply: %d\n", trolConfig->fix[7]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** S1_SOURCE_FUNCTION_GRADIENT ********************************************/
 	
@@ -1688,7 +1702,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for S_1 1  to apply: %d\n", trolConfig->fix[8]);
+	//if(printLog) printf("Nodes for S_1 1  to apply: %d\n", trolConfig->fix[8]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** ETA0_LINE_TO_CONTINUUM_ABSORPTION ********************************************/
 	
@@ -1700,7 +1715,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for eta0 1 to apply: %d\n", trolConfig->fix[0]);
+	//if(printLog) printf("Nodes for eta0 1 to apply: %d\n", trolConfig->fix[0]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** B_MAGNETIC_FIELD_STRENGTH ********************************************/
 	
@@ -1712,7 +1728,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for magnetic field 1 to apply: %d\n", trolConfig->fix[1]);
+	//if(printLog) printf("Nodes for magnetic field 1 to apply: %d\n", trolConfig->fix[1]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** VLOS_LINE_OF_SIGHT_VELOCITY ********************************************/
 	
@@ -1724,7 +1741,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Line Of Sight Velocity to apply: %d\n", trolConfig->fix[2]);
+	//if(printLog) printf("Line Of Sight Velocity to apply: %d\n", trolConfig->fix[2]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** GM_MAGNETIC_FIELD_INCLINATION ********************************************/
 	
@@ -1736,7 +1754,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for gamma 1 to apply: %d\n", trolConfig->fix[5]);
+	//if(printLog) printf("Nodes for gamma 1 to apply: %d\n", trolConfig->fix[5]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** AZ_MAGNETIC_FIELD_AZIMUTH ********************************************/
 	
@@ -1748,7 +1767,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for phi 1 to apply: %d\n", trolConfig->fix[6]);
+	//if(printLog) printf("Nodes for phi 1 to apply: %d\n", trolConfig->fix[6]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** DOPP_DOOPLER_WIDTH ********************************************/
 	
@@ -1760,7 +1780,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for lambda_doppler 1 to apply: %d\n", trolConfig->fix[3]);
+	//if(printLog) printf("Nodes for lambda_doppler 1 to apply: %d\n", trolConfig->fix[3]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** AA_DAMPING_PARAMETER ********************************************/
 	
@@ -1772,7 +1793,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for damping 1 to apply: %d\n", trolConfig->fix[4]);
+	//if(printLog) printf("Nodes for damping 1 to apply: %d\n", trolConfig->fix[4]);
+	if(printLog) printf("%s", LINE);
 
 
 	/*************************** MAC_MACROTURBULENT_VELOCITY ********************************************/
@@ -1785,7 +1807,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Invert macroturbulence 1 to apply: %d\n", trolConfig->fix[9]);
+	//if(printLog) printf("Invert macroturbulence 1 to apply: %d\n", trolConfig->fix[9]);
+	if(printLog) printf("%s", LINE);
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1802,7 +1825,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for S_0 2 to apply: %d\n", trolConfig->fix2[7]);
+	//if(printLog) printf("Nodes for S_0 2 to apply: %d\n", trolConfig->fix2[7]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** S1_SOURCE_FUNCTION_GRADIENT ********************************************/
 	
@@ -1814,7 +1838,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for S_1 2  to apply: %d\n", trolConfig->fix2[8]);
+	//if(printLog) printf("Nodes for S_1 2  to apply: %d\n", trolConfig->fix2[8]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** ETA0_LINE_TO_CONTINUUM_ABSORPTION ********************************************/
 	
@@ -1826,7 +1851,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for eta0 2 to apply: %d\n", trolConfig->fix2[0]);
+	//if(printLog) printf("Nodes for eta0 2 to apply: %d\n", trolConfig->fix2[0]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** B_MAGNETIC_FIELD_STRENGTH ********************************************/
 	
@@ -1838,7 +1864,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for magnetic field 2 to apply: %d\n", trolConfig->fix2[1]);
+	//if(printLog) printf("Nodes for magnetic field 2 to apply: %d\n", trolConfig->fix2[1]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** VLOS_LINE_OF_SIGHT_VELOCITY ********************************************/
 	
@@ -1850,7 +1877,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for LOS velocity 2 to apply: %d\n", trolConfig->fix2[2]);
+	//if(printLog) printf("Nodes for LOS velocity 2 to apply: %d\n", trolConfig->fix2[2]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** GM_MAGNETIC_FIELD_INCLINATION ********************************************/
 	
@@ -1862,7 +1890,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for gamma 2 to apply: %d\n", trolConfig->fix2[5]);
+	//if(printLog) printf("Nodes for gamma 2 to apply: %d\n", trolConfig->fix2[5]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** AZ_MAGNETIC_FIELD_AZIMUTH ********************************************/
 	
@@ -1874,7 +1903,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for phi 2 to apply: %d\n", trolConfig->fix2[6]);
+	//if(printLog) printf("Nodes for phi 2 to apply: %d\n", trolConfig->fix2[6]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** DOPP_DOOPLER_WIDTH ********************************************/
 	
@@ -1886,7 +1916,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for lambda_doppler 2 to apply: %d\n", trolConfig->fix2[3]);
+	//if(printLog) printf("Nodes for lambda_doppler 2 to apply: %d\n", trolConfig->fix2[3]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** AA_DAMPING_PARAMETER ********************************************/
 	
@@ -1898,8 +1929,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Nodes for damping 2 to apply: %d\n", trolConfig->fix2[4]);
-
+	//if(printLog) printf("Nodes for damping 2 to apply: %d\n", trolConfig->fix2[4]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** MAC_MACROTURBULENT_VELOCITY ********************************************/
 	
@@ -1911,7 +1942,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Invert macroturbulence 2 to apply: %d\n", trolConfig->fix2[9]);
+	//if(printLog) printf("Invert macroturbulence 2 to apply: %d\n", trolConfig->fix2[9]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** STRAY LIGHT FACTOR ********************************************/
 	
@@ -1924,7 +1956,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->fix2[10] = trolConfig->fix[10];
-	if(printLog) printf("Stray light Factor  to apply: %d\n", trolConfig->fix[10]);
+	//if(printLog) printf("Stray light Factor  to apply: %d\n", trolConfig->fix[10]);
+	if(printLog) printf("%s", LINE);
 
 
 	/*************************** INVERT FILLING FACTOR ********************************************/
@@ -1937,7 +1970,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Filling Factor  to apply: %d\n", trolConfig->InvertFillingFactor);
+	//if(printLog) printf("Filling Factor  to apply: %d\n", trolConfig->InvertFillingFactor);
+	if(printLog) printf("%s", LINE);
 
 
 	/*************************** MU ********************************************/
@@ -1950,8 +1984,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("mu=cos (theta) to apply: %f\n", trolConfig->mu);
-
+	//if(printLog) printf("mu=cos (theta) to apply: %f\n", trolConfig->mu);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** EstimatedSNForI ********************************************/
 	
@@ -1964,8 +1998,9 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	if(printLog){
-		printf("Estimated S/N for I  to apply: %i\n", trolConfig->EstimatedSNForI);
-		printf("Estimated noise for I  to apply: %lf\n", 1.0/trolConfig->EstimatedSNForI);
+		printf("%s", LINE);
+		/*printf("Estimated S/N for I  to apply: %i\n", trolConfig->EstimatedSNForI);
+		printf("Estimated noise for I  to apply: %lf\n", 1.0/trolConfig->EstimatedSNForI);*/
 	} 
 	trolConfig->noise = 1.0/trolConfig->EstimatedSNForI;
 	trolConfig->sigma[0] = trolConfig->noise*trolConfig->noise;
@@ -1986,7 +2021,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	//trolConfig->toplim = trolConfig->ContinuumContrast;
-	if(printLog) printf("Continuum contrast to apply: %i\n", trolConfig->ContinuumContrast);
+	//if(printLog) printf("Continuum contrast to apply: %i\n", trolConfig->ContinuumContrast);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** TOLERANCE_FOR_SVD ********************************************/
 	
@@ -1998,7 +2034,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Tolerance for SVD to apply: %le\n", trolConfig->ToleranceForSVD);
+	//if(printLog) printf("Tolerance for SVD to apply: %le\n", trolConfig->ToleranceForSVD);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** INITIAL_DIAGONAL_ELEMENT ********************************************/
 	
@@ -2011,8 +2048,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->InitialDiagonalElement = aux;
-	if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
-
+	//if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
+	if(printLog) printf("%s\n", LINE);
 
 
 	return 1;

@@ -2,9 +2,18 @@ CC=mpicc
 
 CFLAGS=
 CFLAGS+=-O3 
-#CFLAGS+=-g 
-#CFLAGS+=-D USE_DOUBLE_PRECISION=double
-#CFLAGS+=-ffast-math
+
+ifdef develop
+	ifeq ($(develop),yes)
+		CFLAGS+=-g 
+		CFLAGS+=-Wall -Wextra		
+	endif
+endif
+ifdef use_double
+	ifeq ($(use_double),yes)
+		CFLAGS+=-D USE_DOUBLE_PRECISION=double
+	endif
+endif
 CFLAGS+=-fno-omit-frame-pointer
 #CFLAGS+=-Wall -Wextra
 #CFLAGS+=-Wconversion
@@ -16,9 +25,9 @@ BIN= milos milosMPI
 
 all: $(BIN)
 
-milos: calculosCompartidos.o fgauss.o fvoigt.o  milos.o me_der.o mil_sinrf.o lib.o create_cuantic.o utilsFits.o milosUtils.o convolution.o readConfig.o 
+milos: calculosCompartidos.o fgauss.o fvoigt.o  milos.o me_der.o mil_sinrf.o lib.o create_cuantic.o utilsFits.o milosUtils.o convolution.o readConfig.o
 
-milosMPI:  calculosCompartidos.o fgauss.o fvoigt.o  milosMPI.o me_der.o mil_sinrf.o lib.o create_cuantic.o utilsFits.o milosUtils.o convolution.o readConfig.o 
+milosMPI:  calculosCompartidos.o fgauss.o fvoigt.o  milosMPI.o me_der.o mil_sinrf.o lib.o create_cuantic.o utilsFits.o milosUtils.o convolution.o readConfig.o
 
 clean:
 	rm -f *.o $(BIN)

@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 	MPI_Type_create_struct(nItemsStructName,blocklenghName,offsetName,typesName,&mpiName);
 	MPI_Type_commit(&mpiName);
 
-	MPI_Request mpiRequestSpectro, mpiRequestLambda,mpiRequestName;
+	//MPI_Request mpiRequestSpectro, mpiRequestLambda,mpiRequestName;
 
 	/************************************/
 	const int root=0;	
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 	PRECISION *wlines;
 	int nlambda, numPixels, indexPixel;
 	
-	int posCENTRAL_WL; // position central wl in file of LINES
+	
 	Init_Model INITIAL_MODEL;
 	PRECISION * deltaLambda, * PSF;
 	int N_SAMPLES_PSF;
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 	nameFile * vOutputNameModelsLocal;
 	nameFile * vOutputNameSynthesisAdjustedLocal;
 
-	char * baseNameOutputObserved;
+	
 	const char	* nameInputFilePSF ;
 
    FitsImage * fitsImage = NULL;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	
 	Init_Model * resultsInitModel;
 	Init_Model * resultsInitModelTotal;
-	float * chisqrfTotal, *vChisqrf, chisqrf;
+	float * chisqrfTotal, *vChisqrf;
 	int * vNumIter, * vNumIterTotal; // to store the number of iterations used to converge for each pixel
 	float  * vSpectraSplit, * vSpectraAdjustedSplit, * vSpectraAjustedTotal;
 
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 	int sendcountsNameInputFiles [numProcs];  // how many files per process
 	int displsPixels [numProcs];  // array describing the displacements where each segment begins
 	int displsSpectro [numProcs];
-	int displsLambda [numProcs];
+	//int displsLambda [numProcs];
 	int displsNameInputFiles [numProcs]; // how many 
 
 	/********************* Read data input from file ******************************/
@@ -535,7 +535,7 @@ int main(int argc, char **argv)
 		for(indexInputFits=0;indexInputFits<sendcountsNameInputFiles[idProc];indexInputFits++){
 			/****************************************************************************************************/
 			// READ PIXELS FROM IMAGE 
-			PRECISION timeReadImage,timeExecuteClassicalEstimates;
+			PRECISION timeReadImage	;
 			clock_t t;
 			t = clock();
 			fitsImage = readFitsSpectroImage(vInputFileSpectraLocal[indexInputFits].name,0);
@@ -765,7 +765,7 @@ int main(int argc, char **argv)
 				sendcountsLambda[i] = sendcountsPixels[i]*nlambda;
 				displsPixels[i] = sum;
 				displsSpectro[i] = sumSpectro;
-				displsLambda[i] = sumLambda;
+				//displsLambda[i] = sumLambda;
 				sum += sendcountsPixels[i];
 				sumSpectro += sendcountsSpectro[i];
 				sumLambda += sendcountsLambda[i];

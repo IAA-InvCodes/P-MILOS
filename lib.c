@@ -36,7 +36,7 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 
 	
 	REAL *BTaux,*APaux;
-	REAL auxWeight;
+
 	//printf("\nVALORES DEL SIGMA SQUARE\n");
 
 	for(j=0;j<NPARMS;j++){

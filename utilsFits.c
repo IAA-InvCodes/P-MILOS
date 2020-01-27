@@ -1018,7 +1018,7 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 					image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
 					image->pixels[i].nLambda = image->nLambdas;
 				}
-				int currentLambda = 0, currentRow = 0, currentStokeParameter=0, currentCol = 0, currentPixel;
+				
 				//PRECISION pixel;
 				if(naxis==4){ // image with 4 dimension 
 					

@@ -105,7 +105,6 @@ int writeFitsImageProfiles(const char * fitsProfileFile, const char * fitsFileOr
  * @param clasicalEstimate
  * @param printSintesis
  * @param nameInputFileSpectra
- * @param nameInputFileLambda
  * @param nameOutputFileModels
  * @param nameOutputFilePerfiles
  * @param useConvolution

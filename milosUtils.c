@@ -549,13 +549,12 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	int i, *fixed, nfree;
 	static PRECISION delta[NTERMS];
 	
-	int iter_chisqr_same;
+	
 	REAL flambda;
 	static REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr;
 	int clanda, ind;
-	Init_Model model;
-	//static PRECISION sigmaTemp[4] = {1.0, 1.0, 1.0, 1.0};
+	Init_Model model;	
 	
 	nfree = CalculaNfree(nspectro);
 
@@ -586,7 +585,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	static PRECISION covar[NTERMS * NTERMS];
 	static PRECISION betad[NTERMS];
 
-	PRECISION chisqr_mem;
+	
 
 	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, AH,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
 	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra,AH, slight, 0,*INSTRUMENTAL_CONVOLUTION);
@@ -603,8 +602,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 
 	ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
-	chisqr_mem = (REAL)ochisqr;
-	iter_chisqr_same = 0;
+	
 
 	model = *initModel;
 	

@@ -9,14 +9,9 @@
 //   (_______/           |/     \|\_______/(_______/(_______)\_______)
 //
 //
-// CMILOS v1.0 (2019)
-// RTE INVERSION C code for SOPHI (based on the ILD code MILOS by D. Orozco)
+// CMILOS v1.0 (2020)
+// RTE INVERSION C code (based on the ILD code MILOS by D. Orozco)
 // Manuel (IAA-CSIC)
-//
-// How to use:
-//
-//  >> milos parameters.trol
-//
 //
 
 /*
@@ -76,10 +71,7 @@ REAL **FGlobalInicial;
 PRECISION *GMAC;
 REAL * G, *dirConvPar;
 
-
 REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
-
-
 
 REAL * opa;
 int FGlobal, HGlobal, uuGlobal;
@@ -123,22 +115,22 @@ int main(int argc, char **argv)
 	int * vNumIter; // to store the number of iterations used to converge for each pixel
 	int indexLine; // index to identify central line to read it 
 
-	int posCENTRAL_WL; // position central wl in file of LINES
+	
 	Init_Model INITIAL_MODEL;
 	PRECISION * deltaLambda, * PSF;
 	PRECISION initialLambda, step, finalLambda;
 	int N_SAMPLES_PSF;
-	clock_t t_ini;
+	
 	//----------------------------------------------
 
 	PRECISION * slight = NULL;
 	int dimStrayLight;
 
 	const char  * nameInputFileSpectra ;
-	const char  * nameInputFileLambda ;
+	
 	
 	char nameOutputFilePerfiles [4096];
-	char * baseNameOutputObserved;
+	
 	const char	* nameInputFileLines;
 	
 	const char	* nameInputFilePSF ;	
@@ -154,10 +146,9 @@ int main(int argc, char **argv)
 	readTrolFile(argv[1],&configCrontrolFile,1);
 
 	nameInputFileSpectra = configCrontrolFile.ObservedProfiles;
-	nameInputFileLambda = configCrontrolFile.WavelengthFile;
 	nameInputFileLines = configCrontrolFile.AtomicParametersFile;
 	
-	baseNameOutputObserved = get_basefilename(configCrontrolFile.ObservedProfiles);
+	
 	
 	
 	
@@ -637,7 +628,7 @@ int main(int argc, char **argv)
 		else if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)==0){ // invert image from fits file 
 
 			// READ PIXELS FROM IMAGE 
-			PRECISION timeReadImage,timeExecuteClassicalEstimates;
+			PRECISION timeReadImage;
 			clock_t t;
 			t = clock();
 			
