@@ -1,12 +1,7 @@
 
 #include "defines.h"
 
-/**
- * 
- * @param fitsFile --> File with fits image 
- * @param numPixels --> This will store the number of pixels read
- */
-vpixels * readImagePixels (char * fitsFile, int * numPixels);
+
 
 /**
  * 
@@ -44,7 +39,7 @@ int readFitsLambdaFile (const char * fitsFileLambda, FitsImage * fitsImage);
 /**
  * 
  * */
-PRECISION * readFitsLambdaToArray (const char * fitsFileLambda, int numRow, int numCol, int * indexLine, int * nLambda);
+PRECISION * readFitsLambdaToArray (const char * fitsFileLambda,  int * indexLine, int * nLambda);
 
 /**
  * This function read the Stray Light values from the file "fitsFileStrayLight" and store it into a vector , in dimStrayLight will be stored the tam of fits file:

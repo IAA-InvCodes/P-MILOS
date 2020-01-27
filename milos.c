@@ -184,7 +184,7 @@ int main(int argc, char **argv)
      	}
 	}
 	else{ // read lambda from fits file
-		vLambda = readFitsLambdaToArray(configCrontrolFile.WavelengthFile,0,0,&indexLine,&nlambda);
+		vLambda = readFitsLambdaToArray(configCrontrolFile.WavelengthFile,&indexLine,&nlambda);
 		if(vLambda==NULL){
 			printf("\n FILE WITH WAVELENGHT HAS NOT BEEN READ PROPERLY, please check it.\n");
 			free(vLambda);
