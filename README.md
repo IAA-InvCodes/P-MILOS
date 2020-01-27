@@ -157,7 +157,8 @@ INITIAL_MODEL_ALFA          :1
 
 ## Instalation
 
-In order to deploy the application, it must first be compiled on the target machine. To do this, you must use the command line option 'make' from same directory where the source code is located. So, the first thing is to position ourselves in the C-MILOS. The code is compiled by default using single precision, but if you want you can compile the code using double precision by specifying the following variable 'use_double=yes' when you run make. 
+In order to deploy the application, it must first be compiled on the target machine. To do this, you must use the command line option 'make' from same directory where the source code is located. So, the first thing is to position ourselves in the C-MILOS. The code is compiled by default using single precision, but if you want you can compile the code using double precision by specifying the following variable 'use_double=yes' when you run make.
+
 The other options are to choose which version of the code to compile (sequential or parallel), or whether to clean up the generated object code and executables. 
 
 * Compile and create executable **milos** 
