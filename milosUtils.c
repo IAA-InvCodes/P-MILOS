@@ -33,7 +33,8 @@ extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
 extern REAL *parcial1, *parcial2, *parcial3;
 extern REAL *nubB, *nupB, *nurB;
-extern PRECISION *G,*GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
+extern PRECISION *G,*GMAC;
+//extern REAL *G;
 extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
 extern fftw_plan planForwardPSF, planBackwardPSF;
 
@@ -155,11 +156,21 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 	}
 	if (fixed[2])
 	{
+		/*if (delta[2] > 2)
+			delta[2] = 2;
+
+		if (delta[2] < -2)
+			delta[2] = -2;		*/
 		modelout->vlos = model->vlos - delta[2];
 	}
 
 	if (fixed[3])
 	{
+
+		if (delta[3] > 1e-2)
+			delta[3] = 1e-2;
+		else if (delta[3] < -1e-2)
+			delta[3] = -1e-2;
 		modelout->dopp = model->dopp - delta[3];
 	}
 
@@ -177,10 +188,15 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 	}
 	if (fixed[6])
 	{
-		if (delta[6] < -30)
+		if (delta[6] < -15)
+			delta[6] = -15;
+		else if (delta[6] > 15)
+			delta[6] = 15;
+
+		/*if (delta[6] < -30)
 			delta[6] = -30;
 		else if (delta[6] > 30)
-			delta[6] = 30;
+			delta[6] = 30;*/
 
 		modelout->az = model->az - delta[6];
 	}
@@ -242,6 +258,7 @@ int check(Init_Model *model)
 	if (model->dopp > 0.6) // idl 0.6
 		model->dopp = 0.6;
 
+	// damping 
 	if (model->aa < 0.0001) // idl 1e-4
 		model->aa = 0.0001;
 	if (model->aa > 10.0) //10
@@ -588,7 +605,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	
 
 	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, AH,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
-	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra,AH, slight, 0,*INSTRUMENTAL_CONVOLUTION);
+	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra,AH, slight, *INSTRUMENTAL_CONVOLUTION);
 
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
 	covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
@@ -636,7 +653,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 			flambda = flambda / 10.0;
 			*initModel = model;
-			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, AH, slight,0,*INSTRUMENTAL_CONVOLUTION);
+			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, AH, slight,*INSTRUMENTAL_CONVOLUTION);
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
 			covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
 			

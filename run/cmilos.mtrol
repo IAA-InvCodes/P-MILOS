@@ -1,5 +1,5 @@
 Number of cycles          (*):15          		! 0 = synthesis, n= max num of iterations, -1 = use classical estimates
-Observed profiles         (*):/home/mcabrera/SolarImages/fits_CRISP_spot/2014.09.28_09_18_00_t0   !
+Observed profiles         (*):/home/mcabrera/SolarImages/fits_CRISP_spot/2014.09.28_09_18_00_t020.fits   !
 Stray light file             :    				! (none=no stray light contam)
 PSF file                     :49.2    				! si fichero .psf leer la psf numerica, si es un numero será la FWHM del filtro gaussiano, si es vacio no se tiene en cuenta
 Wavelength grid file      (s):run/malla.grid 	! (automatic selection, grid, or wavelength file)
@@ -39,3 +39,5 @@ Estimated S/N for I          :1000              !
 Continuum contrast           :1e-12             ! Not used for the moment
 Tolerance for SVD            :1e-3              ! (DEFAULT value: 1e-3)
 Initial diagonal element     :0.1               ! (DEFAULT value: 1.e-1)
+Use FFT for convolutions     :1                       ! (0 or blank = use direct convolution, 1 = use FFT)
+

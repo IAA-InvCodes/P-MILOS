@@ -68,8 +68,11 @@ REAL **HGlobalInicial;
 REAL **FGlobalInicial;
 
 //PRECISION *G, *GMAC;
-PRECISION *GMAC;
-REAL * G, *dirConvPar;
+PRECISION *GMAC,* GMAC_DERIV;
+PRECISION * dirConvPar, *dirConvPar2;
+REAL *resultConv;
+PRECISION * G;
+//REAL * G;
 
 REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
 
@@ -103,7 +106,7 @@ PRECISION FWHM = 0;
 ConfigControl configCrontrolFile;
 
 // fvoigt memory consuption
-REAL _Complex  *z,* zden, * zdiv;
+PRECISION _Complex  *z,* zden, * zdiv;
 
 int main(int argc, char **argv)
 {
@@ -493,7 +496,7 @@ int main(int argc, char **argv)
 
 		// synthesis
       mil_sinrf(cuantic, &initModel, wlines, vLambda, nlambda, spectra, AH, slight,spectra_mac, configCrontrolFile.ConvolveWithPSF);
-      //me_der(cuantic, &initModel, wlines, vLambda, nlambda, d_spectra, spectra_mac, spectra, AH, slight, 0, configCrontrolFile.ConvolveWithPSF);	
+      me_der(cuantic, &initModel, wlines, vLambda, nlambda, d_spectra, spectra_mac, spectra, AH, slight, configCrontrolFile.ConvolveWithPSF);	
 
 		// in this case basenamefile is from initmodel
 		char nameAux [4096];

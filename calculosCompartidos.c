@@ -24,12 +24,13 @@ REAL **uuGlobalInicial;
 REAL **HGlobalInicial;
 REAL **FGlobalInicial;
 extern int FGlobal, HGlobal, uuGlobal;
-extern PRECISION *GMAC;
+extern PRECISION *GMAC,*GMAC_DERIV;
 extern Cuantic *cuantic;
 
 extern REAL * opa;
-extern REAL *dirConvPar;
-extern REAL _Complex  *z,* zden, * zdiv;
+extern PRECISION *dirConvPar,*dirConvPar2;
+extern REAL *resultConv;
+extern PRECISION _Complex  *z,* zden, * zdiv;
 
 
 void AllocateMemoryDerivedSynthesis(int numl)
@@ -45,23 +46,21 @@ void AllocateMemoryDerivedSynthesis(int numl)
 	/**********************************************************/
 
 	//***** VARIABLES FOR FVOIGT ****************************//
-	z = malloc (numl * sizeof(REAL _Complex));
-	zden = malloc (numl * sizeof(REAL _Complex));
-	zdiv = malloc (numl * sizeof(REAL _Complex));	
+	z = malloc (numl * sizeof(PRECISION _Complex));
+	zden = malloc (numl * sizeof(PRECISION _Complex));
+	zdiv = malloc (numl * sizeof(PRECISION _Complex));	
 	/********************************************************/
 
 
 	GMAC = calloc(numl, sizeof(PRECISION));
-	dirConvPar = calloc((numl+numl)+1,sizeof(REAL));
+	GMAC_DERIV = calloc(numl,sizeof(PRECISION));
+	dirConvPar = calloc((numl+numl)+1,sizeof(PRECISION));
+	dirConvPar2 = calloc(numl,sizeof(PRECISION));
+	resultConv = calloc(numl,sizeof(REAL));
 
 	spectra = calloc(numl * NPARMS, sizeof(REAL));
 	spectra_mac = calloc(numl * NPARMS, sizeof(REAL));
 	d_spectra = calloc(numl * NTERMS * NPARMS, sizeof(REAL));
-
-	/*spectra = calloc(numl * NPARMS, sizeof(PRECISION));
-	spectra_mac = calloc(numl * NPARMS, sizeof(PRECISION));
-	d_spectra = calloc(numl * NTERMS * NPARMS, sizeof(PRECISION));*/
-	
 	
 	opa = calloc(numl,sizeof(REAL));
 
@@ -197,7 +196,10 @@ void FreeMemoryDerivedSynthesis()
 	free(dshi);
 
 	free(GMAC);
+	free(GMAC_DERIV);
 	free(dirConvPar);
+	free(dirConvPar2);
+	free(resultConv);
 
 	free(opa);
 	free(spectra);

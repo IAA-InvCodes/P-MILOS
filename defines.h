@@ -22,6 +22,7 @@
 #define FABS(x)	fabs(x)
 #define CREAL(x) creal(x)
 #define CIMAG(x) cimag(x)
+#define EXP(x) exp(x)
 
 #else
 
@@ -35,10 +36,11 @@
 #define FABS(x) fabsf(x)
 #define CREAL(x) crealf(x)
 #define CIMAG(x) cimagf(x)
+#define EXP(x) expf(x)
 
 #endif /* USE_DOUBLE_PRECISION */
 
-
+#define MOD(n, N) ((n<0)? N+n : n)
 
 
 #ifndef DEFINES_H_
@@ -113,19 +115,6 @@ struct INIT_MODEL{
 };
 
 struct CUANTIC{  
-	
-	/*PRECISION N_PI;
-	PRECISION N_SIG;
-	PRECISION * NUB;//size stored in  n_sig
-	PRECISION * NUP;//size stored in n_pi
-	PRECISION * NUR;//size stored in n_sig
-	PRECISION * WEB;//size stored in n_sig
-	PRECISION * WEP;//size stored in n_pi
-	PRECISION * WER;//size stored in n_sig
-	PRECISION GL;
-	PRECISION GU;
-	PRECISION GEFF;
-	PRECISION FO;	*/
 
 	REAL N_PI;
 	REAL N_SIG;
@@ -155,14 +144,14 @@ void FreeMemoryDerivedSynthesis();
 
 Cuantic * create_cuantic(PRECISION * dat, int log);
 
-int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda, REAL *d_spectra,REAL *spectra, REAL * spectra_slight,PRECISION ah,PRECISION * slight,int calcSpectra,int filter);
+int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda, REAL *d_spectra,REAL *spectra, REAL * spectra_slight,PRECISION ah,PRECISION * slight,int filter);
 
 int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *spectra,
 			PRECISION ah,PRECISION * slight,REAL * spectra_mc, int filter);
 			
 
 PRECISION * fgauss(PRECISION MC, PRECISION * eje,int neje,PRECISION landa,int deriv);
-REAL * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambda0, PRECISION lambdaCentral, int nLambda, int * sizeG);
+PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambda0, PRECISION lambdaCentral, int nLambda, int * sizeG);
 
 int fvoigt(PRECISION damp,REAL *vv,int nvv,REAL *h, REAL *f);
 
@@ -261,6 +250,7 @@ struct CONFIG_CONTROL{
 	PRECISION ToleranceForSVD;
 	REAL InitialDiagonalElement;
 	int ConvolveWithPSF;
+	int useFFT;
 	PRECISION FWHM;
 	PRECISION CentralWaveLenght;
 	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]

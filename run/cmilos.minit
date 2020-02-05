@@ -7,7 +7,7 @@ subx1                        :		               	! (0 or blank = invert all pixel
 subx2                        :		               	! (0 or blank = invert all pixels)
 suby1                        :		               	! (0 or blank = invert all pixels)
 suby2                        :               		! (0 or blank = invert all pixels)
-outfile                   (*):output      		    ! (suffix for output files)
+outfile                   (*):psf_cd      		    ! (suffix for output files)
 mask file                    :		                !(pixel mask for excluding pixels)
 t1                           :20 		         	! (blank=do not invert timeseries)
 t2                           :20       			! (blank=do not invert timeseries)

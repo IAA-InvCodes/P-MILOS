@@ -1,3 +1,4 @@
+#include <time.h>
 #include "defines.h"
 #include "lib.h"
 #include <string.h>
@@ -45,8 +46,9 @@ REAL **HGlobalInicial;
 REAL **FGlobalInicial;
 extern int FGlobal,HGlobal,uuGlobal;
 //extern PRECISION *G, *GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
-extern PRECISION *GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
-extern REAL *G;
+extern PRECISION *GMAC,*GMAC_DERIV; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
+//extern REAL *G;
+extern PRECISION *G;
 //extern VSLConvTaskPtr taskConv;
 
 extern fftw_complex * inSpectraFwMAC, *inSpectraBwMAC, *outSpectraFwMAC, *outSpectraBwMAC;
@@ -59,8 +61,9 @@ extern fftw_complex * inPSF_MAC, * inMulMacPSF, * inPSF_MAC_DERIV, *inMulMacPSFD
 extern fftw_plan planForwardPSF_MAC, planForwardPSF_MAC_DERIV,planBackwardPSF_MAC, planBackwardPSF_MAC_DERIV;
 extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
 extern fftw_plan planForwardPSF, planBackwardPSF;
+extern ConfigControl configCrontrolFile;
 
-int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *d_spectra,REAL *spectra, REAL * spectra_slight, PRECISION ah,PRECISION * slight,int calcSpectra, int filter)
+int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *d_spectra,REAL *spectra, REAL * spectra_slight, PRECISION ah,PRECISION * slight,int filter)
 {
 
 	int nterms,numl;
@@ -359,94 +362,148 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		PRECISION ild = (wlines[1] * MC) / 2.99792458e5; //Sigma
 		PRECISION centro = lambda[(int)numl / 2];		  //center of the axis
 
-		if(filter){// if there is PSF filter convolve both gaussian and use the result as the signal to convolve
-			for(i=0;i<numl;i++){ // copy gmac to
-				inPSF_MAC[i] = (GMAC[i]) + 0 * _Complex_I;
-				inPSF_MAC_DERIV[i] = (GMAC[i] / MC * ((((lambda[i] - centro) / ild) * ((lambda[i] - centro) / ild)) - 1.0)) + 0 * _Complex_I;
+		if(configCrontrolFile.useFFT){
+			if(filter){// if there is PSF filter convolve both gaussian and use the result as the signal to convolve
+				for(i=0;i<numl;i++){ // copy gmac to
+					inPSF_MAC[i] = (GMAC[i]) + 0 * _Complex_I;
+					inPSF_MAC_DERIV[i] = (GMAC[i] / MC * ((((lambda[i] - centro) / ild) * ((lambda[i] - centro) / ild)) - 1.0)) + 0 * _Complex_I;
+				}
+				fftw_execute(planForwardPSF_MAC);
+				fftw_execute(planForwardPSF_MAC_DERIV);
+				for(i=0;i<numl;i++){ // multiply both fft gaussians
+					inMulMacPSF[i] = fftw_G_PSF[i] * (fftw_G_MAC_PSF[i]/numl);
+					inMulMacPSFDeriv[i] = fftw_G_PSF[i] * (fftw_G_MAC_DERIV_PSF[i]/numl);
+				}
+				fftw_execute(planBackwardPSF_MAC);
+				fftw_execute(planBackwardPSF_MAC_DERIV);
+				for(i=0,ishift=startShift;i<numl/2;i++,ishift++){
+					inFilterMAC[ishift]= outConvFilters[i]*numl;
+					inFilterMAC_DERIV[ishift]= outConvFiltersDeriv[i]*numl;
+				}
+				for(i=(numl/2),ishift=0;i<numl;i++,ishift++){
+					inFilterMAC[ishift]= outConvFilters[i]*numl;
+					inFilterMAC_DERIV[ishift]= outConvFiltersDeriv[i]*numl;
+				}
 			}
-			fftw_execute(planForwardPSF_MAC);
-			fftw_execute(planForwardPSF_MAC_DERIV);
-			for(i=0;i<numl;i++){ // multiply both fft gaussians
-				inMulMacPSF[i] = fftw_G_PSF[i] * (fftw_G_MAC_PSF[i]/numl);
-				inMulMacPSFDeriv[i] = fftw_G_PSF[i] * (fftw_G_MAC_DERIV_PSF[i]/numl);
-			}
-			fftw_execute(planBackwardPSF_MAC);
-			fftw_execute(planBackwardPSF_MAC_DERIV);
-			for(i=0,ishift=startShift;i<numl/2;i++,ishift++){
-				inFilterMAC[ishift]= outConvFilters[i]*numl;
-				inFilterMAC_DERIV[ishift]= outConvFiltersDeriv[i]*numl;
-			}
-			for(i=(numl/2),ishift=0;i<numl;i++,ishift++){
-				inFilterMAC[ishift]= outConvFilters[i]*numl;
-				inFilterMAC_DERIV[ishift]= outConvFiltersDeriv[i]*numl;
-			}
-		}
-		else{
-			for(i=0;i<numl;i++){
-				inFilterMAC[i] = GMAC[i] + 0 * _Complex_I;
-				inFilterMAC_DERIV[i] = (GMAC[i] / MC * ((((lambda[i] - centro) / ild) * ((lambda[i] - centro) / ild)) - 1.0)) + 0 * _Complex_I;
-			}
-		}
-		fftw_execute(planFilterMAC);
-		fftw_execute(planFilterMAC_DERIV);
-
-		
-    	for(il=0;il<4;il++){
-			for(i=0;i<numl;i++){
-				inSpectraFwMAC[i] = spectra[numl*il+i] + 0 * _Complex_I;
-			} 
-			fftw_execute(planForwardMAC);
-			for(i=0;i<numl;i++){
-				inSpectraBwMAC[i]=(outSpectraFwMAC[i]/numl)*(outFilterMAC_DERIV[i]/numl);
-			}
-			fftw_execute(planBackwardMAC);
-			//shift: -numl/2
-			for(i=0,ishift=startShift;i<numl/2;i++,ishift++){
-				d_spectra[ishift+9*numl+numl*nterms*il]=creal(outSpectraBwMAC[i])*numl;
-			}
-			for(i=(numl/2),ishift=0;i<numl;i++,ishift++){
-				d_spectra[ishift+9*numl+numl*nterms*il]=creal(outSpectraBwMAC[i])*numl;
-			}  					
-			if(calcSpectra){
+			else{
 				for(i=0;i<numl;i++){
-					inSpectraBwMAC[i]=(outSpectraFwMAC[i]/numl)*(outFilterMAC[i]/numl);
+					inFilterMAC[i] = GMAC[i] + 0 * _Complex_I;
+					inFilterMAC_DERIV[i] = (GMAC[i] / MC * ((((lambda[i] - centro) / ild) * ((lambda[i] - centro) / ild)) - 1.0)) + 0 * _Complex_I;
+				}
+			}
+			fftw_execute(planFilterMAC);
+			fftw_execute(planFilterMAC_DERIV);
+
+			
+			for(il=0;il<4;il++){
+				for(i=0;i<numl;i++){
+					inSpectraFwMAC[i] = spectra[numl*il+i] + 0 * _Complex_I;
+				} 
+				fftw_execute(planForwardMAC);
+				for(i=0;i<numl;i++){
+					inSpectraBwMAC[i]=(outSpectraFwMAC[i]/numl)*(outFilterMAC_DERIV[i]/numl);
 				}
 				fftw_execute(planBackwardMAC);
 				//shift: -numl/2
-				for(i=0,ishift=numl/2;i<numl/2;i++,ishift++){
-					spectra[ishift+il*numl]=creal(outSpectraBwMAC[i])*numl;
+				for(i=0,ishift=startShift;i<numl/2;i++,ishift++){
+					d_spectra[ishift+9*numl+numl*nterms*il]=creal(outSpectraBwMAC[i])*numl;
 				}
-				for(i=numl/2,ishift=0;i<numl;i++,ishift++){
-					spectra[ishift+il*numl]=creal(outSpectraBwMAC[i])*numl;
-				} 
-			}  		
-    	}
-		
-		
-	   for(par=0;par<4;par++){
-    		//Va hasta 8 porque la macro no la convoluciono
-    		//seria directamente dmacro=I*dg    		
-	    	for(il=0;il<9;il++){
-				if(il!=7){
-					for(i=0;i<numl;i++){
-						inSpectraFwMAC[i] = d_spectra[(numl*il+numl*nterms*par)+i] + 0 * _Complex_I;
-					} 
-					fftw_execute(planForwardMAC);
-					for(i=0;i<numl;i++){
-						inSpectraBwMAC[i]=(outSpectraFwMAC[i]/numl)*(outFilterMAC[i]/numl);
-					}
-					fftw_execute(planBackwardMAC);  			
+				for(i=(numl/2),ishift=0;i<numl;i++,ishift++){
+					d_spectra[ishift+9*numl+numl*nterms*il]=creal(outSpectraBwMAC[i])*numl;
+				}		
+			}
+			
+			for(par=0;par<4;par++){
+				//Va hasta 8 porque la macro no la convoluciono
+				//seria directamente dmacro=I*dg    		
+				for(il=0;il<9;il++){
+					if(il!=7){
+						for(i=0;i<numl;i++){
+							inSpectraFwMAC[i] = d_spectra[(numl*il+numl*nterms*par)+i] + 0 * _Complex_I;
+						} 
+						fftw_execute(planForwardMAC);
+						for(i=0;i<numl;i++){
+							inSpectraBwMAC[i]=(outSpectraFwMAC[i]/numl)*(outFilterMAC[i]/numl);
+						}
+						fftw_execute(planBackwardMAC);  			
 
-					//shift 
-					for(i=0,ishift=startShift;i<numl/2;i++,ishift++){
-						d_spectra[ishift+il*numl+numl*nterms*par]=creal(outSpectraBwMAC[i])*numl;
+						//shift 
+						for(i=0,ishift=startShift;i<numl/2;i++,ishift++){
+							d_spectra[ishift+il*numl+numl*nterms*par]=creal(outSpectraBwMAC[i])*numl;
+						}
+						for(i=(numl/2),ishift=0;i<numl;i++,ishift++){
+							d_spectra[ishift+il*numl+numl*nterms*par]=creal(outSpectraBwMAC[i])*numl;
+						}  
 					}
-					for(i=(numl/2),ishift=0;i<numl;i++,ishift++){
-						d_spectra[ishift+il*numl+numl*nterms*par]=creal(outSpectraBwMAC[i])*numl;
-					}  
-	    		}
-	    	}
-    	}
+				}
+			}		 
+
+		} // END USE FFT
+		else{ // USE DIRECT CONVOLUTION 
+			for(i=0;i<numl;i++){
+				GMAC_DERIV[i] = (GMAC[i] / MC * ((((lambda[i] - centro) / ild) * ((lambda[i] - centro) / ild)) - 1.0));
+				//inFilterMAC_DERIV[i] = GMAC_DERIV[i];
+			}
+			if(filter){
+				// convolve both gaussians and use this to convolve this with spectra 
+				direct_convolution_double(GMAC_DERIV, nlambda, G, nlambda); 
+				direct_convolution_double(GMAC, nlambda, G, nlambda); 
+			}
+			// DIS-COMMENT FOR CONVOLVE ONLY I WITH CIRCULAR CONVOLUTION AND Q,U,V WITH LINEAR CONVOLUTION 
+			/*convCircular(spectra, GMAC_DERIV, nlambda,d_spectra+(9*numl));
+
+			for(il=1;il<4;il++){
+				direct_convolution2(spectra+nlambda*il, nlambda, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il),1);
+			}*/
+
+			for(il=0;il<4;il++){
+				convCircular(spectra+nlambda*il, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il)); 
+			}
+
+			int h;
+			REAL Ic;
+			for (i = 0; i < 9; i++)
+			{
+				// invert continuous
+				if (i != 7){		
+					if(d_spectra[(nlambda * i)]>d_spectra[(nlambda * i) + (nlambda - 1)])
+						Ic = d_spectra[(nlambda * i)];	
+					else
+						Ic = d_spectra[(nlambda * i) + (nlambda - 1)];
+					for(h=0;h<nlambda;h++){
+						d_spectra[(nlambda * i) + h] = Ic - d_spectra[(nlambda * i) +h];
+					}																													
+					direct_convolution(d_spectra + (nlambda * i), nlambda, GMAC, nlambda); 
+					for(h=0;h<nlambda;h++){
+						d_spectra[(nlambda * i) +h] = Ic - d_spectra[(nlambda * i) + h];
+					}
+				}	
+			}
+
+			for (j = 1; j < NPARMS; j++)
+			{
+				for (i = 0; i < 9; i++)
+				{
+					if (i != 7)																															 //no convolucionamos S0
+						direct_convolution(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), nlambda, GMAC, nlambda); 
+				}
+			}	
+
+			// DISCOMMENT FOR USE CIRCULAR CONVOLUTION ONLY 
+			/*for(il=0;il<4;il++){
+				convCircular(spectra+nlambda*il, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il)); 
+			}
+
+			for (j = 0; j < NPARMS; j++)
+			{
+				for (i = 0; i < 9; i++)
+				{
+					if (i != 7)																															 //no convolucionamos S0
+						convCircular(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), GMAC, nlambda,d_spectra + (nlambda * i) + (nlambda * NTERMS * j)); 
+				}
+			}*/
+
+		}  // END DIRECT CONVOLUTION 
    
     }//end if(MC > 0.0001)
 
@@ -473,44 +530,80 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	}
 	if(!macApplied && filter){
 		int h;
-		int odd=(numl%2);
-		int startShift = (numl)/2;
-		if(odd) startShift+=1;
+		if(configCrontrolFile.useFFT){
+			int odd=(numl%2);
+			int startShift = (numl)/2;
+			if(odd) startShift+=1;
 
-		for (j = 0; j < NPARMS; j++)
-		{
-			for (i = 0; i < NTERMS; i++)
+			for (j = 0; j < NPARMS; j++)
 			{
-				if (i != 7)	{																														 //no convolucionamos S0
-					// copy to inSpectra
-					for(k=0;k<(numl);k++){
-						inSpectraFwPSF[k] = d_spectra[(numl * i + numl * NTERMS * j) + k] + 0 * _Complex_I;
-					}
-					fftw_execute(planForwardPSF);
-					for(h=0;h<numl;h++){
-						inSpectraBwPSF[h] = (outSpectraFwPSF[h]/numl) * fftw_G_PSF[h];
-					}
-					fftw_execute(planBackwardPSF);   			
-					//shift 
-					for(h=0,ishift=startShift;h<numl/2;h++,ishift++){
-						d_spectra[ishift+ numl * i + numl * NTERMS * j]=creal(outSpectraBwPSF[h])*numl;
-					}
-					for(h=(numl/2),ishift=0;h<numl;h++,ishift++){
-						d_spectra[ishift+numl * i + numl * NTERMS * j]=creal(outSpectraBwPSF[h])*numl;
+				for (i = 0; i < NTERMS; i++)
+				{
+					if (i != 7)	{																														 //no convolucionamos S0
+						// copy to inSpectra
+						for(k=0;k<(numl);k++){
+							inSpectraFwPSF[k] = d_spectra[(numl * i + numl * NTERMS * j) + k] + 0 * _Complex_I;
+						}
+						fftw_execute(planForwardPSF);
+						for(h=0;h<numl;h++){
+							inSpectraBwPSF[h] = (outSpectraFwPSF[h]/numl) * fftw_G_PSF[h];
+						}
+						fftw_execute(planBackwardPSF);   			
+						//shift 
+						for(h=0,ishift=startShift;h<numl/2;h++,ishift++){
+							d_spectra[ishift+ numl * i + numl * NTERMS * j]=creal(outSpectraBwPSF[h])*numl;
+						}
+						for(h=(numl/2),ishift=0;h<numl;h++,ishift++){
+							d_spectra[ishift+numl * i + numl * NTERMS * j]=creal(outSpectraBwPSF[h])*numl;
+						}
 					}
 				}
 			}
 		}
-
-		/*for (j = 0; j < NPARMS; j++)
-		{
+		else{ // DIRECT CONVOLUTION 
+			REAL Ic;
+						
+			if(spectra[0]>spectra[nlambda - 1])
+				Ic = spectra[0];
+			else				
+				Ic = spectra[nlambda - 1];
 			for (i = 0; i < NTERMS; i++)
 			{
-				if (i != 7)																															 //no convolucionamos S0
-					direct_convolution(d_spectra + nlambda * i + nlambda * NTERMS * j, nlambda, G, nlambda, 1); //no convolucionamos el ultimo valor
+				// invert continuous
+				if (i != 7){	
+					if(d_spectra[(nlambda * i)]>d_spectra[(nlambda * i) + (nlambda - 1)])
+						Ic = d_spectra[(nlambda * i)];	
+					else
+						Ic = d_spectra[(nlambda * i) + (nlambda - 1)];
+					for(h=0;h<nlambda;h++){
+						d_spectra[(nlambda * i) + h] = Ic - d_spectra[(nlambda * i) +h];
+					}																													
+					direct_convolution(d_spectra + (nlambda * i), nlambda, G, nlambda); 
+					for(h=0;h<nlambda;h++){
+						d_spectra[(nlambda * i) +h] = Ic - d_spectra[(nlambda * i) + h];
+					}
+				}	
 			}
-		}*/
 
+			for (j = 1; j < NPARMS; j++)
+			{
+				for (i = 0; i < NTERMS; i++)
+				{
+					if (i != 7)																															 //no convolucionamos S0
+						direct_convolution(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), nlambda, G, nlambda);
+				}
+			}
+
+			// FOR USE CIRCULAR CONVOLUTION 
+			/*for (j = 0; j < NPARMS; j++)
+			{
+				for (i = 0; i < NTERMS; i++)
+				{
+					if (i != 7)																															 //no convolucionamos S0
+						convCircular(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), nlambda, G, nlambda,d_spectra + (nlambda * i) + (nlambda * NTERMS * j)); 
+				}
+			}*/
+		}
 		//response_functions_convolution(&nlambda);
 	}
 	//ResetPointerShareCalculation();

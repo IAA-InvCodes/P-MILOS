@@ -742,6 +742,8 @@ void loadInitialValues(ConfigControl * configControlFile){
 	configControlFile->suby1 = 0;
 	configControlFile->suby2 = 0;
 
+	configControlFile->useFFT = 0; // by default direct convolution
+
 }
 
 int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, int printLog){
@@ -2050,7 +2052,19 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	trolConfig->InitialDiagonalElement = aux;
 	//if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
 	if(printLog) printf("%s\n", LINE);
-
+	
+	/*************************** USE FFT ********************************************/
+	
+	returnLine = fgets(LINE,4096,fReadParameters);
+	if(returnLine == NULL) return 0;						
+	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->useFFT,comment);
+	if(rfscanf ==0 || rfscanf == EOF){
+		printf("Error reading the file of parameters, param Save Synthesis Profile Adjusted. Please verify it. \n");
+		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		return 0;		
+	}
+	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
+	if(printLog) printf("%s", LINE);
 
 	return 1;
 
@@ -2104,8 +2118,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Type Input Stokes to apply: %s\n", trolConfig->typeInputStokes);
-
+	//if(printLog) printf("Type Input Stokes to apply: %s\n", trolConfig->typeInputStokes);
+	if(printLog) printf("%s", LINE);
 
 	/***************************  type input stray light file  ********************************************/
 
@@ -2117,8 +2131,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Type input stray light to apply: %s\n", trolConfig->typeInputStrayLight);
-
+	//if(printLog) printf("Type input stray light to apply: %s\n", trolConfig->typeInputStrayLight);
+	if(printLog) printf("%s", LINE);
 	/*************************** NX ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2129,8 +2143,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("NX to apply: %d\n", trolConfig->nx);
-
+	//if(printLog) printf("NX to apply: %d\n", trolConfig->nx);
+	if(printLog) printf("%s", LINE);
 	/*************************** NY ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2141,8 +2155,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("NY to apply: %d\n", trolConfig->ny);
-
+	//if(printLog) printf("NY to apply: %d\n", trolConfig->ny);
+	if(printLog) printf("%s", LINE);
 	/*************************** subx1 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2153,8 +2167,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("subX1 to apply: %d\n", trolConfig->subx1);	
-
+	//if(printLog) printf("subX1 to apply: %d\n", trolConfig->subx1);	
+	if(printLog) printf("%s", LINE);
 
 	/*************************** subx2 ********************************************/
 	
@@ -2166,8 +2180,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("subX2 to apply: %d\n", trolConfig->subx2);
-
+	//if(printLog) printf("subX2 to apply: %d\n", trolConfig->subx2);
+	if(printLog) printf("%s", LINE);
 	/*************************** suby1 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2178,8 +2192,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("suby1 to apply: %d\n", trolConfig->suby1);
-
+	//if(printLog) printf("suby1 to apply: %d\n", trolConfig->suby1);
+	if(printLog) printf("%s", LINE);
 	/*************************** suby2 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2190,8 +2204,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("suby2 to apply: %d\n", trolConfig->suby2);
-
+	//if(printLog) printf("suby2 to apply: %d\n", trolConfig->suby2);
+	if(printLog) printf("%s", LINE);
 	// CHECK SIZE IMAGE PARAMS
 
 	if(trolConfig->subx2 > trolConfig->nx || trolConfig->subx1>trolConfig->subx2 || trolConfig->suby2 > trolConfig->ny || trolConfig->suby1 > trolConfig->suby2){
@@ -2215,8 +2229,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Output prefix to apply: %s\n", trolConfig->outputPrefix);
-
+	//if(printLog) printf("Output prefix to apply: %s\n", trolConfig->outputPrefix);
+	if(printLog) printf("%s", LINE);
 
 	/***************************  mask file prefix  ********************************************/
 
@@ -2228,8 +2242,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Maskfile to apply: %s\n", trolConfig->MaskFile);
-
+	//if(printLog) printf("Maskfile to apply: %s\n", trolConfig->MaskFile);
+	if(printLog) printf("%s", LINE);
 	/*************************** t1 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2240,8 +2254,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("t1 to apply: %d\n", trolConfig->t1);
-
+	//if(printLog) printf("t1 to apply: %d\n", trolConfig->t1);
+	if(printLog) printf("%s", LINE);
 	/*************************** t2 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2252,8 +2266,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("t2 to apply: %d\n", trolConfig->t2);
-
+	//if(printLog) printf("t2 to apply: %d\n", trolConfig->t2);
+	if(printLog) printf("%s", LINE);
 	/*************************** SAVE SYNTHESIS PROFILE ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2264,7 +2278,9 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
+	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
+	if(printLog) printf("%s", LINE);
+
 
 	return 1;
 }
