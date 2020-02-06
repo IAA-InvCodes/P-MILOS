@@ -126,12 +126,13 @@ int multmatrixIDLValue(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL *res
 void totalParcialf(REAL * A, int f,int c,REAL * result){
 
 	int i,j;
-	
+	REAL sum;
 	for(i=0;i<c;i++){
-		result[i]=0;
+		sum = 0;
 		for(j=0;j<f;j++){
-			result[i]+=A[j*c+i];
+			sum+=A[j*c+i];
 		}
+		result[i] = sum;
 	}
 }
 
@@ -139,12 +140,13 @@ void totalParcialf(REAL * A, int f,int c,REAL * result){
 void totalParcialMatrixf(REAL * A, int f,int c,int p,REAL *result){
 
 	int i,j,k;
-
+	REAL sum;
 	for(i=0;i<f;i++)
 		for(j=0;j<c;j++){
-			result[i*c+j]=0;
+			sum=0;
 			for(k=0;k<p;k++)
-				result[i*c+j]+=A[i*c+j+f*c*k];
+				sum+=A[i*c+j+f*c*k];
+			result[i*c+j] = sum;
 		}
 
 //	return result;
@@ -198,7 +200,7 @@ int multmatrix(PRECISION *a,int naf,int nac, PRECISION *b,int nbf,int nbc,PRECIS
 int multmatrix_transpose(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,REAL *result,int *fil,int *col,REAL value){
     
     int i,j,k;
-    PRECISION sum;
+    REAL sum;
     
 	if(nac==nbc){
 		(*fil)=naf;

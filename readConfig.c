@@ -146,13 +146,6 @@
   	else
     	if(printLog) printf("No 'ContinuumContrast' setting in configuration file.\n");			
 
-	//  Tolerance for SVD 
-	if(config_lookup_float(&cfg, TOLERANCE_FOR_SVD, &trolConfig->ToleranceForSVD)){
-    	if(printLog) printf("ToleranceForSVD to apply: %f\n", trolConfig->ToleranceForSVD);
-	}
-  	else
-    	if(printLog) printf("No 'ToleranceForSVD' setting in configuration file.\n");	
-
 	//  initial diagonal element
 	if(config_lookup_float(&cfg, INITIAL_DIAGONAL_ELEMENT, &trolConfig->InitialDiagonalElement)){
     	if(printLog) printf("InitialDiagonalElement to apply: %f\n", trolConfig->InitialDiagonalElement);
@@ -730,7 +723,7 @@ void loadInitialValues(ConfigControl * configControlFile){
 	configControlFile->sigma[2] = NOISE_SIGMA;
 	configControlFile->sigma[3] = NOISE_SIGMA;
 
-	configControlFile->ToleranceForSVD = 1e-3;
+	
 	configControlFile->InitialDiagonalElement = ILAMBDA;
 	configControlFile->toplim = TOPLIM;
 	configControlFile->mu = AH;
@@ -975,18 +968,6 @@ int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, 
 		return 0;		
 	}
 	if(printLog) printf("Continuum contrast to apply: %i\n", trolConfig->ContinuumContrast);
-
-	/*************************** TOLERANCE_FOR_SVD ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->ToleranceForSVD,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Tolerance for SVD. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Tolerance for SVD to apply: %le\n", trolConfig->ToleranceForSVD);
 
 	/*************************** INITIAL_DIAGONAL_ELEMENT ********************************************/
 	
@@ -2026,18 +2007,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	//if(printLog) printf("Continuum contrast to apply: %i\n", trolConfig->ContinuumContrast);
 	if(printLog) printf("%s", LINE);
 
-	/*************************** TOLERANCE_FOR_SVD ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->ToleranceForSVD,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Tolerance for SVD. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	//if(printLog) printf("Tolerance for SVD to apply: %le\n", trolConfig->ToleranceForSVD);
-	if(printLog) printf("%s", LINE);
 
 	/*************************** INITIAL_DIAGONAL_ELEMENT ********************************************/
 	

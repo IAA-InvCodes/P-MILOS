@@ -247,7 +247,6 @@ struct CONFIG_CONTROL{
 	PRECISION mu;
 	int EstimatedSNForI;
 	int ContinuumContrast;
-	PRECISION ToleranceForSVD;
 	REAL InitialDiagonalElement;
 	int ConvolveWithPSF;
 	int useFFT;
@@ -305,7 +304,6 @@ typedef struct CONFIG_CONTROL ConfigControl;
 #define MU "mu"
 #define ESTIMATEDSNFORI "EstimatedSNForI"
 #define CONTINUUM_CONTRAST "ContinuumContrast"
-#define TOLERANCE_FOR_SVD "ToleranceForSVD"
 #define INITIAL_DIAGONAL_ELEMENT "InitialDiagonalElement"
 #define USE_INTERPOLAR_SPLINES_OR_LINEAR "UseInterpolarSplinesOrLinear"
 #define CONVOLVE_WITH_PSF "ConvolveWithPSF"
