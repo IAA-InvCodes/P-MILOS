@@ -291,48 +291,53 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 			if(fits_read_key(fptr, TSTRING, CTYPE2, image->ctype_2, comment, &status)) return 0;
 			if(fits_read_key(fptr, TSTRING, CTYPE3, image->ctype_3, comment, &status)) return 0;
 			if(fits_read_key(fptr, TSTRING, CTYPE4, image->ctype_4, comment, &status)) return 0;
+
 			// ORDER MUST BE CTYPE1->'HPLN-TAN',CTYPE2->'HPLT-TAN',CTYPE3->'WAVE-GRI',CTYPE4->'STOKES'
 
-			/*if(strcmp(image->ctype_1,CTYPE_HPLN_TAN)!=0){
+			if(strcmp(image->ctype_1,CTYPE_HPLN_TAN)!=0){
 				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+				printf("\n EXITING THE PROGRAM");
+				fits_close_file(fptr, &status);
+				exit(EXIT_FAILURE);				
 			}
 			if(strcmp(image->ctype_2,CTYPE_HPLT_TAN)!=0){
-				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_2);
+				printf("\n EXITING THE PROGRAM");
+				fits_close_file(fptr, &status);
+				exit(EXIT_FAILURE);								
 			}
 			if(strcmp(image->ctype_3,CTYPE_WAVE)!=0){
-				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_3);
+				printf("\n EXITING THE PROGRAM");
+				fits_close_file(fptr, &status);
+				exit(EXIT_FAILURE);								
 			}
 			if(strcmp(image->ctype_4,CTYPE_STOKES)!=0){
-				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_1);
-			}*/
+				printf("\n ERROR reading spectro image, the first dimension must be 'HPLN-TAN' and is %s",image->ctype_4);
+				printf("\n EXITING THE PROGRAM");
+				fits_close_file(fptr, &status);
+				exit(EXIT_FAILURE);								
+			}
 
 			// GET THE CURRENT POSITION OF EVERY PARAMETER
-			int pos_row = 2;
-			int pos_col = 3;
-			int pos_lambda = 0; 
-			int pos_stokes_parameters = 1;
+			// i = cols, j = rows, k = stokes, h = lambda
+			//int pos_row = 2, pos_col = 3, pos_lambda = 0, pos_stokes_parameters = 1;
+
+			// // i = stokes, j = lambda, k = cols, h = rows
+			int pos_row = 0, pos_col = 1, pos_lambda = 2, pos_stokes_parameters = 3;
 
 			// READ IMAGE AND STORAGE IN STRUCTURE IMAGE 
 			if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
 
-				/*int datatype = 0;
-				switch(bitpix) {
-              case BYTE_IMG:
-                  datatype = TBYTE;
-                  break;
-              case SHORT_IMG:
-                  datatype = TSHORT;
-                  break;
-              case LONG_IMG:
-                  datatype = TINT;
-                  break;
-              case FLOAT_IMG:
-                  datatype = TFLOAT;
-                  break;
-              case DOUBLE_IMG:
-                  datatype = TDOUBLE;
-                  break;
-          		}*/
+				if(bitpix != FLOAT_IMG){
+					printf("\n ERROR: the datatype of FITS spectro image must be FLOAT\n");
+					printf("\n EXITING THE PROGRAM");
+					fits_close_file(fptr, &status);
+					exit(EXIT_FAILURE);
+				}
+
+
+
 				image->rows=naxes[pos_row];
 				image->cols=naxes[pos_col];
 				image->nLambdas=naxes[pos_lambda];
@@ -391,18 +396,25 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 				//PRECISION pixel;
 				if(naxis==4){ // image with 4 dimension 
 					
-					// i = stokes, j = lambda, k = cols, h = rows 		
-					/*for( i=0; i<naxes[3];i++){
+					 		
+					
+					// i = stokes, j = lambda, k = cols, h = rows
+					for( i=0; i<naxes[3];i++){
 						for( j=0; j<naxes[2];j++){
 							for( k=0;k<naxes[1];k++){
 								for( h=0;h<naxes[0];h++){
-									image->pixels[(k*image->rows) + h].spectro[j + (image->nLambdas * i)] = imageTemp [(i*naxes[2]*naxes[1]*naxes[0]) + (j*naxes[1]*naxes[0]) + (k*naxes[0]) + h];  // I =0, Q = 1, U = 2, V = 3
+									if(forParallel){
+										image->spectroImagen[ (((k*image->rows) + h)*(image->nLambdas*image->numStokes)) + (image->nLambdas * i) + j] = imageTemp [(i*naxes[2]*naxes[1]*naxes[0]) + (j*naxes[1]*naxes[0]) + (k*naxes[0]) + h];  // I =0, Q = 1, U = 2, V = 3
+									}
+									else{									
+										image->pixels[(k*image->rows) + h].spectro[j + (image->nLambdas * i)] = imageTemp [(i*naxes[2]*naxes[1]*naxes[0]) + (j*naxes[1]*naxes[0]) + (k*naxes[0]) + h];  // I =0, Q = 1, U = 2, V = 3
+									}
 								}
 							}
 						}
-					}*/
+					}
 					// i = cols, j = rows, k = stokes, h = lambda
-					for( i=0; i<naxes[3];i++){
+					/*for( i=0; i<naxes[3];i++){
 						for( j=0; j<naxes[2];j++){
 							for( k=0;k<naxes[1];k++){
 								for( h=0;h<naxes[0];h++){
@@ -415,7 +427,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 								}
 							}
 						}
-					}					
+					}*/					
 					
 				}
 /*				if(forParallel){

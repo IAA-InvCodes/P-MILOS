@@ -1,5 +1,5 @@
-Number of cycles          (*):15          		! 0 = synthesis, n= max num of iterations, -1 = use classical estimates
-Observed profiles         (*):/home/mcabrera/SolarImages/fits_CRISP_spot/2014.09.28_09_18_00_t0    
+Number of cycles          (*):0          		! 0 = synthesis, n= max num of iterations, -1 = use classical estimates
+Observed profiles         (*):run/initModel.per !    
 Stray light file             :    				! (none=no stray light contam)
 PSF file                     :49.2    				! si fichero .psf leer la psf numerica, si es un numero será la FWHM del filtro gaussiano, si es vacio no se tiene en cuenta
 Wavelength grid file      (s):run/malla.grid 	! (automatic selection, grid, or wavelength file)
