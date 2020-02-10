@@ -3,7 +3,7 @@
 
 ## Description 
 
-Implementacion of MILOS in C 
+Implementacion of MILOS in C. An extended user manual can be found [here](c-milos_manual.pdf)
 
 
 ## Getting Started
