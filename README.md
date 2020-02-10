@@ -3,7 +3,7 @@
 
 ## Description 
 
-Implementacion of MILOS in C. An extended user manual can be found [here](c-milos_manual.pdf)
+This repository contains an implementacion of MILOS in C. An extended user manual can be found [here](c-milos_manual.pdf). But in this page you can find a quick overview about how to install the necessary libraries, the types of files used and how to use the programs (sequential and parallel). 
 
 
 ## Getting Started
@@ -77,20 +77,20 @@ This is an example of one line:
 
 * Spectro 
 
-The **fits** files used for pass to the program the spectro image must contain four dimensions: *number_of_wavelengths*X*number_stokes*X*number_rows*X*number_cols* . The order or these parameters may vary, but to identify each one the header of **fits** file must contain the type of each dimension with this correspondence:
+The **fits** files used for pass to the program the spectro image must contain four dimensions: *number_rows*X*number_cols*number_of_wavelengths*X*number_stokes*X* . The order or these parameters cannot change and for identify each one the header of **fits** file must contain the type of each dimension with this correspondence:
 
-  - Number of Wavelenghts: include CTYPE with the value **'WAVE-GRI'**
-  - Number of Stokes: include CTYPE with the value **'STOKES  '**
   - Number of Rows: include CTYPE with the value **'HPLN-TAN'**
   - Number of Cols: include CTYPE with the value **'HPLT-TAN'**
+  - Number of Wavelenghts: include CTYPE with the value **'WAVE-GRI'**
+  - Number of Stokes: include CTYPE with the value **'STOKES  '**
 
 An example can be this:
 
 ```
-CTYPE1  = 'WAVE-GRI'
-CTYPE2  = 'STOKES  '
-CTYPE3  = 'HPLN-TAN' 
-CTYPE4  = 'HPLT-TAN'  
+CTYPE1  = 'HPLN-TAN' 
+CTYPE2  = 'HPLT-TAN' 
+CTYPE3  = 'WAVE-GRI'
+CTYPE4  = 'STOKES  ' 
 ```
 
 * Wavelengths
