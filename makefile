@@ -20,18 +20,17 @@ CFLAGS+=-fno-omit-frame-pointer
 #CFLAGS+=-Wno-unused-but-set-variable -Wno-unused-parameter
 
 SRCDIR= src
-
-
+DEPEN=$(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.o  $(SRCDIR)/milos.o $(SRCDIR)/me_der.o $(SRCDIR)/mil_sinrf.o $(SRCDIR)/lib.o $(SRCDIR)/create_cuantic.o $(SRCDIR)/utilsFits.o $(SRCDIR)/milosUtils.o $(SRCDIR)/convolution.o $(SRCDIR)/readConfig.o
 LDLIBS= -lm -lcfitsio -lnsl -lgsl -lgslcblas -lfftw3 -ldl -lpthread # -shared-intel
 BIN= milos milosMPI 
 
 
 all: $(BIN)
 
-milos: $(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.o  $(SRCDIR)/milos.o $(SRCDIR)/me_der.o $(SRCDIR)/mil_sinrf.o $(SRCDIR)/lib.o $(SRCDIR)/create_cuantic.o $(SRCDIR)/utilsFits.o $(SRCDIR)/milosUtils.o $(SRCDIR)/convolution.o $(SRCDIR)/readConfig.o
+milos: $(DEPEN)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
-milosMPI:  $(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.o $(SRCDIR)/milosMPI.o $(SRCDIR)/me_der.o $(SRCDIR)/mil_sinrf.o $(SRCDIR)/lib.o $(SRCDIR)/create_cuantic.o $(SRCDIR)/utilsFits.o $(SRCDIR)/milosUtils.o $(SRCDIR)/convolution.o $(SRCDIR)/readConfig.o
+milosMPI: $(DEPEN)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
 clean:
