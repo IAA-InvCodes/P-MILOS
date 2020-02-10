@@ -655,7 +655,7 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 	}
 
 	if(printLog){	
-		printf("\n MALLA GRID --- indexline %d , initial lambda: %lf, step: %lf, finallambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
+		printf("\n\n MALLA GRID --- indexline %d , initial lambda: %lf, step: %lf, finallambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
 	}
 
 	if(dataRead)
@@ -2020,7 +2020,7 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	}
 	trolConfig->InitialDiagonalElement = aux;
 	//if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
-	if(printLog) printf("%s\n", LINE);
+	if(printLog) printf("%s", LINE);
 	
 	/*************************** USE FFT ********************************************/
 	

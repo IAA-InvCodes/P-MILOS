@@ -1,7 +1,7 @@
 
 
 #include "defines.h"
-extern PRECISION _Complex  *z,* zden, * zdiv;
+extern  _Complex double *z,* zden, * zdiv;
 //pro fvoigt,damp,vv,h,f
 int fvoigt(PRECISION damp, REAL *vv, int nvv, REAL *h, REAL *f)
 {

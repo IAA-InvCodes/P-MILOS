@@ -129,6 +129,19 @@ struct CUANTIC{
 	REAL GEFF;
 	REAL FO;	
 	
+	/*PRECISION  N_PI;
+	PRECISION N_SIG;
+	PRECISION * NUB;//size stored in  n_sig
+	PRECISION * NUP;//size stored in n_pi
+	PRECISION * NUR;//size stored in n_sig
+	PRECISION * WEB;//size stored in n_sig
+	PRECISION * WEP;//size stored in n_pi
+	PRECISION * WER;//size stored in n_sig
+	PRECISION GL;
+	PRECISION GU;
+	PRECISION GEFF;
+	PRECISION FO;	*/
+
 };
 
 typedef struct INIT_MODEL Init_Model;

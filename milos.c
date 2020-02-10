@@ -106,7 +106,7 @@ PRECISION FWHM = 0;
 ConfigControl configCrontrolFile;
 
 // fvoigt memory consuption
-PRECISION _Complex  *z,* zden, * zdiv;
+ _Complex double *z,* zden, * zdiv;
 
 int main(int argc, char **argv)
 {
@@ -172,9 +172,9 @@ int main(int argc, char **argv)
       indexLine = readMallaGrid(configCrontrolFile.MallaGrid, &initialLambda, &step, &finalLambda, 1);      
       nlambda = ((finalLambda-initialLambda)/step)+1;
       // pass to armstrong 
-      initialLambda = initialLambda/1000;
-      step = step/1000;
-      finalLambda = finalLambda/1000;
+      initialLambda = initialLambda/1000.0;
+      step = step/1000.0;
+      finalLambda = finalLambda/1000.0;
 	   vLambda = calloc(nlambda,sizeof(PRECISION));
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(nameInputFileLines,dat,indexLine,1);
 		if(configCrontrolFile.CentralWaveLenght==0){
@@ -402,8 +402,8 @@ int main(int argc, char **argv)
 			free(spectroPER);
 		}
 		else if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)==0){ // invert image from fits file 
-			//fitsImage = readFitsSpectroImage(configCrontrolFile.ObservedProfiles,0);
-			fitsImage = readFitsSpectroImageRectangular(configCrontrolFile.ObservedProfiles,&configCrontrolFile,0);
+			fitsImage = readFitsSpectroImage(configCrontrolFile.ObservedProfiles,0);
+			//fitsImage = readFitsSpectroImageRectangular(configCrontrolFile.ObservedProfiles,&configCrontrolFile,0);
 			// ALLOCATE MEMORY FOR STORE THE RESULTS 
 			int indexPixel = 0;
 			vModels = calloc (fitsImage->numPixels , sizeof(Init_Model));
@@ -424,7 +424,7 @@ int main(int argc, char **argv)
 				initModel.alfa = INITIAL_MODEL.alfa; //0.38; //stray light factor
 				initModel.S0 = INITIAL_MODEL.S0;
 				initModel.S1 = INITIAL_MODEL.S1;
-				estimacionesClasicas(wlines[1], fitsImage->pixels[indexPixel].vLambda, fitsImage->pixels[indexPixel].nLambda, fitsImage->pixels[indexPixel].spectro, &initModel);
+				estimacionesClasicas(wlines[1],vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel);
 				//Se comprueba si el resultado fue "nan" en las CE
 				if (isnan(initModel.B))
 					initModel.B = 1;
@@ -507,7 +507,8 @@ int main(int argc, char **argv)
 			int kk;
 			for (kk = 0; kk < nlambda; kk++)
 			{
-				fprintf(fptr,"%d\t%f\t%le\t%le\t%le\t%le\n", indexLine, vLambda[kk]-configCrontrolFile.CentralWaveLenght, spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
+				//fprintf(fptr,"%d\t%f\t%e\t%e\t%e\t%e\n", indexLine, (vLambda[kk]-configCrontrolFile.CentralWaveLenght)*1000, spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
+				fprintf(fptr,"%d\t%f\t%e\t%e\t%e\t%e\n", indexLine, vLambda[kk], spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
 			}
 			fclose(fptr);
 			printf("\n*******************************************************************************************");

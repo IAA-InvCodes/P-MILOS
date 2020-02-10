@@ -30,7 +30,7 @@ extern Cuantic *cuantic;
 extern REAL * opa;
 extern PRECISION *dirConvPar,*dirConvPar2;
 extern REAL *resultConv;
-extern PRECISION _Complex  *z,* zden, * zdiv;
+extern _Complex double *z,* zden, * zdiv;
 
 
 void AllocateMemoryDerivedSynthesis(int numl)
@@ -46,9 +46,9 @@ void AllocateMemoryDerivedSynthesis(int numl)
 	/**********************************************************/
 
 	//***** VARIABLES FOR FVOIGT ****************************//
-	z = malloc (numl * sizeof(PRECISION _Complex));
-	zden = malloc (numl * sizeof(PRECISION _Complex));
-	zdiv = malloc (numl * sizeof(PRECISION _Complex));	
+	z = malloc (numl * sizeof(_Complex double));
+	zden = malloc (numl * sizeof(_Complex double));
+	zdiv = malloc (numl * sizeof(_Complex double));	
 	/********************************************************/
 
 

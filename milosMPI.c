@@ -89,7 +89,7 @@ PRECISION FWHM = 0;
 
 ConfigControl configCrontrolFile;
 
-PRECISION _Complex  *z,* zden, * zdiv;
+_Complex double  *z,* zden, * zdiv;
 
 int main(int argc, char **argv)
 {
@@ -611,7 +611,7 @@ int main(int argc, char **argv)
 						else 
 							slightPixel = slight+nlambda*indexPixel;
 					}
-					lm_mils(cuantic, wlines, vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
+										lm_mils(cuantic, wlines, vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
 							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel]);						
 
 					vModels[indexPixel] = initModel;
