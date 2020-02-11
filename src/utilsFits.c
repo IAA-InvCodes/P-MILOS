@@ -376,6 +376,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 				if(forParallel){
 					//image->vLambdaImagen = calloc(image->numPixels*image->nLambdas, sizeof(PRECISION));
 					image->vLambdaImagen = NULL;
+					image->pixels = NULL;
 					image->spectroImagen = calloc(image->numPixels*image->nLambdas*image->numStokes, sizeof(float));
 				}
 				else{
@@ -1240,22 +1241,24 @@ PRECISION * readFitsStrayLightFile (const char * fitsFileStrayLight, int * dimSt
 
 void freeFitsImage(FitsImage * image){
 	int i;
-	if(image->pixels!=NULL){
-		for( i=0;i<image->numPixels;i++){
-			if(image->pixels[i].spectro!=NULL)
-				free(image->pixels[i].spectro);
-			if(image->pixels[i].vLambda!=NULL)
-				free(image->pixels[i].vLambda);
-		}
+	if(image!=NULL){
+		if(image->pixels!=NULL){
+			for( i=0;i<image->numPixels;i++){
+				if(image->pixels[i].spectro!=NULL)
+					free(image->pixels[i].spectro);
+				if(image->pixels[i].vLambda!=NULL)
+					free(image->pixels[i].vLambda);
+			}
 
-		free(image->pixels);
+			free(image->pixels);
+		}
+		if(image->spectroImagen!=NULL)
+			free(image->spectroImagen);
+		if(image->vLambdaImagen!=NULL)
+			free(image->vLambdaImagen);
+		free(image);
 	}
-	if(image->spectroImagen!=NULL)
-		free(image->spectroImagen);
-	if(image->vLambdaImagen!=NULL)
-		free(image->vLambdaImagen);
 	
-	free(image);
 }
 
 

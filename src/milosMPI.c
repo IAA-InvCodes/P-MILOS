@@ -511,7 +511,7 @@ int main(int argc, char **argv)
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	if(numberOfFileSpectra>=numProcs){ // Scatter name of files 
+	if(numberOfFileSpectra>=numProcs){ // ONE IMAGE PER PROCESSOR
 		Init_Model *vModels;
 
 		vInputFileSpectraLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
@@ -741,7 +741,8 @@ int main(int argc, char **argv)
 				resultsInitModelTotal = calloc (numPixels , sizeof(Init_Model));
 				chisqrfTotal = calloc (numPixels , sizeof(float));
 				vNumIterTotal = calloc (numPixels, sizeof(int));
-				vSpectraAjustedTotal = calloc (numPixels*nlambda*NPARMS,sizeof(float));
+				if(configCrontrolFile.SaveSynthesisAdjusted)
+					vSpectraAjustedTotal = calloc (numPixels*nlambda*NPARMS,sizeof(float));
 			}
 			// allocate memory in all processes 
 			
@@ -927,7 +928,7 @@ int main(int argc, char **argv)
 				free(vChisqrf);
 				free(vNumIter);
 			}
-			
+		
 			FreeMemoryDerivedSynthesis();
 			
 		}
