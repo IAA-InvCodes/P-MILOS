@@ -20,17 +20,19 @@ CFLAGS+=-fno-omit-frame-pointer
 #CFLAGS+=-Wno-unused-but-set-variable -Wno-unused-parameter
 
 SRCDIR= src
-DEPEN=$(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.o  $(SRCDIR)/milos.o $(SRCDIR)/me_der.o $(SRCDIR)/mil_sinrf.o $(SRCDIR)/lib.o $(SRCDIR)/create_cuantic.o $(SRCDIR)/utilsFits.o $(SRCDIR)/milosUtils.o $(SRCDIR)/convolution.o $(SRCDIR)/readConfig.o
+DEPENCOMMON=$(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.o  $(SRCDIR)/me_der.o $(SRCDIR)/mil_sinrf.o $(SRCDIR)/lib.o $(SRCDIR)/create_cuantic.o $(SRCDIR)/utilsFits.o $(SRCDIR)/milosUtils.o $(SRCDIR)/convolution.o $(SRCDIR)/readConfig.o
+DEPEN_SEQ=$(SRCDIR)/milos.o 
+DEPEN_PAR=$(SRCDIR)/milosMPI.o 
 LDLIBS= -lm -lcfitsio -lnsl -lgsl -lgslcblas -lfftw3 -ldl -lpthread # -shared-intel
 BIN= milos milosMPI 
 
 
 all: $(BIN)
 
-milos: $(DEPEN)
+milos: $(DEPENCOMMON) $(DEPEN_SEQ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
-milosMPI: $(DEPEN)
+milosMPI: $(DEPENCOMMON) $(DEPEN_PAR)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
 clean:
