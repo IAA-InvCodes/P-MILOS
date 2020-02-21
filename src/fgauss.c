@@ -126,7 +126,8 @@ PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambd
 	PRECISION *mtb ;
 	PRECISION *term, *loai;
 	int i;
-	int nloai, nmtb;
+	int nloai;
+	int nmtb;
 	PRECISION cte;
 	
 
@@ -195,7 +196,7 @@ PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambd
 	{
 
 		nmtb = *sizeG;
-		mtb = calloc(nmtb, sizeof(PRECISION));
+		mtb = malloc ( (*sizeG)* sizeof(PRECISION));
 		for (i = 0; i < *sizeG; i++)
 		{
 			mtb[i] = exp(-term[i]);

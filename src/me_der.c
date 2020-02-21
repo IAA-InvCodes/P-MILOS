@@ -460,7 +460,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 				convCircular(spectra+nlambda*il, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il)); 
 			}
 
-			int h;
+			/*int h;
 			REAL Ic;
 			for (i = 0; i < 9; i++)
 			{
@@ -488,9 +488,9 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 						direct_convolution(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), nlambda, GMAC, nlambda); 
 				}
 			}	
-
+			*/
 			// DISCOMMENT FOR USE CIRCULAR CONVOLUTION ONLY 
-			/*for(il=0;il<4;il++){
+			for(il=0;il<4;il++){
 				convCircular(spectra+nlambda*il, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il)); 
 			}
 
@@ -501,7 +501,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 					if (i != 7)																															 //no convolucionamos S0
 						convCircular(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), GMAC, nlambda,d_spectra + (nlambda * i) + (nlambda * NTERMS * j)); 
 				}
-			}*/
+			}
 
 		}  // END DIRECT CONVOLUTION 
    

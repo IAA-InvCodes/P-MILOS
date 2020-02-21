@@ -1453,6 +1453,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
 	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->ObservedProfiles,comment);
+	if(trolConfig->ObservedProfiles[0]=='!')
+		trolConfig->ObservedProfiles[0] = '\0';	
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Observed Profiles. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
@@ -1566,6 +1568,8 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
 	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->InitialGuessModel,comment);
+	if(trolConfig->InitialGuessModel[0]=='!')
+		trolConfig->InitialGuessModel[0] = '\0';
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Initial guess model 1. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);

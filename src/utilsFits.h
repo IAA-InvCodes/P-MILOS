@@ -25,7 +25,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
  * @param fitsFileSpectra --> name of the fits file to read 
  * Return the image read or NULL if something was wrong during the lecture. 
  */
-FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, ConfigControl * configCrontrolFile, int forParallel);
+FitsImage * readFitsSpectroNPixels (const char * fitsFileSpectra, int rowInit, int colInit,int rowEnd, int colEnd, int numPixelsRead,  int forParallel);
 
 /**
  * This function read the lambda values for the image from the file "fitsFileLambda" and store it into a struct of FitsImage. The file of spectro must
@@ -72,7 +72,7 @@ void freeFitsImage(FitsImage * image);
  * 
  */
 int writeFitsImageModels(const char * fitsFile, int numRows, int numCols, Init_Model * vInitModel, float * vChisqrf, int * vNumIterPixel, int addChiqr);
-
+int writeFitsImageModelsSubSet(const char * fitsFileName, int numRows, int numCols,int rowInit, int colInit, int numPixelsWrite,int displs, Init_Model * vInitModel, float * vChisqrf, int * vNumIterPixel, int addChiqr);
 
 int writeFitsImageModelsWithArray(char * fitsFile, int numRows, int numCols, PRECISION * eta0, PRECISION * B, PRECISION * vlos, PRECISION * dopp, PRECISION * aa, PRECISION * gm, PRECISION * az, PRECISION * S0, PRECISION * S1, PRECISION * mac, PRECISION * alfa, PRECISION * vChisqrf);
 /**
@@ -118,3 +118,12 @@ int readFileCuanticLines(char * inputLineFile, PRECISION * cuanticDat, PRECISION
 int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel);
 
 int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, char * nameInputPSF);*/
+
+/**
+ * 
+ * @param: fitsFile
+ * @param: numRows
+ * @param: numCols
+ *  
+ * */
+int readSizeImageSpectro(const char * fitsFile, int * numRows, int * numCols);

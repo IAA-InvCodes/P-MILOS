@@ -405,9 +405,9 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise)
 void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel)
 {
 
-	PRECISION x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, beta_B, Ic, Vlos;
+	double x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, beta_B, Ic, Vlos;
 	float *spectroI, *spectroQ, *spectroU, *spectroV;
-	PRECISION L, m, gamma, gamma_rad, tan_gamma, C;
+	double L, m, gamma, gamma_rad, tan_gamma, C;
 	int i;
 
 	spectroI = spectro;
@@ -415,42 +415,54 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	spectroU = spectro + nlambda * 2;
 	spectroV = spectro + nlambda * 3;
 
-	Ic = spectro[nlambda - 1]; // Continuo ultimo valor de I
+
+	//Ic = spectro[nlambda - 1]; // Continuo ultimo valor de I
+
+	Ic = spectro[0]; // Continuo ultimo valor de I
+	int index =0;
+	for (i = 0; i < nlambda; i++)
+	{
+		if(spectroI[i]>Ic){
+			Ic = spectroI[i];
+			index = i;
+		}
+	}	
 
 	x = 0;
 	y = 0;
-	for (i = 0; i < nlambda - 1; i++)
+	for (i = 0; i < nlambda-1 ; i++)
 	{
 		aux = (Ic - (spectroI[i] + spectroV[i]));
-		x = x + aux * (lambda[i] - lambda_0);
-		y = y + aux;
+		x += (aux * (lambda[i] - lambda_0));
+		y += aux;
 	}
 
 	//Para evitar nan
-	if (fabs(y) > 1e-15)
+	//if (fabs(y) > 1e-15)
 		LM_lambda_plus = x / y;
-	else
-		LM_lambda_plus = 0;
+	//else
+		//LM_lambda_plus = 0;
 
 	x = 0;
 	y = 0;
-	for (i = 0; i < nlambda - 1; i++)
+	for (i = 0; i < nlambda-1 ; i++)
 	{
 		aux = (Ic - (spectroI[i] - spectroV[i]));
-		x = x + aux * (lambda[i] - lambda_0);
-		y = y + aux;
+		x += (aux * (lambda[i] - lambda_0));
+		y += aux;
 	}
 
-	if (fabs(y) > 1e-15)
+	//if (fabs(y) > 1e-15)
 		LM_lambda_minus = x / y;
-	else
-		LM_lambda_minus = 0;
+	//else
+		//LM_lambda_minus = 0;
 
-	C = (CTE4_6_13 * (lambda_0 * lambda_0) * (double)cuantic->GEFF);
+	C = ((CTE4_6_13 * pow(lambda_0,2.0)) * (double)cuantic->GEFF);
 	beta_B = 1 / C;
 
-	Blos = beta_B * ((LM_lambda_plus - LM_lambda_minus) / 2);
+	Blos = (1 / C) * ((LM_lambda_plus - LM_lambda_minus) / 2);
 	Vlos = (VLIGHT / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
+	//Vlos = (C / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
 
 
 	//------------------------------------------------------------------------------------------------------------
@@ -523,11 +535,11 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 		Vlos = (20);
 
 
-	//initModel->B = (B_aux > 4000 ? 4000 : B_aux);
-	//initModel->vlos = Vlos; //(Vlos*1.5);//1.5;
-	//initModel->gm = gamma;
+	initModel->B = (B_aux > 4000 ? 4000 : B_aux);
+	initModel->vlos = Vlos; //(Vlos*1.5);//1.5;
+	initModel->gm = gamma;
 	initModel->az = phi;
-	//initModel->S0 = Blos;
+	initModel->S0 = Blos;
 
 	//Liberar memoria del vector de lambda auxiliar
 	

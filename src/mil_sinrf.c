@@ -379,7 +379,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 			if(filter){
 				direct_convolution_double(GMAC, nlambda, G, nlambda);
 			}
-			REAL Ic;
+			/*REAL Ic;
 			if(spectra[0]>spectra[nlambda - 1])
 				Ic = spectra[0];
 			else				
@@ -393,10 +393,10 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 			//convolucion QUV
 			for (i = 1; i < NPARMS; i++)
 				direct_convolution(spectra + nlambda * i, nlambda, GMAC, nlambda); 		
-
+			*/
 			// FOR USE CIRCULAR CONVOLUTION 
-			/*for (i = 0; i < NPARMS; i++)
-				convCircular(spectra + nlambda * i, GMAC, nlambda,spectra + nlambda * i);				*/
+			for (i = 0; i < NPARMS; i++)
+				convCircular(spectra + nlambda * i, GMAC, nlambda,spectra + nlambda * i);				
 		}
 
    }//end if(MC > 0.0001)

@@ -69,9 +69,9 @@ REAL **FGlobalInicial;
 
 //PRECISION *G, *GMAC;
 PRECISION *GMAC,* GMAC_DERIV;
-PRECISION * dirConvPar, *dirConvPar2;
-REAL *resultConv;
-PRECISION * G;
+PRECISION * dirConvPar;
+//REAL *resultConv;
+PRECISION * G = NULL;
 //REAL * G;
 
 REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
 	
 	const char	* nameInputFilePSF ;	
 
-    FitsImage * fitsImage;
+   FitsImage * fitsImage;
 	PRECISION  dat[7];
 
 	/********************* Read data input from file ******************************/
@@ -151,17 +151,13 @@ int main(int argc, char **argv)
 	nameInputFileSpectra = configCrontrolFile.ObservedProfiles;
 	nameInputFileLines = configCrontrolFile.AtomicParametersFile;
 	
-	
-	
-	
-	
 	nameInputFilePSF = configCrontrolFile.PSFFile;
 	FWHM = configCrontrolFile.FWHM;
 
 
 	/***************** READ INIT MODEL ********************************/
-
-	if(!readInitialModel(&INITIAL_MODEL,configCrontrolFile.InitialGuessModel)){
+	if(configCrontrolFile.InitialGuessModel[0]!='\0' && !readInitialModel(&INITIAL_MODEL,configCrontrolFile.InitialGuessModel)){
+		printf("\nERROR READING GUESS MODEL 1 FILE\n");
 		exit(EXIT_FAILURE);
 	}
 	
@@ -359,40 +355,39 @@ int main(int argc, char **argv)
       	
 
 			Init_Model initModel;
-			initModel.eta0 = INITIAL_MODEL.eta0;
-			initModel.B = INITIAL_MODEL.B; //200 700
-			initModel.gm = INITIAL_MODEL.gm;
-			initModel.az = INITIAL_MODEL.az;
-			initModel.vlos = INITIAL_MODEL.vlos; //km/s 0
-			initModel.mac = INITIAL_MODEL.mac;
-			initModel.dopp = INITIAL_MODEL.dopp;
-			initModel.aa = INITIAL_MODEL.aa;
-			initModel.alfa = INITIAL_MODEL.alfa; //0.38; //stray light factor
-			initModel.S0 = INITIAL_MODEL.S0;
-			initModel.S1 = INITIAL_MODEL.S1;
+			initModel.eta0 = 0;
+			initModel.mac = 0;
+			initModel.dopp = 0;
+			initModel.aa = 0;
+			initModel.alfa = 0; //0.38; //stray light factor
+			initModel.S1 = 0;
 			//invert with classical estimates
 			estimacionesClasicas(wlines[1], vLambda, nlambda, spectroPER, &initModel);
 			// save model to file
 			char nameAuxOutputModel [4096];
-			//strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
-			strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
+			if(configCrontrolFile.ObservedProfiles[0]!='\0')
+				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
+			else
+				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
+				
+
 			strcat(nameAuxOutputModel,"_model");
 			strcat(nameAuxOutputModel,MOD_FILE);
 			FILE * fptr = fopen(nameAuxOutputModel, "w");
 			if(fptr!=NULL){
-				fprintf(fptr,"\n MODEL_ETHA0: %lf",initModel.eta0);
-				fprintf(fptr,"\n MODEL_B: %lf",initModel.B);
-				fprintf(fptr,"\n MODEL_VLOS: %lf",initModel.vlos);
-				fprintf(fptr,"\n MODEL_LAMBDADOPP: %lf",initModel.dopp);
-				fprintf(fptr,"\n MODEL_AA: %lf",initModel.aa);
-				fprintf(fptr,"\n MODEL_GM: %lf",initModel.gm);
-				fprintf(fptr,"\n MODEL_AZI: %lf",initModel.az);
-				fprintf(fptr,"\n MODEL_S0: %lf",initModel.S0);
-				fprintf(fptr,"\n MODEL_S1: %lf",initModel.S1);
-				fprintf(fptr,"\n MODEL_MAC: %lf",initModel.mac);
-				fprintf(fptr,"\n MODEL_ALFA: %lf",initModel.alfa);
-				fprintf(fptr,"\n NUMBER ITERATIONS TO CONVERGE: %d",0);
-				fprintf(fptr,"\n Chisqrf %le",0.0);
+				fprintf(fptr,"MODEL_ETHA0: %lf",initModel.eta0);
+				fprintf(fptr,"\nMODEL_B: %lf",initModel.B);
+				fprintf(fptr,"\nMODEL_VLOS: %lf",initModel.vlos);
+				fprintf(fptr,"\nMODEL_LAMBDADOPP: %lf",initModel.dopp);
+				fprintf(fptr,"\nMODEL_AA: %lf",initModel.aa);
+				fprintf(fptr,"\nMODEL_GM: %lf",initModel.gm);
+				fprintf(fptr,"\nMODEL_AZI: %lf",initModel.az);
+				fprintf(fptr,"\nMODEL_S0: %lf",initModel.S0);
+				fprintf(fptr,"\nMODEL_S1: %lf",initModel.S1);
+				fprintf(fptr,"\nMODEL_MAC: %lf",initModel.mac);
+				fprintf(fptr,"\nMODEL_ALFA: %lf",initModel.alfa);
+				fprintf(fptr,"\nNUMBER ITERATIONS TO CONVERGE: %d",0);
+				fprintf(fptr,"\nChisqrf %le",0.0);
 				fprintf(fptr,"\n\n");
 				fclose(fptr);
 			}
@@ -438,10 +433,12 @@ int main(int argc, char **argv)
 
 			}
 			char nameAuxOutputModel [4096];
-			//strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
-			strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
+			if(configCrontrolFile.ObservedProfiles[0]!='\0')
+				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
+			else
+				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
 			strcat(nameAuxOutputModel,"_model");
-			strcat(nameAuxOutputModel,MOD_FILE);			
+			strcat(nameAuxOutputModel,FITS_FILE);			
 			if(!writeFitsImageModels(nameAuxOutputModel,fitsImage->rows,fitsImage->cols,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){
 					printf("\n ERROR WRITING FILE OF MODELS: %s",nameAuxOutputModel);
 					//slog_error(0,"\n ERROR WRITING FILE OF MODELS: %s",nameOutputFileModels);
@@ -479,15 +476,15 @@ int main(int argc, char **argv)
       printf("\n MODEL ATMOSPHERE: \n");
       printf("\n ETA0: %lf",initModel.eta0);
       printf("\n B: %lf",initModel.B);
-      printf("\n gm: %lf",initModel.gm);
-      printf("\n az: %lf",initModel.az);
       printf("\n vlos: %lf",initModel.vlos);
-      printf("\n mac: %lf",initModel.mac);
       printf("\n dopp: %lf",initModel.dopp);
       printf("\n aa: %lf",initModel.aa);
-      printf("\n alfa: %lf",initModel.alfa);
+      printf("\n gm: %lf",initModel.gm);
+      printf("\n az: %lf",initModel.az);
       printf("\n S0: %lf",initModel.S0);
-      printf("\n S1: %lf",initModel.S1);
+      printf("\n S1: %lf",initModel.S1);      
+      printf("\n mac: %lf",initModel.mac);
+      printf("\n alfa: %lf",initModel.alfa);
 		printf("\n");    
 
       
@@ -500,7 +497,10 @@ int main(int argc, char **argv)
 
 		// in this case basenamefile is from initmodel
 		char nameAux [4096];
-		strcpy(nameAux,get_basefilename(configCrontrolFile.InitialGuessModel));
+		if(configCrontrolFile.ObservedProfiles[0]!='\0')
+			strcpy(nameAux,get_basefilename(configCrontrolFile.ObservedProfiles));
+		else
+			strcpy(nameAux,get_basefilename(configCrontrolFile.InitialGuessModel));		
 		strcat(nameAux,PER_FILE);
 		FILE *fptr = fopen(nameAux, "w");
 		if(fptr!=NULL){
@@ -518,6 +518,30 @@ int main(int argc, char **argv)
 		else{
 			printf("\n ERROR !!! The output file can not be open: %s",nameAux);
 		}
+
+		/*int number_parametros = 0;
+		for (number_parametros = 0; number_parametros < NTERMS; number_parametros++)
+		{
+			strcpy(nameAux,get_basefilename(configCrontrolFile.InitialGuessModel));
+			strcat(nameAux,"_C_");
+			char extension[10];
+			sprintf(extension, "%d%s", number_parametros,".per");
+			strcat(nameAux,extension);
+			FILE *fptr = fopen(nameAux, "w");
+			//printf("\n FUNCION RESPUESTA: %d \n",number_parametros);
+			int kk;
+			for (kk = 0; kk < nlambda; kk++)
+			{
+			fprintf(fptr,"1\t%lf\t%le\t%le\t%le\t%le\n", vLambda[kk],
+			d_spectra[kk + nlambda * number_parametros],
+			d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS],
+			d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS * 2],
+			d_spectra[kk + nlambda * number_parametros + nlambda * NTERMS * 3]);
+			}
+			fclose(fptr);
+		}
+		printf("\n");*/
+
 	}
 	else{ // INVERT PIXEL FROM PER FILE OR IMAGE FROM FITS FILE 
 		if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),PER_FILE)==0){ // invert only per file
@@ -572,26 +596,29 @@ int main(int argc, char **argv)
 			char nameAuxOutputModel [4096];
 			/*strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
 			strcat(nameAuxOutputModel,OUTPUT_MOD_TXT_EXT);*/
-			
-			strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
+			if(configCrontrolFile.ObservedProfiles[0]!='\0')
+				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
+			else
+				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
+							
 			strcat(nameAuxOutputModel,"_model");
 			strcat(nameAuxOutputModel,MOD_FILE);
 
 			FILE *fptr = fopen(nameAuxOutputModel, "w");
 			if(fptr!=NULL){
-				fprintf(fptr,"MODEL_ETHA0: %lf",initModel.eta0);
-				fprintf(fptr,"\nMODEL_B: %lf",initModel.B);
-				fprintf(fptr,"\nMODEL_VLOS: %lf",initModel.vlos);
-				fprintf(fptr,"\nMODEL_LAMBDADOPP: %lf",initModel.dopp);
-				fprintf(fptr,"\nMODEL_AA: %lf",initModel.aa);
-				fprintf(fptr,"\nMODEL_GM: %lf",initModel.gm);
-				fprintf(fptr,"\nMODEL_AZI: %lf",initModel.az);
-				fprintf(fptr,"\nMODEL_S0: %lf",initModel.S0);
-				fprintf(fptr,"\nMODEL_S1: %lf",initModel.S1);
-				fprintf(fptr,"\nMODEL_MAC: %lf",initModel.mac);
-				fprintf(fptr,"\nMODEL_ALFA: %lf",initModel.alfa);
-				fprintf(fptr,"\nNUMBER ITERATIONS TO CONVERGE: %d",numIter);
-				fprintf(fptr,"\nChisqrf %le",chisqrf);
+				fprintf(fptr,"MODEL_ETHA0: %lf\n",initModel.eta0);
+				fprintf(fptr,"MODEL_B: %lf\n",initModel.B);
+				fprintf(fptr,"MODEL_VLOS: %lf\n",initModel.vlos);
+				fprintf(fptr,"MODEL_LAMBDADOPP: %lf\n",initModel.dopp);
+				fprintf(fptr,"MODEL_AA: %lf\n",initModel.aa);
+				fprintf(fptr,"MODEL_GM: %lf\n",initModel.gm);
+				fprintf(fptr,"MODEL_AZI: %lf\n",initModel.az);
+				fprintf(fptr,"MODEL_S0: %lf\n",initModel.S0);
+				fprintf(fptr,"MODEL_S1: %lf\n",initModel.S1);
+				fprintf(fptr,"MODEL_MAC: %lf\n",initModel.mac);
+				fprintf(fptr,"MODEL_ALFA: %lf\n",initModel.alfa);
+				fprintf(fptr,"NUMBER ITERATIONS TO CONVERGE: %d\n",numIter);
+				fprintf(fptr,"Chisqrf %le\n",chisqrf);
 				fprintf(fptr,"\n\n");
 				fclose(fptr);
 				printf("\n*******************************************************************************************");
@@ -607,7 +634,11 @@ int main(int argc, char **argv)
 			if(configCrontrolFile.SaveSynthesisAdjusted){
 				char nameAuxOutputStokes [4096];
 				//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
-				strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));
+				//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));
+				if(configCrontrolFile.ObservedProfiles[0]!='\0')
+					strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
+				else
+					strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));				
 				strcat(nameAuxOutputStokes,STOKES_PER_EXT);
 				FILE *fptr = fopen(nameAuxOutputStokes, "w");
 				if(fptr!=NULL){
@@ -725,10 +756,11 @@ int main(int argc, char **argv)
 				//slog_info(0,"\n FINISH EXECUTION OF INVERSION: %f seconds to execute \n", timeReadImage);
 				
 				char nameAuxOutputModel [4096];
-				//strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
-				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
-				//strcat(nameAuxOutputModel,"_model");
-				//strcat(nameAuxOutputModel,MOD_FILE);
+				if(configCrontrolFile.ObservedProfiles[0]!='\0')
+					strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
+				else
+					strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));				
+
 				strcat(nameAuxOutputModel,MOD_FITS);
 				if(!writeFitsImageModels(nameAuxOutputModel,fitsImage->rows,fitsImage->cols,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){
 						printf("\n ERROR WRITING FILE OF MODELS: %s",nameAuxOutputModel);
@@ -740,7 +772,11 @@ int main(int argc, char **argv)
 					// WRITE SINTHETIC PROFILES TO FITS FILE
 					char nameAuxOutputStokes [4096];
 					//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
-					strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));
+					//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));
+					if(configCrontrolFile.ObservedProfiles[0]!='\0')
+						strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
+					else
+						strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));					
 					strcat(nameAuxOutputStokes,STOKES_FIT_EXT);
 					if(!writeFitsImageProfiles(nameAuxOutputStokes,nameInputFileSpectra,imageStokesAdjust)){
 						printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",nameOutputFilePerfiles);
@@ -748,15 +784,14 @@ int main(int argc, char **argv)
 				}
 				if(configCrontrolFile.SaveSynthesisAdjusted)
 					free(imageStokesAdjust);
+				free(vModels);
+				free(vChisqrf);
+				free(vNumIter);					
 			}
 			else{
 				printf("\n\n ***************************** FITS FILE WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************\n");
 			}			
 
-
-			free(vModels);
-			free(vChisqrf);
-			free(vNumIter);
 			printf(" \n***********************  IMAGE INVERSION DONE, CLEANING MEMORY *********************\n");
 			freeFitsImage(fitsImage);
 		}
@@ -807,7 +842,7 @@ int main(int argc, char **argv)
 	free(cuantic);
 	free(wlines);
 	FreeMemoryDerivedSynthesis();
-	free(G);
+	if(G!=NULL) free(G);
 
 	return 0;
 }
