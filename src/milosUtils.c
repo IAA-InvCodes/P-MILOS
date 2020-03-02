@@ -142,11 +142,11 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 
 	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
 
-	if (fixed[0])
+	if (fixed[0])  // ETHA 0 
 	{
 		modelout->eta0 = model->eta0 - delta[0]; // 0
 	}
-	if (fixed[1])
+	if (fixed[1]) // B
 	{
 		if (delta[1] < -300) //300
 			delta[1] = -300;
@@ -154,7 +154,7 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 			delta[1] = 300;
 		modelout->B = model->B - delta[1]; //magnetic field
 	}
-	if (fixed[2])
+	if (fixed[2]) // VLOS
 	{
 		/*if (delta[2] > 2)
 			delta[2] = 2;
@@ -164,7 +164,7 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 		modelout->vlos = model->vlos - delta[2];
 	}
 
-	if (fixed[3])
+	if (fixed[3]) // DOPPLER WIDTH
 	{
 
 		/*if (delta[3] > 1e-2)
@@ -174,10 +174,10 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 		modelout->dopp = model->dopp - delta[3];
 	}
 
-	if (fixed[4])
+	if (fixed[4]) // DAMPING 
 		modelout->aa = model->aa - delta[4];
 
-	if (fixed[5])
+	if (fixed[5])  // GAMMA 
 	{
 		if (delta[5] < -30) //15
 			delta[5] = -30;
@@ -186,7 +186,7 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 
 		modelout->gm = model->gm - delta[5]; //5
 	}
-	if (fixed[6])
+	if (fixed[6]) // AZIMUTH
 	{
 		/*if (delta[6] < -15)
 			delta[6] = -15;
@@ -405,7 +405,8 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise)
 void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel)
 {
 
-	double x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, beta_B, Ic, Vlos;
+	double x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, beta_B, Ic, Icmax, Vlos;
+	double aux_vlos,x_vlos,y_vlos;
 	float *spectroI, *spectroQ, *spectroU, *spectroV;
 	double L, m, gamma, gamma_rad, tan_gamma, C;
 	int i;
@@ -416,25 +417,30 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	spectroV = spectro + nlambda * 3;
 
 
-	//Ic = spectro[nlambda - 1]; // Continuo ultimo valor de I
+	Ic = spectro[nlambda - 1]; // Continuo ultimo valor de I
 
-	Ic = spectro[0]; // Continuo ultimo valor de I
+	/*Icmax = spectro[0];
 	int index =0;
 	for (i = 0; i < nlambda; i++)
 	{
 		if(spectroI[i]>Ic){
-			Ic = spectroI[i];
+			Icmax = spectroI[i];
 			index = i;
 		}
-	}	
+	}*/
 
 	x = 0;
 	y = 0;
+	x_vlos = 0;
+	y_vlos = 0;
 	for (i = 0; i < nlambda-1 ; i++)
 	{
 		aux = (Ic - (spectroI[i] + spectroV[i]));
+		aux_vlos = (Ic - spectroI[i]);
 		x += (aux * (lambda[i] - lambda_0));
+		x_vlos += (aux_vlos * (lambda[i] - lambda_0));
 		y += aux;
+		y_vlos += aux_vlos;
 	}
 
 	//Para evitar nan
@@ -457,12 +463,13 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	//else
 		//LM_lambda_minus = 0;
 
-	C = ((CTE4_6_13 * pow(lambda_0,2.0)) * (double)cuantic->GEFF);
+	C = (CTE4_6_13 * (lambda_0*lambda_0) * cuantic->GEFF);
 	beta_B = 1 / C;
 
 	Blos = (1 / C) * ((LM_lambda_plus - LM_lambda_minus) / 2);
-	Vlos = (VLIGHT / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
-	//Vlos = (C / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
+	//Vlos = (VLIGHT / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
+	
+	Vlos = (VLIGHT / (lambda_0)) * ((x_vlos/y_vlos) / 2);
 
 
 	//------------------------------------------------------------------------------------------------------------
@@ -496,9 +503,14 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	tan_gamma = fabs(sqrt(x / y));
 
 	gamma_rad = atan(tan_gamma); //gamma en radianes
-
 	gamma = gamma_rad * (180 / PI); //gamma en grados
 
+	if(gamma>=85 && gamma <=90){  
+		gamma_rad = 85 *(PI/180);
+	}
+	if(gamma>90 && gamma <=95){ 
+		gamma_rad = 95 *(PI/180);
+	}
 	//correccion
 	//utilizamos el signo de Blos para ver corregir el cuadrante
 	
@@ -510,7 +522,42 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	PRECISION tan2phi, phi;
 
-	tan2phi = (spectroU[1] + spectroU[nlambda-1]) / (spectroQ[1] + spectroQ[nlambda-1]);
+	double sum_u =0.0, sum_q = 0.0;
+	for(i=0;i<nlambda;i++){
+		if( fabs(spectroU[i]>0.0001 || fabs(spectroQ[i])>0.0001  )){
+			sum_u += spectroU[i];
+			sum_q += spectroQ[i];
+		}
+	}
+	tan2phi = sum_u/sum_q;
+	phi = (atan(tan2phi) * 180 / PI) / 2;
+	if ( sum_u > 0 && sum_q > 0 )
+		phi = phi;
+	else if ( sum_u < 0 && sum_q > 0 )
+		phi = phi + 180;
+	else if ( sum_u< 0 && sum_q < 0 )
+		phi = phi + 90;
+	else if ( sum_u > 0 && sum_q < 0 )
+		phi = phi + 90;
+	
+	/*double sum_tan2phi,phi_aux;
+	for(i=0;i<nlambda;i++){
+		if( fabs(spectroU[i]>0.01 || fabs(spectroQ[i])>0.01  )){
+			phi_aux = spectroU[i]/spectroQ[i];
+			if ( spectroU[i] > 0 && spectroQ[i] > 0 )
+				phi_aux = phi_aux;
+			else if ( spectroU[i] < 0 && spectroQ[i] > 0 )
+				phi_aux = phi_aux + PI;
+			else if ( spectroU[i] < 0 && spectroQ[i] < 0 )
+				phi_aux = phi_aux + (PI/2);
+			else if ( spectroU[i] > 0 && spectroQ[i] < 0 )
+				phi_aux = phi_aux + (PI/2);
+			sum_tan2phi += atan(phi_aux);
+		}
+	}
+	
+	phi = (sum_tan2phi * 180 / PI) / 2;*/
+	/*tan2phi = (spectroU[1] + spectroU[nlambda-1]) / (spectroQ[1] + spectroQ[nlambda-1]);
 
 	phi = (atan(tan2phi) * 180 / PI) / 2; //atan con paso a grados
 
@@ -521,7 +568,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	else if ( (spectroU[1] + spectroU[nlambda-1]) < 0 && (spectroQ[1] + spectroQ[nlambda-1]) < 0 )
 		phi = phi + 90;
 	else if ( (spectroU[1] + spectroU[nlambda-1]) > 0 && (spectroQ[1] + spectroQ[nlambda-1]) < 0 )
-		phi = phi + 90;
+		phi = phi + 90;*/
 	
 	PRECISION B_aux;
 
@@ -532,14 +579,18 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	if (Vlos < (-20))
 		Vlos = -20;
 	if (Vlos > (20))
-		Vlos = (20);
+		Vlos = 20;
 
 
+	/*if(B_aux >4000)
+		B_aux = 4000;
+	if(B_aux < 0.0001)
+		B_aux = 10;*/
 	initModel->B = (B_aux > 4000 ? 4000 : B_aux);
 	initModel->vlos = Vlos; //(Vlos*1.5);//1.5;
 	initModel->gm = gamma;
 	initModel->az = phi;
-	initModel->S0 = Blos;
+	//initModel->S0 = Blos;
 
 	//Liberar memoria del vector de lambda auxiliar
 	
@@ -564,6 +615,11 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 {
 
 	
+
+	REAL PARBETA_better = 5.0;
+   	REAL PARBETA_worst = 10.0;
+  	REAL PARBETA_FACTOR = 1.0;
+
 	//int iter;
 	int i, *fixed, nfree;
 	static PRECISION delta[NTERMS];
@@ -571,7 +627,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	
 	REAL flambda;
 	static REAL beta[NTERMS], alpha[NTERMS * NTERMS];
-	REAL chisqr, ochisqr;
+	REAL chisqr, ochisqr, chisqr0;
 	int clanda, ind;
 	Init_Model model;	
 	
@@ -621,7 +677,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 
 	ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
-	
+	chisqr0 = ochisqr;
 
 	model = *initModel;
 	
@@ -653,7 +709,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		if (chisqr - ochisqr < 0.)
 		{
 
-			flambda = flambda / 10.0;
+			//flambda = flambda / 10.0;
+			flambda=flambda/(PARBETA_better*PARBETA_FACTOR);
 			*initModel = model;
 			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, AH, slight,*INSTRUMENTAL_CONVOLUTION);
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
@@ -670,14 +727,16 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		}
 		else
 		{
-			flambda = flambda * 10; //10;
+			//flambda = flambda * 10; //10;
+			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
 		}
 
 		if ((flambda > 1e+7) || (flambda < 1e-25)) 
 			clanda=1 ; // condition to exit of the loop 		
 
 		(*iter)++;
-		
+		PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
+
 	} while (*iter < miter && !clanda);
 
 	*chisqrf = ochisqr;

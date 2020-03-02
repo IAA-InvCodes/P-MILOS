@@ -371,7 +371,7 @@ int main(int argc, char **argv)
 				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
 				
 
-			strcat(nameAuxOutputModel,"_model");
+			strcat(nameAuxOutputModel,"_model_ce");
 			strcat(nameAuxOutputModel,MOD_FILE);
 			FILE * fptr = fopen(nameAuxOutputModel, "w");
 			if(fptr!=NULL){
@@ -437,7 +437,7 @@ int main(int argc, char **argv)
 				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
 			else
 				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.InitialGuessModel));
-			strcat(nameAuxOutputModel,"_model");
+			strcat(nameAuxOutputModel,"_model_ce");
 			strcat(nameAuxOutputModel,FITS_FILE);			
 			if(!writeFitsImageModels(nameAuxOutputModel,fitsImage->rows,fitsImage->cols,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){
 					printf("\n ERROR WRITING FILE OF MODELS: %s",nameAuxOutputModel);
@@ -728,6 +728,18 @@ int main(int argc, char **argv)
 					initModel.S0 = INITIAL_MODEL.S0;
 					initModel.S1 = INITIAL_MODEL.S1;
 					
+					// CLASSICAL ESTIMATES TO GET B, GAMMA
+					estimacionesClasicas(wlines[1], vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel);
+					if (isnan(initModel.B))
+						initModel.B = 1;
+					if (isnan(initModel.vlos))
+						initModel.vlos = 1e-3;
+					if (isnan(initModel.gm))
+						initModel.gm = 1;						
+					if (isnan(initModel.az))
+						initModel.az = 1;
+					// INVERSION RTE
+
 					PRECISION * slightPixel;
 					if(slight==NULL) 
 						slightPixel = NULL;

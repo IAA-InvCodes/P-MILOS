@@ -69,6 +69,7 @@ void direct_convolution(REAL *x, int nx, PRECISION *h, int nh)
 
 	int nx_aux;
 	int k, j;
+	double aux;
 
 	nx_aux = nx + nh - 1; // tamano de toda la convolucion
 
@@ -90,7 +91,7 @@ void direct_convolution(REAL *x, int nx, PRECISION *h, int nh)
 	for (k = 0; k < nx; k++)
 	{
 		//x[k] = 0;
-		double aux = 0;
+		aux = 0;
 		for (j = 0; j < nh; j++)
 		{
 			aux += h[j] * dirConvPar[j + k];
@@ -104,7 +105,7 @@ void direct_convolution2(REAL *x, int nx, PRECISION *h, int nh, REAL *result, in
 
 	int nx_aux;
 	int k, j;
-
+	double aux;
 	nx_aux = nx + nh - 1; // tamano de toda la convolucion
 
 	int mitad_nh = nh / 2;
@@ -125,7 +126,7 @@ void direct_convolution2(REAL *x, int nx, PRECISION *h, int nh, REAL *result, in
 	for (k = 0; k < nx; k++)
 	{
 
-		double aux = 0;
+		aux = 0;
 		for (j = 0; j < nh; j++)
 		{
 			aux += h[j] * dirConvPar[j + k];

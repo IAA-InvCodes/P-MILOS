@@ -787,6 +787,176 @@ int main(int argc, char **argv)
 
 	AllocateMemoryDerivedSynthesis(nlambda);
 	//*************************************** ONE IMAGE PER PROCESSOR *********************************
+
+	if(numFilesPerProcessParallel){
+
+		//clock_t t = clock();
+		// EACH PROC PROCESS THER PIXELS 
+		for(indexInputFits=0;indexInputFits<numFilesPerProcessParallel;indexInputFits++){
+			if(vNumPixelsImage[indexInputFits] > 0){
+				local_start_execution = MPI_Wtime();
+				for(indexPixel = 0; indexPixel < sendcountsPixels_L[indexInputFits][idProc]; indexPixel++){
+					float * vAuxSpectraSplit = vSpectraSplit_L[indexInputFits];
+					//Initial Model
+					Init_Model initModel;
+					initModel.eta0 = INITIAL_MODEL.eta0;
+					initModel.B = INITIAL_MODEL.B; 
+					initModel.gm = INITIAL_MODEL.gm;
+					initModel.az = INITIAL_MODEL.az;
+					initModel.vlos = INITIAL_MODEL.vlos; //km/s 0
+					initModel.mac = INITIAL_MODEL.mac;
+					initModel.dopp = INITIAL_MODEL.dopp;
+					initModel.aa = INITIAL_MODEL.aa;
+					initModel.alfa = INITIAL_MODEL.alfa; 
+					initModel.S0 = INITIAL_MODEL.S0;
+					initModel.S1 = INITIAL_MODEL.S1;
+
+					// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
+					estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel);
+					if (isnan(initModel.B))
+						initModel.B = 1;
+					if (isnan(initModel.vlos))
+						initModel.vlos = 1e-3;
+					if (isnan(initModel.gm))
+						initModel.gm = 1;						
+					if (isnan(initModel.az))
+						initModel.az = 1;
+					// INVERSION RTE
+					
+					PRECISION * slightPixel;
+					if(slight==NULL) 
+						slightPixel = NULL;
+					else{
+						if(dimStrayLight==nlambda) 
+							slightPixel = slight;
+						else 
+							slightPixel = slight+nlambda*indexPixel;
+					}
+					
+					
+					lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &(vChisqrf_L[indexInputFits][indexPixel]), slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
+						configCrontrolFile.WeightForStokes, configCrontrolFile.fix, configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&(vNumIter_L[indexInputFits][indexPixel]));																		
+					
+					resultsInitModel_L[indexInputFits][indexPixel] = initModel;
+					if(configCrontrolFile.SaveSynthesisAdjusted){
+						int kk;
+						for (kk = 0; kk < (nlambda * NPARMS); kk++)
+						{
+							vSpectraAdjustedSplit_L[indexInputFits][ (indexPixel*(nlambda * NPARMS))+kk] = spectra[kk] ;
+						}						
+					}
+					
+				}
+
+				MPI_Igatherv(resultsInitModel_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], mpiInitModel, resultsInitModelTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], mpiInitModel, root, MPI_COMM_WORLD,&vMpiRequestInitModel[indexInputFits]);
+				MPI_Igatherv(vChisqrf_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_FLOAT, chisqrfTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestChisqr[indexInputFits]);		
+				MPI_Igatherv(vNumIter_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_INT, vNumIterTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_INT, root, MPI_COMM_WORLD,&vMpiRequestIter[indexInputFits]);		
+				
+				if(configCrontrolFile.SaveSynthesisAdjusted)
+					MPI_Igatherv(vSpectraAdjustedSplit_L[indexInputFits], sendcountsSpectro_L[indexInputFits][idProc], MPI_FLOAT, vSpectraAjustedTotal_L[indexInputFits], sendcountsSpectro_L[indexInputFits], displsSpectro_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestSpectraAd[indexInputFits]);		
+				local_elapsed_execution = MPI_Wtime() - local_start_execution;
+				MPI_Ireduce(&local_elapsed_execution, &vElapsed_execution[indexInputFits], 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD,&vMpiRequestReduceExecution[indexInputFits]);
+
+			}
+		}
+
+
+		if(idProc==root){
+			int indexInputFits = 0;
+			do{
+				MPI_Wait(&vMpiRequestInitModel[indexInputFits],MPI_STATUS_IGNORE);
+				MPI_Wait(&vMpiRequestChisqr[indexInputFits],MPI_STATUS_IGNORE);
+				MPI_Wait(&vMpiRequestIter[indexInputFits],MPI_STATUS_IGNORE);
+				MPI_Wait(&vMpiRequestReduceExecution[indexInputFits],MPI_STATUS_IGNORE);
+				if(configCrontrolFile.SaveSynthesisAdjusted)
+					MPI_Wait(&vMpiRequestSpectraAd[indexInputFits],MPI_STATUS_IGNORE);
+
+					double timeWriteImage;
+					clock_t t;
+					t = clock();
+
+					if(!writeFitsImageModels(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows,fitsImages[indexInputFits]->cols,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
+							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+					}
+					t = clock() - t;
+					timeWriteImage = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+					
+					// PROCESS FILE OF SYNTETIC PROFILES
+					if(configCrontrolFile.SaveSynthesisAdjusted){
+						fitsImages[indexInputFits]->pixels = calloc(fitsImages[indexInputFits]->numPixels, sizeof(vpixels));
+						for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
+							fitsImages[indexInputFits]->pixels[i].spectro = calloc ((fitsImages[indexInputFits]->numStokes*fitsImages[indexInputFits]->nLambdas),sizeof(float));
+							//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+						}		
+						for(indexPixel=0;indexPixel<fitsImages[indexInputFits]->numPixels;indexPixel++)
+						{	
+							int kk;
+							for (kk = 0; kk < (nlambda * NPARMS); kk++)
+							{
+								fitsImages[indexInputFits]->pixels[indexPixel].spectro[kk] = vSpectraAjustedTotal_L[indexInputFits][kk+(indexPixel*(nlambda * NPARMS))] ;
+							}
+						}					
+						// WRITE SINTHETIC PROFILES TO FITS FILE
+						if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits])){
+							printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
+						}
+						
+						for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
+							free(fitsImages[indexInputFits]->pixels[i].spectro);
+							fitsImages[indexInputFits]->pixels[i].spectro = NULL;
+							//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+						}							
+						free(fitsImages[indexInputFits]->pixels);
+						fitsImages[indexInputFits]->pixels = NULL;
+					}
+
+					free(resultsInitModelTotal_L[indexInputFits]);		
+					free(chisqrfTotal_L[indexInputFits]);
+					free(vNumIterTotal_L[indexInputFits]);
+					if(configCrontrolFile.SaveSynthesisAdjusted){
+						free(vSpectraAjustedTotal_L[indexInputFits]);
+					}
+					
+					printf("\n************************************************************************************************************************\n");
+					printf("\n INVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f *********************\n", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
+					//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
+					printf("\n TIME TO WRITE FITS IMAGE:  %f seconds to execute \n", timeWriteImage);
+					printf("\n************************************************************************************************************************\n\n");
+					freeFitsImage(fitsImages[indexInputFits]);
+				/*}
+				else{
+					if(configCrontrolFile.SaveSynthesisAdjusted){
+						free(vSpectraAdjustedSplit_L[indexInputFits]);
+					}
+					free(vSpectraSplit_L[indexInputFits]);
+					free(resultsInitModel_L[indexInputFits]);				
+					free(vChisqrf_L[indexInputFits]);
+					free(vNumIter_L[indexInputFits]);
+				}*/
+				indexInputFits++;			
+			}while(indexInputFits<numFilesPerProcessParallel);
+		}
+
+		free(fitsImages);
+		free(vMpiRequestScatter);
+		free(vMpiRequestInitModel);
+		free(vMpiRequestChisqr);
+		free(vMpiRequestIter);
+		free(vMpiRequestSpectraAd);
+		free(vNumPixelsImage);
+		free(vMpiRequestReduceExecution);
+		free(resultsInitModel_L);
+		free(resultsInitModelTotal_L);
+		free(chisqrfTotal_L);
+		free(vChisqrf_L);
+		free(vNumIter_L);
+		free(vNumIterTotal_L);
+		free(vSpectraSplit_L);
+		free(vSpectraAdjustedSplit_L);
+		free(vSpectraAjustedTotal_L);
+	}
+
+
 	if(numFilesPerProcess>=1){ // ONE IMAGE PER PROCESSOR
 		Init_Model *vModels;
 
@@ -877,6 +1047,19 @@ int main(int argc, char **argv)
 					initModel.S0 = INITIAL_MODEL.S0;
 					initModel.S1 = INITIAL_MODEL.S1;
 					
+					// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
+					estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel);
+					if (isnan(initModel.B))
+						initModel.B = 1;
+					if (isnan(initModel.vlos))
+						initModel.vlos = 1e-3;
+					if (isnan(initModel.gm))
+						initModel.gm = 1;
+					if (isnan(initModel.az))
+						initModel.az = 1;
+					// INVERSION RTE
+
+
 					PRECISION * slightPixel;
 					if(slight==NULL) 
 						slightPixel = NULL;
@@ -1057,6 +1240,18 @@ int main(int argc, char **argv)
 				initModel.S0 = INITIAL_MODEL.S0;
 				initModel.S1 = INITIAL_MODEL.S1;
 
+				// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
+				estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel);
+
+				if (isnan(initModel.B))
+					initModel.B = 1;
+				if (isnan(initModel.vlos))
+					initModel.vlos = 1e-3;
+				if (isnan(initModel.gm))
+					initModel.gm = 1;						
+				if (isnan(initModel.az))
+					initModel.az = 1;
+
 				// INVERSION RTE
 				
 				PRECISION * slightPixel;
@@ -1179,162 +1374,7 @@ int main(int argc, char **argv)
 	}
 
 
-	if(numFilesPerProcessParallel){
 
-		//clock_t t = clock();
-		// EACH PROC PROCESS THER PIXELS 
-		for(indexInputFits=0;indexInputFits<numFilesPerProcessParallel;indexInputFits++){
-			if(vNumPixelsImage[indexInputFits] > 0){
-				local_start_execution = MPI_Wtime();
-				for(indexPixel = 0; indexPixel < sendcountsPixels_L[indexInputFits][idProc]; indexPixel++){
-					//Initial Model
-					Init_Model initModel;
-					initModel.eta0 = INITIAL_MODEL.eta0;
-					initModel.B = INITIAL_MODEL.B; 
-					initModel.gm = INITIAL_MODEL.gm;
-					initModel.az = INITIAL_MODEL.az;
-					initModel.vlos = INITIAL_MODEL.vlos; //km/s 0
-					initModel.mac = INITIAL_MODEL.mac;
-					initModel.dopp = INITIAL_MODEL.dopp;
-					initModel.aa = INITIAL_MODEL.aa;
-					initModel.alfa = INITIAL_MODEL.alfa; 
-					initModel.S0 = INITIAL_MODEL.S0;
-					initModel.S1 = INITIAL_MODEL.S1;
-
-					// INVERSION RTE
-					
-					PRECISION * slightPixel;
-					if(slight==NULL) 
-						slightPixel = NULL;
-					else{
-						if(dimStrayLight==nlambda) 
-							slightPixel = slight;
-						else 
-							slightPixel = slight+nlambda*indexPixel;
-					}
-					
-					float * vAuxSpectraSplit = vSpectraSplit_L[indexInputFits];
-					lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &(vChisqrf_L[indexInputFits][indexPixel]), slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
-						configCrontrolFile.WeightForStokes, configCrontrolFile.fix, configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&(vNumIter_L[indexInputFits][indexPixel]));																		
-					
-					resultsInitModel_L[indexInputFits][indexPixel] = initModel;
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						int kk;
-						for (kk = 0; kk < (nlambda * NPARMS); kk++)
-						{
-							vSpectraAdjustedSplit_L[indexInputFits][ (indexPixel*(nlambda * NPARMS))+kk] = spectra[kk] ;
-						}						
-					}
-					
-				}
-
-				MPI_Igatherv(resultsInitModel_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], mpiInitModel, resultsInitModelTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], mpiInitModel, root, MPI_COMM_WORLD,&vMpiRequestInitModel[indexInputFits]);
-				MPI_Igatherv(vChisqrf_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_FLOAT, chisqrfTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestChisqr[indexInputFits]);		
-				MPI_Igatherv(vNumIter_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_INT, vNumIterTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_INT, root, MPI_COMM_WORLD,&vMpiRequestIter[indexInputFits]);		
-				
-				if(configCrontrolFile.SaveSynthesisAdjusted)
-					MPI_Igatherv(vSpectraAdjustedSplit_L[indexInputFits], sendcountsSpectro_L[indexInputFits][idProc], MPI_FLOAT, vSpectraAjustedTotal_L[indexInputFits], sendcountsSpectro_L[indexInputFits], displsSpectro_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestSpectraAd[indexInputFits]);		
-				local_elapsed_execution = MPI_Wtime() - local_start_execution;
-				MPI_Ireduce(&local_elapsed_execution, &vElapsed_execution[indexInputFits], 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD,&vMpiRequestReduceExecution[indexInputFits]);
-
-			}
-		}
-
-
-		if(idProc==root){
-			int indexInputFits = 0;
-			do{
-				MPI_Wait(&vMpiRequestInitModel[indexInputFits],MPI_STATUS_IGNORE);
-				MPI_Wait(&vMpiRequestChisqr[indexInputFits],MPI_STATUS_IGNORE);
-				MPI_Wait(&vMpiRequestIter[indexInputFits],MPI_STATUS_IGNORE);
-				MPI_Wait(&vMpiRequestReduceExecution[indexInputFits],MPI_STATUS_IGNORE);
-				if(configCrontrolFile.SaveSynthesisAdjusted)
-					MPI_Wait(&vMpiRequestSpectraAd[indexInputFits],MPI_STATUS_IGNORE);
-
-					double timeWriteImage;
-					clock_t t;
-					t = clock();
-
-					if(!writeFitsImageModels(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows,fitsImages[indexInputFits]->cols,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
-							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
-					}
-					t = clock() - t;
-					timeWriteImage = ((double)t)/CLOCKS_PER_SEC; // in seconds 
-					
-					// PROCESS FILE OF SYNTETIC PROFILES
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						fitsImages[indexInputFits]->pixels = calloc(fitsImages[indexInputFits]->numPixels, sizeof(vpixels));
-						for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
-							fitsImages[indexInputFits]->pixels[i].spectro = calloc ((fitsImages[indexInputFits]->numStokes*fitsImages[indexInputFits]->nLambdas),sizeof(float));
-							//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
-						}		
-						for(indexPixel=0;indexPixel<fitsImages[indexInputFits]->numPixels;indexPixel++)
-						{	
-							int kk;
-							for (kk = 0; kk < (nlambda * NPARMS); kk++)
-							{
-								fitsImages[indexInputFits]->pixels[indexPixel].spectro[kk] = vSpectraAjustedTotal_L[indexInputFits][kk+(indexPixel*(nlambda * NPARMS))] ;
-							}
-						}					
-						// WRITE SINTHETIC PROFILES TO FITS FILE
-						if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits])){
-							printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
-						}
-						
-						for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
-							free(fitsImages[indexInputFits]->pixels[i].spectro);
-							fitsImages[indexInputFits]->pixels[i].spectro = NULL;
-							//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
-						}							
-						free(fitsImages[indexInputFits]->pixels);
-						fitsImages[indexInputFits]->pixels = NULL;
-					}
-
-					free(resultsInitModelTotal_L[indexInputFits]);		
-					free(chisqrfTotal_L[indexInputFits]);
-					free(vNumIterTotal_L[indexInputFits]);
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						free(vSpectraAjustedTotal_L[indexInputFits]);
-					}
-					
-					printf("\n************************************************************************************************************************\n");
-					printf("\n INVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f *********************\n", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
-					//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
-					printf("\n TIME TO WRITE FITS IMAGE:  %f seconds to execute \n", timeWriteImage);
-					printf("\n************************************************************************************************************************\n\n");
-					freeFitsImage(fitsImages[indexInputFits]);
-				/*}
-				else{
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						free(vSpectraAdjustedSplit_L[indexInputFits]);
-					}
-					free(vSpectraSplit_L[indexInputFits]);
-					free(resultsInitModel_L[indexInputFits]);				
-					free(vChisqrf_L[indexInputFits]);
-					free(vNumIter_L[indexInputFits]);
-				}*/
-				indexInputFits++;			
-			}while(indexInputFits<numFilesPerProcessParallel);
-		}
-
-		free(fitsImages);
-		free(vMpiRequestScatter);
-		free(vMpiRequestInitModel);
-		free(vMpiRequestChisqr);
-		free(vMpiRequestIter);
-		free(vMpiRequestSpectraAd);
-		free(vNumPixelsImage);
-		free(vMpiRequestReduceExecution);
-		free(resultsInitModel_L);
-		free(resultsInitModelTotal_L);
-		free(chisqrfTotal_L);
-		free(vChisqrf_L);
-		free(vNumIter_L);
-		free(vNumIterTotal_L);
-		free(vSpectraSplit_L);
-		free(vSpectraAdjustedSplit_L);
-		free(vSpectraAjustedTotal_L);
-	}
 	FreeMemoryDerivedSynthesis();
 
 	fftw_free(inFilterMAC);

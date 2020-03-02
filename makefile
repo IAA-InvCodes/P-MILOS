@@ -1,3 +1,7 @@
+ifdef icc
+	export OMPI_CC=icc
+endif
+
 CC=mpicc
 
 CFLAGS=
