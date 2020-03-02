@@ -402,7 +402,7 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise)
 * @Date:  Nov. 2011
 *
 */
-void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel)
+void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel, int forInitialUse)
 {
 
 	double x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, beta_B, Ic, Icmax, Vlos;
@@ -444,10 +444,10 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	}
 
 	//Para evitar nan
-	//if (fabs(y) > 1e-15)
+	if (fabs(y) > 1e-15)
 		LM_lambda_plus = x / y;
-	//else
-		//LM_lambda_plus = 0;
+	else
+		LM_lambda_plus = 0;
 
 	x = 0;
 	y = 0;
@@ -458,18 +458,17 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 		y += aux;
 	}
 
-	//if (fabs(y) > 1e-15)
+	if (fabs(y) > 1e-15)
 		LM_lambda_minus = x / y;
-	//else
-		//LM_lambda_minus = 0;
+	else
+		LM_lambda_minus = 0;
 
 	C = (CTE4_6_13 * (lambda_0*lambda_0) * cuantic->GEFF);
 	beta_B = 1 / C;
 
 	Blos = (1 / C) * ((LM_lambda_plus - LM_lambda_minus) / 2);
 	//Vlos = (VLIGHT / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
-	
-	Vlos = (VLIGHT / (lambda_0)) * ((x_vlos/y_vlos) / 2);
+	Vlos = (VLIGHT / (lambda_0)) * ((x_vlos/y_vlos) / 2); // for now use the center without spectroV only spectroI 
 
 
 	//------------------------------------------------------------------------------------------------------------
@@ -481,9 +480,6 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	//Vlos = ( 2*(VLIGHT)*0.08 / (PI*lambda_0)) * atan((spectroI[0]+spectroI[1]-spectroI[3]-spectroI[4])/(spectroI[0]-spectroI[1]-spectroI[3]+spectroI[4]));
 
 	//------------------------------------------------------------------------------------------------------------
-
-	//Blos = Blos * 1; //factor de correción x campo debil
-	//Vlos = Vlos * 1; //factor de correción ...
 
 	//inclinacion
 	x = 0;
@@ -505,21 +501,21 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	gamma_rad = atan(tan_gamma); //gamma en radianes
 	gamma = gamma_rad * (180 / PI); //gamma en grados
 
-	if(gamma>=85 && gamma <=90){  
-		gamma_rad = 85 *(PI/180);
+	if(forInitialUse){
+		if(gamma>=85 && gamma <=90){  
+			gamma_rad = 85 *(PI/180);
+		}
+		if(gamma>90 && gamma <=95){ 
+			gamma_rad = 95 *(PI/180);
+		}
 	}
-	if(gamma>90 && gamma <=95){ 
-		gamma_rad = 95 *(PI/180);
-	}
-	//correccion
-	//utilizamos el signo de Blos para ver corregir el cuadrante
-	
-
+	//correction 
+	//we use the sign of Blos to see to correct the quadrant
 	if (Blos < 0)
 		gamma = (180) - gamma;
 
-	//azimuth
 
+	// CALCULATIONS FOR AZIMUTH 
 	PRECISION tan2phi, phi;
 
 	double sum_u =0.0, sum_q = 0.0;
@@ -540,57 +536,25 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	else if ( sum_u > 0 && sum_q < 0 )
 		phi = phi + 90;
 	
-	/*double sum_tan2phi,phi_aux;
-	for(i=0;i<nlambda;i++){
-		if( fabs(spectroU[i]>0.01 || fabs(spectroQ[i])>0.01  )){
-			phi_aux = spectroU[i]/spectroQ[i];
-			if ( spectroU[i] > 0 && spectroQ[i] > 0 )
-				phi_aux = phi_aux;
-			else if ( spectroU[i] < 0 && spectroQ[i] > 0 )
-				phi_aux = phi_aux + PI;
-			else if ( spectroU[i] < 0 && spectroQ[i] < 0 )
-				phi_aux = phi_aux + (PI/2);
-			else if ( spectroU[i] > 0 && spectroQ[i] < 0 )
-				phi_aux = phi_aux + (PI/2);
-			sum_tan2phi += atan(phi_aux);
-		}
-	}
-	
-	phi = (sum_tan2phi * 180 / PI) / 2;*/
-	/*tan2phi = (spectroU[1] + spectroU[nlambda-1]) / (spectroQ[1] + spectroQ[nlambda-1]);
-
-	phi = (atan(tan2phi) * 180 / PI) / 2; //atan con paso a grados
-
-	if ( (spectroU[1] + spectroU[nlambda-1]) > 0 && (spectroQ[1] + spectroQ[nlambda-1]) > 0 )
-		phi = phi;
-	else if ( (spectroU[1] + spectroU[nlambda-1]) < 0 && (spectroQ[1] + spectroQ[nlambda-1]) > 0 )
-		phi = phi + 180;
-	else if ( (spectroU[1] + spectroU[nlambda-1]) < 0 && (spectroQ[1] + spectroQ[nlambda-1]) < 0 )
-		phi = phi + 90;
-	else if ( (spectroU[1] + spectroU[nlambda-1]) > 0 && (spectroQ[1] + spectroQ[nlambda-1]) < 0 )
-		phi = phi + 90;*/
+	// END CALCULATIONS FOR AZIMUTH 
 	
 	PRECISION B_aux;
-
-	//B_aux = fabs(Blos / cos(gamma_rad)) * 2; // 2 factor de corrección
 	B_aux = fabs(Blos / cos(gamma_rad)); // 
 
-	//Vlos = Vlos * 1.5;
+	
 	if (Vlos < (-20))
 		Vlos = -20;
 	if (Vlos > (20))
 		Vlos = 20;
 
 
-	/*if(B_aux >4000)
-		B_aux = 4000;
-	if(B_aux < 0.0001)
-		B_aux = 10;*/
 	initModel->B = (B_aux > 4000 ? 4000 : B_aux);
-	initModel->vlos = Vlos; //(Vlos*1.5);//1.5;
+	initModel->vlos = Vlos;
 	initModel->gm = gamma;
 	initModel->az = phi;
-	//initModel->S0 = Blos;
+
+	if(!forInitialUse) // store Blos in SO if we are in non-initialization use
+		initModel->S0 = Blos;
 
 	//Liberar memoria del vector de lambda auxiliar
 	

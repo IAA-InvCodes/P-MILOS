@@ -812,7 +812,7 @@ int main(int argc, char **argv)
 					initModel.S1 = INITIAL_MODEL.S1;
 
 					// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
-					estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel);
+					estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel,1);
 					if (isnan(initModel.B))
 						initModel.B = 1;
 					if (isnan(initModel.vlos))
@@ -1048,7 +1048,7 @@ int main(int argc, char **argv)
 					initModel.S1 = INITIAL_MODEL.S1;
 					
 					// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
-					estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel);
+					estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel,1);
 					if (isnan(initModel.B))
 						initModel.B = 1;
 					if (isnan(initModel.vlos))
@@ -1241,7 +1241,7 @@ int main(int argc, char **argv)
 				initModel.S1 = INITIAL_MODEL.S1;
 
 				// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
-				estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel);
+				estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel,1);
 
 				if (isnan(initModel.B))
 					initModel.B = 1;

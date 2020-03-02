@@ -362,7 +362,7 @@ int main(int argc, char **argv)
 			initModel.alfa = 0; //0.38; //stray light factor
 			initModel.S1 = 0;
 			//invert with classical estimates
-			estimacionesClasicas(wlines[1], vLambda, nlambda, spectroPER, &initModel);
+			estimacionesClasicas(wlines[1], vLambda, nlambda, spectroPER, &initModel,0);
 			// save model to file
 			char nameAuxOutputModel [4096];
 			if(configCrontrolFile.ObservedProfiles[0]!='\0')
@@ -419,16 +419,7 @@ int main(int argc, char **argv)
 				initModel.alfa = INITIAL_MODEL.alfa; //0.38; //stray light factor
 				initModel.S0 = INITIAL_MODEL.S0;
 				initModel.S1 = INITIAL_MODEL.S1;
-				estimacionesClasicas(wlines[1],vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel);
-				//Se comprueba si el resultado fue "nan" en las CE
-				if (isnan(initModel.B))
-					initModel.B = 1;
-				if (isnan(initModel.vlos))
-					initModel.vlos = 1e-3;
-				if (isnan(initModel.gm))
-					initModel.gm = 1;
-				if (isnan(initModel.az))
-					initModel.az = 1;
+				estimacionesClasicas(wlines[1],vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel,0);
 				vModels[indexPixel] = initModel;
 
 			}
@@ -729,7 +720,7 @@ int main(int argc, char **argv)
 					initModel.S1 = INITIAL_MODEL.S1;
 					
 					// CLASSICAL ESTIMATES TO GET B, GAMMA
-					estimacionesClasicas(wlines[1], vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel);
+					estimacionesClasicas(wlines[1], vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, &initModel,1);
 					if (isnan(initModel.B))
 						initModel.B = 1;
 					if (isnan(initModel.vlos))

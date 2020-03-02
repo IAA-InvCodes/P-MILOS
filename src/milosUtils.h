@@ -56,7 +56,7 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise);
 * @Date:  Nov. 2011
 *
 */
-void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel);
+void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel, int forInitialUse);
 
 /**
  * 
