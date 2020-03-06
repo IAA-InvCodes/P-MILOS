@@ -11,7 +11,7 @@ int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel);
 
 int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISION * step, PRECISION * finalLambda, int printLog);
 
-int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInputPSF);
+int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInputPSF, PRECISION centralWaveLenght);
 
 void loadInitialValues(ConfigControl * configControlFile);
 

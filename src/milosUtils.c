@@ -717,29 +717,37 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
  * Make the interpolation between deltaLambda and PSF where deltaLambda es x and PSF f(x)
  *  Return the array with the interpolation. 
  * */
-int interpolationSplinePSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * lambdasSamples, PRECISION centralLambda, size_t N_PSF, PRECISION * fInterpolated, size_t NSamples){
+int interpolationSplinePSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * lambdasSamples, size_t N_PSF, PRECISION * fInterpolated, size_t NSamples){
 
 	size_t i;
 	gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  	gsl_spline *spline_cubic = gsl_spline_alloc(gsl_interp_cspline, N_PSF);
+  	//gsl_spline *spline_cubic = gsl_spline_alloc(gsl_interp_cspline, N_PSF);
 	//gsl_spline *spline_akima = gsl_spline_alloc(gsl_interp_akima, NSamples);
-	//gsl_spline *spline_steffen = gsl_spline_alloc(gsl_interp_steffen, NSamples);
+	gsl_spline *spline_steffen = gsl_spline_alloc(gsl_interp_steffen, NSamples);
 
-	gsl_spline_init(spline_cubic, deltaLambda, PSF, N_PSF);
+	//gsl_spline_init(spline_cubic, deltaLambda, PSF, N_PSF);
 	//gsl_spline_init(spline_akima, deltaLambda, PSF, N_PSF);
-	//gsl_spline_init(spline_steffen, deltaLambda, PSF, N_PSF);
+	gsl_spline_init(spline_steffen, deltaLambda, PSF, N_PSF);
 
 	for (i = 0; i < NSamples; ++i){
-   	PRECISION xi = lambdasSamples[i]-centralLambda;
-      fInterpolated[i] = gsl_spline_eval(spline_cubic, xi, acc);
+   	
+      //fInterpolated[i] = gsl_spline_eval(spline_cubic, xi, acc);
       //PRECISION yi_akima = gsl_spline_eval(spline_akima, xi, acc);
-      //PRECISION yi_steffen = gsl_spline_eval(spline_steffen, xi, acc);
-    }
+      PRECISION yi_steffen = gsl_spline_eval(spline_steffen, lambdasSamples[i], acc);
+		if(!gsl_isnan(yi_steffen)){
+			fInterpolated[i] = yi_steffen;
+		}
+		else
+		{
+			fInterpolated[i] = 0.0f;
+		}
+		
+   }
 
-  gsl_spline_free(spline_cubic);
-  //gsl_spline_free(spline_akima);
-  //gsl_spline_free(spline_steffen);
-  gsl_interp_accel_free(acc);
+  	//gsl_spline_free(spline_cubic);
+	//gsl_spline_free(spline_akima);
+	gsl_spline_free(spline_steffen);
+	gsl_interp_accel_free(acc);
 
 	return 1;
 }
@@ -749,19 +757,22 @@ int interpolationSplinePSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
  * Make the interpolation between deltaLambda and PSF where deltaLambda es x and PSF f(x)
  *  Return the array with the interpolation. 
  * */
-int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * lambdasSamples, PRECISION centralLambda, size_t N_PSF, PRECISION * fInterpolated, size_t NSamples){
+int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * lambdasSamples, size_t N_PSF, PRECISION * fInterpolated, size_t NSamples){
 
 	size_t i;
 	gsl_interp *interpolation = gsl_interp_alloc (gsl_interp_linear,N_PSF);
    gsl_interp_init(interpolation, deltaLambda, PSF, N_PSF);
    gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
 
-
 	for (i = 0; i < NSamples; ++i){
-   	PRECISION xi = lambdasSamples[i]-centralLambda;
-      fInterpolated[i] = gsl_interp_eval(interpolation, deltaLambda, PSF, xi, accelerator);
-    }
-
+		double aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i], accelerator);
+		// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
+		if(!gsl_isnan(aux)) 
+      	fInterpolated[i] = aux;
+		else
+			fInterpolated[i] = 0.0f;
+		
+   }
   
   gsl_interp_free(interpolation);
   gsl_interp_accel_free(accelerator);

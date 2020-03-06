@@ -297,3 +297,6 @@ void strip_ext(char *fname)
         *end = '\0';
     }  
 }
+
+
+

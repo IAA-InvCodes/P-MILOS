@@ -120,7 +120,6 @@ PRECISION * fgauss(PRECISION MC, PRECISION *eje, int neje, PRECISION landa, int 
 
 PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambda0, PRECISION lambdaCentral, int nLambda, int * sizeG)
 {
-	//int fgauss(PRECISION MC, PRECISION * eje,int neje,PRECISION landa,int deriv,PRECISION * mtb,int nmtb){
 
 	REAL *mtb_final;
 	PRECISION *mtb ;
@@ -129,35 +128,12 @@ PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambd
 	int nloai;
 	int nmtb;
 	PRECISION cte;
-	
-
-	//int even = (nLambda%2);
 	*sizeG = nLambda;
-
-	/*if(even) {
-		*sizeG = nLambda;
-	}
-	else{
-		*sizeG = nLambda + 1;
-	}*/
-
-	//printf("\nCENTRO DE CREACIÓN DE LA GAUSSIANA: %d\n",centro);
-	//lambda0 = vLambda[centro];		  //center of the axis
-	//step_between_lw = vLambda[1]-vLambda[0]; // step to create the gaussian 
-	//ild = (landa * MC) / 2.99792458e5; //Sigma
 
 	///Conversion from FWHM to Gaussian sigma (1./(2*sqrt(2*alog2)))
 	PRECISION sigma=FWHM*0.42466090/1000.0; // in Angstroms
 	//PRECISION sigma = FWHM * (2 * sqrt(2 * log(2)))/1000;
 
-	//printf("lambda0-> %f  ...sigma %lf\n",lambda0,sigma);
-
-	/*
-	for(i=0;i<neje;i++){
-		printf("eje (%d) %f  ...\n",i,eje[i]);
-	}
-*/
-	//int half = nLambda/2 +1;
 	term = (PRECISION *)calloc(*sizeG, sizeof(PRECISION));
 
 	for (i = 0; i < *sizeG; i++)
@@ -165,7 +141,6 @@ PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambd
 		PRECISION lambdaX = lambda0 +i*step_between_lw;
 		PRECISION aux = ((lambdaX - lambdaCentral) / sigma);
 		term[i] = ( aux * aux) / 2; //exponent
-		//printf("term (%d) %f  ...\n",i,term[i]);
 	}
 
 	nloai = 0;

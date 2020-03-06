@@ -670,7 +670,7 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 /**
  * 
  * */
-int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInputPSF){
+int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInputPSF, PRECISION centralWaveLenght){
 
 	// first of all read the number of lines to give size for arrays deltaLambda and PSF
 	FILE *fp;
@@ -689,8 +689,8 @@ int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInput
 	int index =0;
 	while ((read = getline(&line, &len, fp)) != -1) {
 		double delta, psf;
-		sscanf(line,"%lf  %lf", &delta, &psf);
-		deltaLambda[index] = delta;
+		sscanf(line,"%le  %le", &delta, &psf);
+		deltaLambda[index] = (delta/1000)+centralWaveLenght;
 		PSF[index] = psf;
 		index++;
 	}
@@ -1501,9 +1501,15 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		}
 	} 
 	else{
-		if(strcmp(file_ext(trolConfig->PSFFile),PSF_FILE)==0){
+		
+		if(strcmp(file_ext(trolConfig->PSFFile),PSF_FILE)==0 ){
 			trolConfig->ConvolveWithPSF = 1;
 		}
+		else{
+			printf("\nERROR: The extension of PSF file is not '.psf' . REVIEW IT %s, PLEASE\n",trolConfig->PSFFile);
+			exit(EXIT_FAILURE);
+		}
+
 	}
 	//if(printLog) printf("PSF file read from control file: %s. Convolve with PSF? %d \n", trolConfig->PSFFile,trolConfig->ConvolveWithPSF);
 	if(printLog) printf("%s", LINE);

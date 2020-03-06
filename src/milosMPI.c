@@ -342,12 +342,22 @@ int main(int argc, char **argv)
 				if(N_SAMPLES_PSF>0){
 					deltaLambda = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
 					PSF = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
-					readPSFFile(deltaLambda,PSF,nameInputFilePSF);
-					PRECISION * fInterpolated = calloc(nlambda,sizeof(PRECISION));
-					interpolationLinearPSF(deltaLambda,  PSF, vGlobalLambda ,configCrontrolFile.CentralWaveLenght, N_SAMPLES_PSF,fInterpolated, nlambda);						
+					readPSFFile(deltaLambda,PSF,nameInputFilePSF,configCrontrolFile.CentralWaveLenght);
+					if( vGlobalLambda[0]< (deltaLambda[0]+1e-4)  || vGlobalLambda[nlambda-1]> (deltaLambda[N_SAMPLES_PSF-1]+1e-4) ){
+						if(idProc==root){
+							printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vGlobalLambda[0],deltaLambda[N_SAMPLES_PSF-1],vGlobalLambda[nlambda-1]);
+						}
+						exit(EXIT_FAILURE);
+					}
+					G = calloc(nlambda,sizeof(PRECISION));
+					interpolationLinearPSF(deltaLambda,  PSF, vGlobalLambda , N_SAMPLES_PSF, G, nlambda);		
+					sizeG=nlambda;				
 				}
 				else{
-					G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
+					//G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
+					if(idProc==root)
+						printf("\n****************** ERROR THE PSF FILE is empty or damaged.******************\n");
+					exit(EXIT_FAILURE);
 				}
 		}
 
