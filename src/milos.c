@@ -260,8 +260,8 @@ int main(int argc, char **argv)
 				deltaLambda = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
 				PSF = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
 				readPSFFile(deltaLambda,PSF,nameInputFilePSF,configCrontrolFile.CentralWaveLenght);
-				// CHECK if values of deltaLambda are in the same range of vLambda
-				if( vLambda[0]< (deltaLambda[0]+1e-4)  || vLambda[nlambda-1]> (deltaLambda[N_SAMPLES_PSF-1]+1e-4) ){
+				// CHECK if values of deltaLambda are in the same range of vLambda. For do that we truncate to 4 decimal places 
+				if( (trunc(vLambda[0]*1000)/1000) < (trunc(deltaLambda[0]*1000)/1000)  || (trunc(vLambda[nlambda-1]*1000)/1000) > (trunc(deltaLambda[N_SAMPLES_PSF-1]*1000)/1000) ){
 					printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file \n\n");
 					exit(EXIT_FAILURE);
 				}

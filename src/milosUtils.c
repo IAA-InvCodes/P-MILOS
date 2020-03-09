@@ -542,10 +542,10 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	B_aux = fabs(Blos / cos(gamma_rad)); // 
 
 	
-	if (Vlos < (-20))
-		Vlos = -20;
-	if (Vlos > (20))
-		Vlos = 20;
+	if (Vlos < (-4))
+		Vlos = -4;
+	if (Vlos > (4))
+		Vlos = 4;
 
 
 	initModel->B = (B_aux > 4000 ? 4000 : B_aux);
