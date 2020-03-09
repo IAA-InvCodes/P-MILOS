@@ -721,21 +721,22 @@ int interpolationSplinePSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 
 	size_t i;
 	gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  	//gsl_spline *spline_cubic = gsl_spline_alloc(gsl_interp_cspline, N_PSF);
+  	gsl_spline *spline_cubic = gsl_spline_alloc(gsl_interp_cspline, N_PSF);
 	//gsl_spline *spline_akima = gsl_spline_alloc(gsl_interp_akima, NSamples);
-	gsl_spline *spline_steffen = gsl_spline_alloc(gsl_interp_steffen, NSamples);
+	//gsl_spline *spline_steffen = gsl_spline_alloc(gsl_interp_steffen, NSamples);
 
-	//gsl_spline_init(spline_cubic, deltaLambda, PSF, N_PSF);
+	gsl_spline_init(spline_cubic, deltaLambda, PSF, N_PSF);
 	//gsl_spline_init(spline_akima, deltaLambda, PSF, N_PSF);
-	gsl_spline_init(spline_steffen, deltaLambda, PSF, N_PSF);
+	//gsl_spline_init(spline_steffen, deltaLambda, PSF, N_PSF);
 
 	for (i = 0; i < NSamples; ++i){
    	
       //fInterpolated[i] = gsl_spline_eval(spline_cubic, xi, acc);
       //PRECISION yi_akima = gsl_spline_eval(spline_akima, xi, acc);
-      PRECISION yi_steffen = gsl_spline_eval(spline_steffen, lambdasSamples[i], acc);
-		if(!gsl_isnan(yi_steffen)){
-			fInterpolated[i] = yi_steffen;
+      //PRECISION yi_steffen = gsl_spline_eval(spline_steffen, lambdasSamples[i], acc);
+		PRECISION yi = gsl_spline_eval(spline_cubic, lambdasSamples[i], acc);
+		if(!gsl_isnan(yi)){
+			fInterpolated[i] = yi;
 		}
 		else
 		{
@@ -744,9 +745,9 @@ int interpolationSplinePSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 		
    }
 
-  	//gsl_spline_free(spline_cubic);
+  	gsl_spline_free(spline_cubic);
 	//gsl_spline_free(spline_akima);
-	gsl_spline_free(spline_steffen);
+	//gsl_spline_free(spline_steffen);
 	gsl_interp_accel_free(acc);
 
 	return 1;
