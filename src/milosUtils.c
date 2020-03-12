@@ -758,7 +758,7 @@ int interpolationSplinePSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
  * Make the interpolation between deltaLambda and PSF where deltaLambda es x and PSF f(x)
  *  Return the array with the interpolation. 
  * */
-int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * lambdasSamples, size_t N_PSF, PRECISION * fInterpolated, size_t NSamples){
+int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * lambdasSamples, size_t N_PSF, PRECISION * fInterpolated, size_t NSamples,double offset){
 
 	size_t i;
 	gsl_interp *interpolation = gsl_interp_alloc (gsl_interp_linear,N_PSF);
@@ -766,17 +766,55 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
    gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
 
 	for (i = 0; i < NSamples; ++i){
-		double aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i], accelerator);
-		// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
-		if(!gsl_isnan(aux)) 
-      	fInterpolated[i] = aux;
-		else
-			fInterpolated[i] = 0.0f;
-		
+		//printf("\n VALOR A INERPOLAR EN X %f, iteration %i\n",lambdasSamples[i],i);
+		double aux;
+		if(offset>0){
+			if(lambdasSamples[i]-offset>= deltaLambda[0]){
+				aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i]-offset, accelerator);
+						// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
+				if(!gsl_isnan(aux)) 
+					fInterpolated[i] = aux;
+				else
+					fInterpolated[i] = 0.0f;
+			}
+			else
+			{
+				aux = 0.0f;
+			}
+		}
+		else{
+			if(lambdasSamples[i]+offset<= deltaLambda[NSamples-1]){
+				aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i]+offset, accelerator);
+						// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
+				if(!gsl_isnan(aux)) 
+					fInterpolated[i] = aux;
+				else
+					fInterpolated[i] = 0.0f;
+			}
+			else
+			{
+				aux = 0.0f;
+			}			
+		}
    }
   
-  gsl_interp_free(interpolation);
-  gsl_interp_accel_free(accelerator);
+  	gsl_interp_free(interpolation);
+  	gsl_interp_accel_free(accelerator);
+
+  	// normalizations 
+	double cte = 0;
+	for(i=0; i< NSamples; i++){
+		cte += fInterpolated[i];
+	}
+	for(i=0; i< NSamples; i++){
+		fInterpolated[i] /= cte;
+	}
+
+	/*for(i=0; i< NSamples; i++){
+		if(fInterpolated[i]<1e-3)
+			fInterpolated[i] =0;
+	}*/
+
 
 	return 1;
 }

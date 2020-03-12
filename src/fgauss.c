@@ -185,11 +185,11 @@ PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambd
 	{
 		cte += mtb[i];
 	}
-	mtb_final = calloc(nmtb,sizeof(REAL));
+	//mtb_final = calloc(nmtb,sizeof(REAL));
 	for (i = 0; i < *sizeG; i++)
 	{
 		mtb[i] /= cte;
-		mtb_final[i] = mtb[i];
+		//mtb_final[i] = mtb[i];
 	}
 
 	free(loai);

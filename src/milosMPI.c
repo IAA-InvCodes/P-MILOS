@@ -234,11 +234,16 @@ int main(int argc, char **argv)
 	}
 
 	/***************** READ WAVELENGHT FROM GRID OR FITS ********************************/
-	PRECISION * vGlobalLambda;
+	PRECISION * vGlobalLambda, *vOffsetsLambda;
 
 	if(configCrontrolFile.useMallaGrid){ // read lambda from grid file
 		indexLine = readMallaGrid(configCrontrolFile.MallaGrid, &initialLambda, &step, &finalLambda, (idProc==root));      
 		nlambda = ((finalLambda-initialLambda)/step)+1;
+		vOffsetsLambda = calloc(nlambda,sizeof(PRECISION));
+		vOffsetsLambda[0] = initialLambda;
+		for(i=1;i<nlambda;i++){
+			vOffsetsLambda[i] = vOffsetsLambda[i-1]+step;
+		}
 		// pass to armstrong 
 		initialLambda = initialLambda/1000;
 		step = step/1000;
@@ -344,15 +349,26 @@ int main(int argc, char **argv)
 					PSF = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
 					readPSFFile(deltaLambda,PSF,nameInputFilePSF,configCrontrolFile.CentralWaveLenght);
 					// CHECK if values of deltaLambda are in the same range of vLambda. For do that we truncate to 4 decimal places 
-					if( (trunc(vGlobalLambda[0]*1000)/1000) < (trunc(deltaLambda[0]*1000)/1000)  || (trunc(vGlobalLambda[nlambda-1]*1000)/1000) > (trunc(deltaLambda[N_SAMPLES_PSF-1]*1000)/1000) ){
+					if( (trunc(vOffsetsLambda[0])) < (trunc(deltaLambda[0]))  || (trunc(vOffsetsLambda[nlambda-1])) > (trunc(deltaLambda[N_SAMPLES_PSF-1])) ){
 						if(idProc==root){
-							printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vGlobalLambda[0],deltaLambda[N_SAMPLES_PSF-1],vGlobalLambda[nlambda-1]);
+							printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vOffsetsLambda[0],deltaLambda[N_SAMPLES_PSF-1],vOffsetsLambda[nlambda-1]);
 						}
 						exit(EXIT_FAILURE);
 					}
 					G = calloc(nlambda,sizeof(PRECISION));
-					interpolationLinearPSF(deltaLambda,  PSF, vGlobalLambda , N_SAMPLES_PSF, G, nlambda);		
-					sizeG=nlambda;				
+					double offset;
+					int posWL = 0;
+					for(i=0;i<nlambda && !posWL;i++){
+						if( (trunc(vGlobalLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
+							posWL = i;
+					}
+					if(posWL!= (nlambda/2)){ // move center to the middle of samples
+						//printf("\nPOS CENTRAL WL %i",posWL);
+						offset = (((nlambda/2)-posWL)*step)*1000;
+						//printf ("\n OFFSET IS %f\n",offset);
+					}					
+					interpolationLinearPSF(deltaLambda,  PSF, vOffsetsLambda , N_SAMPLES_PSF, G, nlambda,offset);		
+					sizeG=nlambda;	
 				}
 				else{
 					//G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
