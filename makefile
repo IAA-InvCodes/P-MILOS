@@ -1,11 +1,12 @@
-ifdef icc
-	export OMPI_CC=icc
-endif
+compiler= $(shell mpicc --showme:command)
 
 CC=mpicc
 
 CFLAGS=
-CFLAGS+=-O3 
+ifeq ($(compiler),icc)
+	CFLAGS+=-ipo -xHost -prof-gen-sampling
+endif
+CFLAGS+=-O3
 
 ifdef develop
 	ifeq ($(develop),yes)
@@ -19,6 +20,11 @@ ifdef use_double
 	endif
 endif
 CFLAGS+=-fno-omit-frame-pointer
+
+HOST_SIZE   := $(shell getconf LONG_BIT)
+
+CFLAGS+=-m${HOST_SIZE}
+#CFLAGS+=-qopt-report=5
 #CFLAGS+=-Wall -Wextra
 #CFLAGS+=-Wconversion
 #CFLAGS+=-Wno-unused-but-set-variable -Wno-unused-parameter
