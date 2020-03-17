@@ -1,4 +1,4 @@
-compiler= $(shell mpicc --showme:command)
+compiler= $(shell mpicc -show | awk '{print $1}')
 
 CC=mpicc
 
