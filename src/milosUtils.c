@@ -44,6 +44,11 @@ extern fftw_complex * fftw_G_PSF;
 
 extern Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
 
+
+extern gsl_vector *eval;
+extern gsl_matrix *evec;
+extern gsl_eigen_symmv_workspace * workspace;
+
 void spectral_synthesis_convolution(int * nlambda)
 {
 
@@ -326,9 +331,6 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	int aux_nf, aux_nc;
 	
 	epsilon = 1e-12;
-	
-	gsl_vector *eval = gsl_vector_alloc (NTERMS);
-  	gsl_matrix *evec = gsl_matrix_alloc (NTERMS, NTERMS);
 
 	for (j = 0; j < NTERMS * NTERMS; j++)
 	{
@@ -336,9 +338,7 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	}
 
 	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h1, NTERMS, NTERMS);
-	gsl_eigen_symmv_workspace * workspace = gsl_eigen_symmv_alloc (NTERMS);
 	gsl_eigen_symmv(&gsl_h1.matrix, eval, evec, workspace);
-	gsl_eigen_symmv_free (workspace);
 	w = gsl_vector_ptr(eval,0);
 	v = gsl_matrix_ptr(evec,0,0);
 
@@ -350,9 +350,6 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	}
 
 	multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
-	
-	gsl_vector_free(eval);
-	gsl_matrix_free(evec);
 	
 	return 1;
 }
@@ -762,8 +759,8 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 
 	size_t i;
 	gsl_interp *interpolation = gsl_interp_alloc (gsl_interp_linear,N_PSF);
-   gsl_interp_init(interpolation, deltaLambda, PSF, N_PSF);
-   gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
+   	gsl_interp_init(interpolation, deltaLambda, PSF, N_PSF);
+   	gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
 
 	for (i = 0; i < NSamples; ++i){
 		//printf("\n VALOR A INERPOLAR EN X %f, iteration %i\n",lambdasSamples[i],i);
@@ -797,9 +794,6 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 			}			
 		}
    }
-  
-  	gsl_interp_free(interpolation);
-  	gsl_interp_accel_free(accelerator);
 
   	// normalizations 
 	double cte = 0;
@@ -809,7 +803,9 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 	for(i=0; i< NSamples; i++){
 		fInterpolated[i] /= cte;
 	}
-
+  	gsl_interp_accel_free(accelerator);
+	gsl_interp_free(interpolation);
+  	
 	/*for(i=0; i< NSamples; i++){
 		if(fInterpolated[i]<1e-3)
 			fInterpolated[i] =0;

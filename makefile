@@ -4,7 +4,7 @@ CC=mpicc
 
 CFLAGS=
 ifeq ($(compiler),icc)
-	CFLAGS+=-ipo -xHost -prof-gen-sampling
+	CFLAGS+=-ipo -xHost
 endif
 CFLAGS+=-O3
 

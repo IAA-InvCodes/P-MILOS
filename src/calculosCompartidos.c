@@ -29,6 +29,7 @@ extern Cuantic *cuantic;
 
 extern REAL * opa;
 extern PRECISION *dirConvPar;
+
 //extern REAL *resultConv;
 extern _Complex double *z,* zden, * zdiv;
 

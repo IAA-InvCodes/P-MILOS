@@ -41,7 +41,9 @@
 #include <unistd.h>
 #include <complex.h>
 #include <fftw3.h> //siempre a continuacion de complex.h
-
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_eigen.h>
 
 Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
 
@@ -108,6 +110,12 @@ ConfigControl configCrontrolFile;
 // fvoigt memory consuption
  _Complex double *z,* zden, * zdiv;
 
+
+// 
+gsl_vector *eval;
+gsl_matrix *evec;
+gsl_eigen_symmv_workspace * workspace;
+
 int main(int argc, char **argv)
 {
 	int i; // for indexes
@@ -119,6 +127,12 @@ int main(int argc, char **argv)
 	int indexLine; // index to identify central line to read it 
 
 	
+	// allocate memory for eigen values
+	eval = gsl_vector_alloc (NTERMS);
+  	evec = gsl_matrix_alloc (NTERMS, NTERMS);
+	workspace = gsl_eigen_symmv_alloc (NTERMS);
+
+	//*****
 	Init_Model INITIAL_MODEL;
 	PRECISION * deltaLambda, * PSF;
 	PRECISION initialLambda, step, finalLambda;
@@ -270,11 +284,12 @@ int main(int argc, char **argv)
 					printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vOffsetsLambda[0],deltaLambda[N_SAMPLES_PSF-1],vOffsetsLambda[nlambda-1]);
 					exit(EXIT_FAILURE);
 				}
-				G = calloc(nlambda,sizeof(PRECISION));
+				G = malloc(nlambda * sizeof(PRECISION));
 				
-				double offset;
+				double offset=0;
 				for(i=0;i<nlambda && !posWL;i++){
-					if( (trunc(vLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
+					//if( (trunc(vLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
+					if( fabs(trunc(vOffsetsLambda[i]))==0) 
 						posWL = i;
 				}
 				if(posWL!= (nlambda/2)){ // move center to the middle of samples
@@ -872,6 +887,9 @@ int main(int argc, char **argv)
 	free(wlines);
 	FreeMemoryDerivedSynthesis();
 	if(G!=NULL) free(G);
+	gsl_eigen_symmv_free (workspace);
+	gsl_vector_free(eval);
+	gsl_matrix_free(evec);
 
 	return 0;
 }
