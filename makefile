@@ -6,6 +6,9 @@ CFLAGS=
 ifeq ($(compiler),icc)
 	CFLAGS+=-ipo -xHost
 endif
+ifeq ($(compiler),gcc)
+	CFLAGS+=-march=native
+endif
 CFLAGS+=-O3
 
 ifdef develop
