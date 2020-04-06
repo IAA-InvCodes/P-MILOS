@@ -341,18 +341,21 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 					exit(EXIT_FAILURE);
 				}
 
-
-
 				image->rows=naxes[pos_row];
 				image->cols=naxes[pos_col];
 				image->nLambdas=naxes[pos_lambda];
 				image->numStokes=naxes[pos_stokes_parameters];
+				if(image->numStokes!=4){
+					printf("\n************** PLEASE REVIEW THE ORDER OF HEADER NAXIS. DIMENSION OF STOKES MUST HAVE AS VALUE: 4 \n");
+					exit(EXIT_FAILURE);
+				}
 				image->numPixels = naxes[pos_col] * naxes[pos_row]; // we will read the image by columns 
 				image->pos_lambda = pos_lambda;
 				image->pos_col = pos_col;
 				image->pos_row = pos_row;
 				image->pos_stokes_parameters = pos_stokes_parameters;
 				numPixelsFitsFile = naxes[pos_row]*naxes[pos_col]*naxes[pos_lambda]*naxes[pos_stokes_parameters];
+
 
 				// allocate memory to read all pixels in the same array 
 				float * imageTemp = calloc(numPixelsFitsFile, sizeof(float));
@@ -381,7 +384,6 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 					image->pixels = calloc(image->numPixels, sizeof(vpixels));
 					for( i=0;i<image->numPixels;i++){
 						image->pixels[i].spectro = calloc ((image->numStokes*image->nLambdas),sizeof(float));
-						//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
 						image->pixels[i].vLambda = NULL;
 						image->pixels[i].nLambda = image->nLambdas;
 					}					
