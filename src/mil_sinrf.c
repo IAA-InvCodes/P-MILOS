@@ -58,7 +58,7 @@ extern fftw_plan planForwardPSF, planBackwardPSF;
 extern ConfigControl configCrontrolFile;
 
 int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *spectra,
-			PRECISION ah,PRECISION * slight, REAL * spectra_mc, int filter)
+			REAL ah,PRECISION * slight, REAL * spectra_mc, int filter)
 {
 
 	int offset,numl;

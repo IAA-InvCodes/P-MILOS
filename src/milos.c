@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 	
 	const char	* nameInputFilePSF ;	
 
-   FitsImage * fitsImage;
+    FitsImage * fitsImage;
 	PRECISION  dat[7];
 
 	/********************* Read data input from file ******************************/
@@ -216,6 +216,11 @@ int main(int argc, char **argv)
 	}
 
 	/*********************************************** INITIALIZE VARIABLES  *********************************/
+
+	REAL * vSigma = malloc((nlambda*NPARMS)*sizeof(REAL));
+	for(i=0;i<nlambda*NPARMS;i++){
+		vSigma[i] = configCrontrolFile.sigma[0];
+	}
 
 	CC = PI / 180.0;
 	CC_2 = CC * 2;
@@ -524,8 +529,8 @@ int main(int argc, char **argv)
       AllocateMemoryDerivedSynthesis(nlambda);
 
 		// synthesis
-      mil_sinrf(cuantic, &initModel, wlines, vLambda, nlambda, spectra, AH, slight,spectra_mac, configCrontrolFile.ConvolveWithPSF);
-      me_der(cuantic, &initModel, wlines, vLambda, nlambda, d_spectra, spectra_mac, spectra, AH, slight, configCrontrolFile.ConvolveWithPSF);	
+      mil_sinrf(cuantic, &initModel, wlines, vLambda, nlambda, spectra, configCrontrolFile.mu, slight,spectra_mac, configCrontrolFile.ConvolveWithPSF);
+      me_der(cuantic, &initModel, wlines, vLambda, nlambda, d_spectra, spectra_mac, spectra, configCrontrolFile.mu, slight, configCrontrolFile.ConvolveWithPSF);	
 
 		// in this case basenamefile is from initmodel
 		char nameAux [4096];
@@ -622,7 +627,7 @@ int main(int argc, char **argv)
 
       	int numIter;
       	lm_mils(cuantic, wlines, vLambda, nlambda, spectroPER, nlambda, &initModel, spectra, &chisqrf, slight, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
-               configCrontrolFile.WeightForStokes, configCrontrolFile.fix, configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&numIter);
+               configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma,configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&numIter,configCrontrolFile.mu);
 
 			// SAVE OUTPUT MODEL 
 			char nameAuxOutputModel [4096];
@@ -782,7 +787,7 @@ int main(int argc, char **argv)
 							slightPixel = slight+nlambda*indexPixel;
 					}
 					lm_mils(cuantic, wlines, vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
-							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel]);						
+							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.sigma,configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu);						
 					
 					vModels[indexPixel] = initModel;
 					if(configCrontrolFile.SaveSynthesisAdjusted){
@@ -885,6 +890,7 @@ int main(int argc, char **argv)
 
 	free(cuantic);
 	free(wlines);
+	free(vSigma);
 	FreeMemoryDerivedSynthesis();
 	if(G!=NULL) free(G);
 	gsl_eigen_symmv_free (workspace);

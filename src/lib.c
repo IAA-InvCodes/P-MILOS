@@ -58,7 +58,14 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 }
 
 
-
+/**
+ * @param spectra: array with synthetic spectro 
+ * @param nspectro: size of spectro
+ * @param spectro: original spectro
+ * @param w: array of weight for I,Q,U,V 
+ * @param sig: array with sigma for I,Q,U,V 
+ * @param nfree: (nspectro * NPARMS) - NTERMS, NPARAMs is 4 and NTERMS 11. 
+ * */
 REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL nfree){
 	
 	REAL TOT,dif;	
@@ -66,18 +73,23 @@ REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL n
 	int i,j;
 
 	TOT=0;
-	for(j=0;j<NPARMS;j++){
+/*	for(j=0;j<NPARMS;j++){
 		opa=0;
 		for(i=0;i<nspectro;i++){
 			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
 			opa+= (dif*dif);
 		}
 		TOT+=((w[j]*opa)/(sig[j]));
-		//TOT+=((w[j]*opa)/(sig[j]*sig[j]));
-		//TOT+= opa;///(sig[j]*sig[j]);
+	}*/
+
+	for(j=0;j<NPARMS;j++){
+		opa=0;
+		for(i=0;i<nspectro;i++){
+			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
+			opa+= ((dif*dif)*w[j])/(sig[i+nspectro*j]);
+		}
+		TOT+= opa;
 	}
-		
-	//return TOT/15;		
 	return TOT/nfree;
 	
 }

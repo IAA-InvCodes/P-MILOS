@@ -572,7 +572,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
 				Init_Model *initModel, REAL *spectra, float *chisqrf,
 				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
-				REAL *sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter)
+				REAL *vSigma, REAL * sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter,REAL ah)
 {
 
 	
@@ -585,7 +585,11 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	int i, *fixed, nfree;
 	static PRECISION delta[NTERMS];
 	
-	
+	for(i=0;i<nlambda*NPARMS;i++){
+		if(spectro[i]<-1) vSigma[i]=1e10*1e10;
+	}
+
+
 	REAL flambda;
 	static REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr, chisqr0;
@@ -623,8 +627,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	
 
-	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, AH,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
-	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra,AH, slight, *INSTRUMENTAL_CONVOLUTION);
+	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra,ah,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
+	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra, ah, slight, *INSTRUMENTAL_CONVOLUTION);
 
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
 	covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
@@ -637,7 +641,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	}
 
 
-	ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
+	ochisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
 	chisqr0 = ochisqr;
 
 	model = *initModel;
@@ -656,9 +660,9 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		AplicaDelta(initModel, delta, fixed, &model);
 
 		check(&model);
-		mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, AH,slight,spectra_mac,*INSTRUMENTAL_CONVOLUTION);
+		mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac,*INSTRUMENTAL_CONVOLUTION);
 	
-		chisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
+		chisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
 		
 		/**************************************************************************/
 
@@ -673,7 +677,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			//flambda = flambda / 10.0;
 			flambda=flambda/(PARBETA_better*PARBETA_FACTOR);
 			*initModel = model;
-			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, AH, slight,*INSTRUMENTAL_CONVOLUTION);
+			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, ah, slight,*INSTRUMENTAL_CONVOLUTION);
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
 			covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
 			
