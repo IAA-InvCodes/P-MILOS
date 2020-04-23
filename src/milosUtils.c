@@ -585,9 +585,9 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	int i, *fixed, nfree;
 	static PRECISION delta[NTERMS];
 	
-	for(i=0;i<nlambda*NPARMS;i++){
+	/*for(i=0;i<nlambda*NPARMS;i++){
 		if(spectro[i]<-1) vSigma[i]=1e10*1e10;
-	}
+	}*/
 
 
 	REAL flambda;
@@ -641,7 +641,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	}
 
 
-	ochisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
+	ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
 	chisqr0 = ochisqr;
 
 	model = *initModel;
@@ -662,7 +662,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		check(&model);
 		mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac,*INSTRUMENTAL_CONVOLUTION);
 	
-		chisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
+		chisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
 		
 		/**************************************************************************/
 

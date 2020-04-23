@@ -73,23 +73,23 @@ REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL n
 	int i,j;
 
 	TOT=0;
-/*	for(j=0;j<NPARMS;j++){
+	for(j=0;j<NPARMS;j++){
 		opa=0;
 		for(i=0;i<nspectro;i++){
 			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
 			opa+= (dif*dif);
 		}
 		TOT+=((w[j]*opa)/(sig[j]));
-	}*/
+	}
 
-	for(j=0;j<NPARMS;j++){
+	/*for(j=0;j<NPARMS;j++){
 		opa=0;
 		for(i=0;i<nspectro;i++){
 			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
 			opa+= ((dif*dif)*w[j])/(sig[i+nspectro*j]);
 		}
 		TOT+= opa;
-	}
+	}*/
 	return TOT/nfree;
 	
 }
