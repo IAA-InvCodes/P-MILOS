@@ -282,6 +282,7 @@ struct CONFIG_CONTROL{
 	char MaskFile[4096];
 	int t1;
 	int t2;
+	int logclambda;
 };
 
 typedef struct CONFIG_CONTROL ConfigControl;

@@ -738,6 +738,7 @@ void loadInitialValues(ConfigControl * configControlFile){
 
 	configControlFile->useFFT = 0; // by default direct convolution
 
+	configControlFile->logclambda = 0; // by default don't use fast convergence
 }
 
 int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, int printLog){
@@ -2042,12 +2043,27 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	if(returnLine == NULL) return 0;						
 	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->useFFT,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Save Synthesis Profile Adjusted. Please verify it. \n");
+		printf("Error reading the file of parameters, param useFFT. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
 	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
 	if(printLog) printf("%s", LINE);
+
+
+	/*************************** LOGCLAMBDA ********************************************/
+	
+	returnLine = fgets(LINE,4096,fReadParameters);
+	if(returnLine == NULL) return 0;						
+	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->logclambda,comment);
+	if(rfscanf ==0 || rfscanf == EOF){
+		printf("Error reading the file of parameters, param logclambda. Please verify it. \n");
+		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		return 0;		
+	}
+	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
+	if(printLog) printf("%s", LINE);
+
 
 	return 1;
 

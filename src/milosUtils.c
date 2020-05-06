@@ -607,7 +607,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
 				Init_Model *initModel, REAL *spectra, float *chisqrf,
 				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
-				REAL *vSigma, REAL sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter, REAL ah)
+				REAL *vSigma, REAL sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter, REAL ah, int logclambda)
 {
 
 	
@@ -744,7 +744,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			clanda=1 ; // condition to exit of the loop 		
 
 		(*iter)++;
-		PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
+		if(logclambda) PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
 
 	} while (*iter < miter && !clanda);
 

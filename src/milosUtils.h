@@ -75,7 +75,7 @@ void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, PRECISION * slight
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
 				Init_Model *initModel, REAL *spectra, float *chisqrf,
 				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
-				REAL *vSigma, REAL sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter,REAL ah);
+				REAL *vSigma, REAL sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter,REAL ah, int logclambda);
 
 /**
  * Make the interpolation between deltaLambda and PSF where deltaLambda es x and PSF f(x)
