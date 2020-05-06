@@ -1,6 +1,5 @@
 #include "defines.h"
 #include <stdarg.h>
-
 extern REAL *dtaux, *etai_gp3, *ext1, *ext2, *ext3, *ext4;
 extern REAL *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
 extern REAL *gp1, *gp2, *dt, *dti, *gp3, *gp4, *gp5, *gp6, *etai_2;
@@ -23,7 +22,6 @@ extern Cuantic *cuantic;
 
 extern REAL * opa;
 extern PRECISION *dirConvPar;
-
 //extern REAL *resultConv;
 extern _Complex double *z,* zden, * zdiv;
 

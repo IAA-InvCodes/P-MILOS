@@ -22,7 +22,7 @@ ifdef use_double
 		CFLAGS+=-D USE_DOUBLE_PRECISION=double
 	endif
 endif
-CFLAGS+=-fno-omit-frame-pointer
+CFLAGS+=-fno-omit-frame-pointer 
 
 HOST_SIZE   := $(shell getconf LONG_BIT)
 

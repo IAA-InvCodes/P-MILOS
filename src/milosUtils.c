@@ -413,8 +413,34 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	spectroU = spectro + nlambda * 2;
 	spectroV = spectro + nlambda * 3;
 
+	//check if there is ghost lambdas in the extrems
+	int beginLambda = 0;
+	
+	int exit=0;
+	for(i=0;i<nlambda && !exit;i++){
+		if(spectroI[i]<0){
+			beginLambda++;
+		}
+		else
+		{
+			exit=1;
+		}	
+	}
 
-	Ic = spectro[nlambda - 1]; // Continuo ultimo valor de I
+	int endLambda = nlambda;
+	exit=0;
+	for(i=nlambda-1;i>=0 && !exit;i--){
+		if(spectroI[i]<0){
+			endLambda--;
+		}
+		else
+		{
+			exit=1;
+		}	
+	}
+
+
+	Ic = spectro[endLambda - 1]; // Continuo ultimo valor de I
 
 	/*Icmax = spectro[0];
 	int index =0;
@@ -424,20 +450,24 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 			Icmax = spectroI[i];
 			index = i;
 		}
-	}*/
+	}
+
+	Ic = Icmax;*/
 
 	x = 0;
 	y = 0;
 	x_vlos = 0;
 	y_vlos = 0;
-	for (i = 0; i < nlambda-1 ; i++)
+	for (i = beginLambda; i < endLambda-1 ; i++)
 	{
-		aux = (Ic - (spectroI[i] + spectroV[i]));
-		aux_vlos = (Ic - spectroI[i]);
-		x += (aux * (lambda[i] - lambda_0));
-		x_vlos += (aux_vlos * (lambda[i] - lambda_0));
-		y += aux;
-		y_vlos += aux_vlos;
+		if(spectroI[i]>-1 && spectroV[i]>-1){
+			aux = (Ic - (spectroI[i] + spectroV[i]));
+			aux_vlos = (Ic - spectroI[i]);
+			x += (aux * (lambda[i] - lambda_0));
+			x_vlos += (aux_vlos * (lambda[i] - lambda_0));
+			y += aux;
+			y_vlos += aux_vlos;
+		}
 	}
 
 	//Para evitar nan
@@ -448,11 +478,13 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	x = 0;
 	y = 0;
-	for (i = 0; i < nlambda-1 ; i++)
+	for (i = beginLambda; i < endLambda-1 ; i++)
 	{
-		aux = (Ic - (spectroI[i] - spectroV[i]));
-		x += (aux * (lambda[i] - lambda_0));
-		y += aux;
+		if(spectroI[i]>-1 && spectroV[i]>-1){
+			aux = (Ic - (spectroI[i] - spectroV[i]));
+			x += (aux * (lambda[i] - lambda_0));
+			y += aux;
+		}
 	}
 
 	if (fabs(y) > 1e-15)
@@ -481,14 +513,15 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	//inclinacion
 	x = 0;
 	y = 0;
-	for (i = 0; i < nlambda - 1; i++)
+	for (i = beginLambda; i < endLambda - 1; i++)
 	{
-		L = FABS(SQRT(spectroQ[i] * spectroQ[i] + spectroU[i] * spectroU[i]));
-		m = fabs((4 * (lambda[i] - lambda_0) * L)); // / (3*C*Blos) ); //2*3*C*Blos mod abril 2016 (en test!)
+		if(spectroQ[i]>-1 && spectroU[i]>-1 && spectroV[i]>-1){
+			L = FABS(SQRT(spectroQ[i] * spectroQ[i] + spectroU[i] * spectroU[i]));
+			m = fabs((4 * (lambda[i] - lambda_0) * L)); // / (3*C*Blos) ); //2*3*C*Blos mod abril 2016 (en test!)
 
-		x = x + FABS(spectroV[i]) * m;
-		y = y + FABS(spectroV[i]) * FABS(spectroV[i]);
-
+			x = x + FABS(spectroV[i]) * m;
+			y = y + FABS(spectroV[i]) * FABS(spectroV[i]);
+		}
 	}
 
 	y = y * fabs((3 * C * Blos));
@@ -517,9 +550,11 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	double sum_u =0.0, sum_q = 0.0;
 	for(i=0;i<nlambda;i++){
-		if( fabs(spectroU[i]>0.0001 || fabs(spectroQ[i])>0.0001  )){
-			sum_u += spectroU[i];
-			sum_q += spectroQ[i];
+		if(spectroU[i]>-1 && spectroQ[i]>-1){
+			if( fabs(spectroU[i]>0.0001 || fabs(spectroQ[i])>0.0001  )){
+				sum_u += spectroU[i];
+				sum_q += spectroQ[i];
+			}
 		}
 	}
 	tan2phi = sum_u/sum_q;
@@ -572,9 +607,10 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
 				Init_Model *initModel, REAL *spectra, float *chisqrf,
 				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
-				REAL *vSigma, REAL * sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter,REAL ah)
+				REAL *vSigma, REAL sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter, REAL ah)
 {
 
+	
 	
 
 	REAL PARBETA_better = 5.0;
@@ -582,14 +618,22 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
   	REAL PARBETA_FACTOR = 1.0;
 
 	//int iter;
-	int i, *fixed, nfree;
+	int i, *fixed, nfree, n_ghots=0;
 	static PRECISION delta[NTERMS];
 	
-	/*for(i=0;i<nlambda*NPARMS;i++){
-		if(spectro[i]<-1) vSigma[i]=1e10*1e10;
-	}*/
-
-
+	for(i=0;i<nlambda*NPARMS;i++){
+		if(spectro[i]<-1){ 
+			//printf("\n sigma %i cambiada",i);
+			vSigma[i]= 1000000000000000000000.0;
+			//vSigma[i]= FLT_MAX;
+			//vSigma[i]= -1;
+			n_ghots++;
+		}
+		else{
+			vSigma[i] = sigma;
+		}
+	}
+	
 	REAL flambda;
 	static REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr, chisqr0;
@@ -597,7 +641,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	Init_Model model;	
 	
 	nfree = CalculaNfree(nspectro);
-
+	nfree = nfree - n_ghots;	
 	if (nfree == 0)
 	{
 		return -1; //'NOT ENOUGH POINTS'
@@ -627,11 +671,11 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	
 
-	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra,ah,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
-	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra, ah, slight, *INSTRUMENTAL_CONVOLUTION);
+	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac, *INSTRUMENTAL_CONVOLUTION);
+	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra,ah, slight, *INSTRUMENTAL_CONVOLUTION);
 
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
-	covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
+	covarm(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
 
 	for (i = 0; i < NTERMS; i++)
 		betad[i] = beta[i];
@@ -641,7 +685,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	}
 
 
-	ochisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
+	ochisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
 	chisqr0 = ochisqr;
 
 	model = *initModel;
@@ -662,7 +706,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		check(&model);
 		mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac,*INSTRUMENTAL_CONVOLUTION);
 	
-		chisqr = fchisqr(spectra, nspectro, spectro, weight, sigma, nfree);
+		chisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
 		
 		/**************************************************************************/
 
@@ -679,7 +723,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			*initModel = model;
 			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, ah, slight,*INSTRUMENTAL_CONVOLUTION);
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
-			covarm(weight, sigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
+			covarm(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
 			
 			for (i = 0; i < NTERMS; i++)
 				betad[i] = beta[i];
@@ -700,7 +744,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			clanda=1 ; // condition to exit of the loop 		
 
 		(*iter)++;
-		PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
+		//PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
 
 	} while (*iter < miter && !clanda);
 
@@ -763,13 +807,15 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 
 	size_t i;
 	gsl_interp *interpolation = gsl_interp_alloc (gsl_interp_linear,N_PSF);
-   	gsl_interp_init(interpolation, deltaLambda, PSF, N_PSF);
-   	gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
+	gsl_interp_init(interpolation, deltaLambda, PSF, N_PSF);
+	gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
 
+	//printf("\n[");
 	for (i = 0; i < NSamples; ++i){
-		//printf("\n VALOR A INERPOLAR EN X %f, iteration %i\n",lambdasSamples[i],i);
+		//printf("\n VALOR A INERPOLAR EN X %f, iteration %li",lambdasSamples[i]-offset,i);
+		//printf("\t%f,",lambdasSamples[i]-offset);
 		double aux;
-		if(offset>0){
+		if(offset>=0){
 			if(lambdasSamples[i]-offset>= deltaLambda[0]){
 				aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i]-offset, accelerator);
 						// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
@@ -784,8 +830,9 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 			}
 		}
 		else{
-			if(lambdasSamples[i]+offset<= deltaLambda[NSamples-1]){
-				aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i]+offset, accelerator);
+			//printf("lamba+offset %f  deltalambda %f ",lambdasSamples[i]+offset,deltaLambda[NSamples-1] );
+			if(lambdasSamples[i]-offset>= deltaLambda[NSamples-1]){
+				aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i]-offset, accelerator);
 						// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
 				if(!gsl_isnan(aux)) 
 					fInterpolated[i] = aux;
@@ -797,7 +844,8 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 				aux = 0.0f;
 			}			
 		}
-   }
+	}
+	//printf("]\n");
 
   	// normalizations 
 	double cte = 0;

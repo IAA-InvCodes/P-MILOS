@@ -511,37 +511,37 @@ int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel){
 	while ((read = getline(&line, &len, fReadInitModel)) != -1) {
 		double aux_value;
 		sscanf(line,"%99[^:]:%lf%99[^!]!",name, &aux_value,comment);
-		if(strstr(name,"INITIAL_MODEL_B")!=NULL){ // B
+		if(strstr(name,"magnetic field")!=NULL){ // B
 			INIT_MODEL->B = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_GM")!=NULL){ // GM
+		if(strstr(name,"gamma")!=NULL){ // GM
 			INIT_MODEL->gm = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_AZI")!=NULL){ // AZI
+		if(strstr(name,"phi")!=NULL){ // AZI
 			INIT_MODEL->az = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_ETHA0")!=NULL){ // ETHA0
+		if(strstr(name,"eta_0")!=NULL){ // ETHA0
 			INIT_MODEL->eta0 = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_LAMBDADOPP")!=NULL){ // LAMBDADOPP
+		if(strstr(name,"Doppler width")!=NULL){ // LAMBDADOPP
 			INIT_MODEL->dopp = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_AA")!=NULL){ // AA
+		if(strstr(name,"damping")!=NULL){ // AA
 			INIT_MODEL->aa = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_ALFA")!=NULL){ // ALFA
+		if(strstr(name,"filling factor")!=NULL){ // ALFA
 			INIT_MODEL->alfa = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_MAC")!=NULL){ // MAC
+		if(strstr(name,"v_mac")!=NULL){ // MAC
 			INIT_MODEL->mac = aux_value;
 		}		
-		if(strstr(name,"INITIAL_MODEL_VLOS")!=NULL){ // VLOS
+		if(strstr(name,"LOS velocity")!=NULL){ // VLOS
 			INIT_MODEL->vlos = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_S0")!=NULL){ // S0
+		if(strstr(name,"S_0")!=NULL){ // S0
 			INIT_MODEL->S0 = aux_value;
 		}
-		if(strstr(name,"INITIAL_MODEL_S1")!=NULL){ // S1
+		if(strstr(name,"S_1")!=NULL){ // S1
 			INIT_MODEL->S1 = aux_value;
 		}				
 	}
@@ -643,8 +643,8 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 	while ((read = getline(&line, &len, fp)) != -1 && !dataRead){
 		//printf("\n linea leida %s",line);
 		if(found){ //1                       :        -624.37,        21.53,     1765.46
-			//sscanf(line,"%i,%i%99[^:]:%lf,%lf,%lf",&indexLine,initialLambda,step,finalLambda);
-			sscanf(line,"%i%99[^:]:%lf%lf%lf",&indexLine,name,initialLambda,step,finalLambda);
+			sscanf(line,"%i%99[^:]:%lf,%lf,%lf",&indexLine,name,initialLambda,step,finalLambda);
+			//sscanf(line,"%i%99[^:]:%lf%lf%lf",&indexLine,name,initialLambda,step,finalLambda);
 			dataRead = 1;
 		}
 		else{
@@ -718,11 +718,11 @@ void loadInitialValues(ConfigControl * configControlFile){
 	/*configControlFile->fix[10] = 0;
 	configControlFile->fix2[10]= 0;*/
 
-	configControlFile->noise = NOISE_SIGMA;
-	configControlFile->sigma[0] = NOISE_SIGMA;
-	configControlFile->sigma[1] = NOISE_SIGMA;
-	configControlFile->sigma[2] = NOISE_SIGMA;
-	configControlFile->sigma[3] = NOISE_SIGMA;
+	configControlFile->noise = NOISE_SIGMA * NOISE_SIGMA;
+	configControlFile->sigma[0] = configControlFile->noise;
+	configControlFile->sigma[1] = configControlFile->noise;
+	configControlFile->sigma[2] = configControlFile->noise;
+	configControlFile->sigma[3] = configControlFile->noise;
 
 	
 	configControlFile->InitialDiagonalElement = ILAMBDA;
@@ -1995,13 +1995,16 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("%s", LINE);
 		/*printf("Estimated S/N for I  to apply: %i\n", trolConfig->EstimatedSNForI);
 		printf("Estimated noise for I  to apply: %lf\n", 1.0/trolConfig->EstimatedSNForI);*/
-	} 
-	trolConfig->noise = 1.0/trolConfig->EstimatedSNForI;
-	trolConfig->sigma[0] = trolConfig->noise*trolConfig->noise;
-	trolConfig->sigma[1] = trolConfig->sigma[0];
-	trolConfig->sigma[2] = trolConfig->sigma[0];
-	trolConfig->sigma[3] = trolConfig->sigma[0];
-	// PUT VALUES IN ARRAY OF SIGMA 
+	}
+	if(trolConfig->EstimatedSNForI!=0){ // IF it's empty then take value from default.
+		trolConfig->noise = 1.0/trolConfig->EstimatedSNForI;
+		trolConfig->noise = trolConfig->noise * trolConfig->noise;
+		trolConfig->sigma[0] = trolConfig->noise*trolConfig->noise;
+		trolConfig->sigma[1] = trolConfig->sigma[0];
+		trolConfig->sigma[2] = trolConfig->sigma[0];
+		trolConfig->sigma[3] = trolConfig->sigma[0];
+	}
+	
 
 
  	/*************************** CONTINIUM CONTRAST ********************************************/

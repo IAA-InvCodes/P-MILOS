@@ -92,7 +92,6 @@ PRECISION FWHM = 0;
 ConfigControl configCrontrolFile;
 
 _Complex double  *z,* zden, * zdiv;
-
 gsl_vector *eval;
 gsl_matrix *evec;
 gsl_eigen_symmv_workspace * workspace;
@@ -107,7 +106,7 @@ int main(int argc, char **argv)
 	int numProcs, idProc;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
-   MPI_Comm_rank(MPI_COMM_WORLD, &idProc);
+    MPI_Comm_rank(MPI_COMM_WORLD, &idProc);
 
 	/** DEFINE MPI TYPE TO SEND MODELS **/
 	MPI_Datatype mpiInitModel;
@@ -289,7 +288,7 @@ int main(int argc, char **argv)
 	/*********************************************** INITIALIZE VARIABLES  *********************************/
 	REAL * vSigma = malloc((nlambda*NPARMS)*sizeof(REAL));
 	for(i=0;i<nlambda*NPARMS;i++){
-		vSigma[i] = configCrontrolFile.sigma[0];
+		vSigma[i] = configCrontrolFile.noise;
 	}
 
 	CC = PI / 180.0;
@@ -320,15 +319,15 @@ int main(int argc, char **argv)
 	planFilterMAC = fftw_plan_dft_1d(nlambda, inFilterMAC, outFilterMAC, FFT_FORWARD, FFTW_MEASURE     );
 	inFilterMAC_DERIV = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);
 	outFilterMAC_DERIV = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);
-	planFilterMAC_DERIV = fftw_plan_dft_1d(nlambda, inFilterMAC_DERIV, outFilterMAC_DERIV, FFT_FORWARD, FFTW_MEASURE);
+	planFilterMAC_DERIV = fftw_plan_dft_1d(nlambda, inFilterMAC_DERIV, outFilterMAC_DERIV, FFT_FORWARD, FFTW_MEASURE     );
 
 
 	inSpectraFwMAC = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);
 	outSpectraFwMAC = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);
-	planForwardMAC = fftw_plan_dft_1d(nlambda, inSpectraFwMAC, outSpectraFwMAC, FFT_FORWARD, FFTW_MEASURE);
+	planForwardMAC = fftw_plan_dft_1d(nlambda, inSpectraFwMAC, outSpectraFwMAC, FFT_FORWARD, FFTW_MEASURE    );
 	inSpectraBwMAC = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);
 	outSpectraBwMAC = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);		
-	planBackwardMAC = fftw_plan_dft_1d(nlambda, inSpectraBwMAC, outSpectraBwMAC, FFT_BACKWARD, FFTW_MEASURE);
+	planBackwardMAC = fftw_plan_dft_1d(nlambda, inSpectraBwMAC, outSpectraBwMAC, FFT_BACKWARD, FFTW_MEASURE    );
 
 	// ********************************************* IF PSF HAS BEEN SELECTEC IN TROL READ PSF FILE OR CREATE GAUSSIAN FILTER ***********//
 	if(configCrontrolFile.ConvolveWithPSF){
@@ -355,6 +354,7 @@ int main(int argc, char **argv)
 					if(ch=='\n')
 						N_SAMPLES_PSF++;
 				}
+				
 				//close the file
 				fclose(fp);
 				if(N_SAMPLES_PSF>0){
@@ -876,7 +876,7 @@ int main(int argc, char **argv)
 					
 					
 					lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &(vChisqrf_L[indexInputFits][indexPixel]), slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
-						configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.sigma,configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&(vNumIter_L[indexInputFits][indexPixel]),configCrontrolFile.mu);																		
+						configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.noise, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&(vNumIter_L[indexInputFits][indexPixel]),configCrontrolFile.mu);																		
 					
 					resultsInitModel_L[indexInputFits][indexPixel] = initModel;
 					if(configCrontrolFile.SaveSynthesisAdjusted){
@@ -1111,7 +1111,7 @@ int main(int argc, char **argv)
 							slightPixel = slight+nlambda*indexPixel;
 					}
 					lm_mils(cuantic, wlines, vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
-							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma,configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu);						
+							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.noise, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu);						
 
 					vModels[indexPixel] = initModel;
 					if(configCrontrolFile.SaveSynthesisAdjusted){
@@ -1306,7 +1306,7 @@ int main(int argc, char **argv)
 				}
 				
 				lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
-					configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma,configCrontrolFile.sigma, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu);																							
+					configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma,  configCrontrolFile.noise,configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu);																							
 				
 				resultsInitModel[indexPixel] = initModel;
 				if(configCrontrolFile.SaveSynthesisAdjusted){

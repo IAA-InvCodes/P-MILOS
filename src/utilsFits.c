@@ -340,7 +340,6 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 					fits_close_file(fptr, &status);
 					exit(EXIT_FAILURE);
 				}
-
 				image->rows=naxes[pos_row];
 				image->cols=naxes[pos_col];
 				image->nLambdas=naxes[pos_lambda];
@@ -355,8 +354,6 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 				image->pos_row = pos_row;
 				image->pos_stokes_parameters = pos_stokes_parameters;
 				numPixelsFitsFile = naxes[pos_row]*naxes[pos_col]*naxes[pos_lambda]*naxes[pos_stokes_parameters];
-
-
 				// allocate memory to read all pixels in the same array 
 				float * imageTemp = calloc(numPixelsFitsFile, sizeof(float));
 				if (!imageTemp)  {
