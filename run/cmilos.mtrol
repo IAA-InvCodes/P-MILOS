@@ -1,4 +1,4 @@
-Number of cycles          (*):0          	! 0 = synthesis, n= max iterations, -1 = classical estimates
+Number of cycles          (*):100          	! 0 = synthesis, n= max iterations, -1 = classical estimates
 Observed profiles         (*):run/initModel.per !    
 Stray light file             :    		! (none=no stray light)
 PSF file                     :49.2    		! file or FWHM of gaussian in mA
@@ -16,7 +16,7 @@ Nodes for S_0 1     	     :1              	! (0 or blank=no, 1=yes)
 Nodes for S_1 1		     :1                 ! (0 or blank=no, 1=yes)
 Nodes for eta0 1             :1                 ! (0 or blank=no, 1=yes)
 Nodes for magnetic field 1   :1			! (0 or blank=no, 1=yes)
-Nodes for LOS velocity 1     :1              	! (0 or blank=no, 1=yes)
+Nodes for LOS velocity 1     :0              	! (0 or blank=no, 1=yes)
 Nodes for gamma 1            :1             	! (0 or blank=no, 1=yes)
 Nodes for phi 1              :1              	! (0 or blank=no, 1=yes)
 Nodes for lambda_doppler 1   :1			! (0 or blank=no, 1=yes)
@@ -39,4 +39,4 @@ Estimated S/N for I          :1000              !
 Continuum contrast           :            	! Not used 
 Initial diagonal element     :0.1               ! (DEFAULT value: 1.e-1)
 Use FFT for convolutions     :0                 ! (0 = direct convol; 1 = FFT)
-
+Diagonal element acceleration :0                 ! (0 or blank=no, 1=yes)
