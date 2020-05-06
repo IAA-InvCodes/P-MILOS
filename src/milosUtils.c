@@ -744,7 +744,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			clanda=1 ; // condition to exit of the loop 		
 
 		(*iter)++;
-		//PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
+		PARBETA_FACTOR = log10f(chisqr)/log10f(chisqr0);
 
 	} while (*iter < miter && !clanda);
 
