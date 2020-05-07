@@ -24,7 +24,7 @@ extern REAL * opa;
 extern PRECISION *dirConvPar;
 //extern REAL *resultConv;
 extern _Complex double *z,* zden, * zdiv;
-
+extern int NTERMS;
 
 void AllocateMemoryDerivedSynthesis(int numl)
 {

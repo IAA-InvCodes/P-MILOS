@@ -45,9 +45,10 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_eigen.h>
 
+
+int NTERMS=11;
+
 Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
-
-
 PRECISION **PUNTEROS_CALCULOS_COMPARTIDOS;
 int POSW_PUNTERO_CALCULOS_COMPARTIDOS;
 int POSR_PUNTERO_CALCULOS_COMPARTIDOS;
@@ -76,7 +77,7 @@ PRECISION * dirConvPar;
 PRECISION * G = NULL;
 //REAL * G;
 
-REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
+
 
 REAL * opa;
 int FGlobal, HGlobal, uuGlobal;
@@ -124,12 +125,6 @@ int main(int argc, char **argv)
 	int * vNumIter; // to store the number of iterations used to converge for each pixel
 	int indexLine; // index to identify central line to read it 
 
-	
-	// allocate memory for eigen values
-	eval = gsl_vector_alloc (NTERMS);
-  	evec = gsl_matrix_alloc (NTERMS, NTERMS);
-	workspace = gsl_eigen_symmv_alloc (NTERMS);
-
 	//*****
 	Init_Model INITIAL_MODEL;
 	PRECISION * deltaLambda, * PSF;
@@ -142,7 +137,6 @@ int main(int argc, char **argv)
 	int dimStrayLight;
 
 	const char  * nameInputFileSpectra ;
-	
 	
 	char nameOutputFilePerfiles [4096];
 	
@@ -166,6 +160,15 @@ int main(int argc, char **argv)
 	nameInputFilePSF = configCrontrolFile.PSFFile;
 	FWHM = configCrontrolFile.FWHM;
 
+	// if don't invert filling factor and/or macroturbulence remove from NTERMS
+
+	if(configCrontrolFile.fix[10]==0) NTERMS--;
+	if(configCrontrolFile.fix[9]==0) NTERMS--;
+
+	// allocate memory for eigen values
+	eval = gsl_vector_alloc (NTERMS);
+  	evec = gsl_matrix_alloc (NTERMS, NTERMS);
+	workspace = gsl_eigen_symmv_alloc (NTERMS);
 
 	/***************** READ INIT MODEL ********************************/
 	if(configCrontrolFile.InitialGuessModel[0]!='\0' && !readInitialModel(&INITIAL_MODEL,configCrontrolFile.InitialGuessModel)){

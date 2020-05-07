@@ -16,7 +16,7 @@
 
 
 
-extern REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
+extern int NTERMS;
 extern REAL * opa;
 
 
@@ -36,7 +36,7 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 
 	
 	REAL *BTaux,*APaux;
-
+	REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
 	//printf("\nVALORES DEL SIGMA SQUARE\n");
 
 	for(j=0;j<NPARMS;j++){

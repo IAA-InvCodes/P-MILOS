@@ -5,7 +5,7 @@ PSF file                     :49.2    		! file or FWHM of gaussian in mA
 Wavelength grid file      (*):run/malla.grid 	! 
 Atomic parameters file    (*):run/LINES      	! 
 Abundance file		     : 			! not used
-Initial guess model 1     (*):run/initModel.mod !
+Initial guess model 1     (*):run/guess.mod !
 Initial guess model 2        :			! not implemented
 Weight for Stokes I          :1               	! (DEFAULT=1; 0=not inverted)
 Weight for Stokes Q          :1                 ! (DEFAULT=1; 0=not inverted)
@@ -16,12 +16,12 @@ Nodes for S_0 1     	     :1              	! (0 or blank=no, 1=yes)
 Nodes for S_1 1		     :1                 ! (0 or blank=no, 1=yes)
 Nodes for eta0 1             :1                 ! (0 or blank=no, 1=yes)
 Nodes for magnetic field 1   :1			! (0 or blank=no, 1=yes)
-Nodes for LOS velocity 1     :0              	! (0 or blank=no, 1=yes)
+Nodes for LOS velocity 1     :1              	! (0 or blank=no, 1=yes)
 Nodes for gamma 1            :1             	! (0 or blank=no, 1=yes)
 Nodes for phi 1              :1              	! (0 or blank=no, 1=yes)
 Nodes for lambda_doppler 1   :1			! (0 or blank=no, 1=yes)
 Nodes for damping 1	     :1			! (0 or blank=no, 1=yes)
-Invert macroturbulence 1     :0                	! (0 or blank=no, 1=yes)
+Invert macroturbulence 1     :1                	! (0 or blank=no, 1=yes)
 Nodes for S_0 2     	     :                  ! not used 
 Nodes for S_1 2  	     :             	! not used                      
 Nodes for eta0 2             :                  ! not used 

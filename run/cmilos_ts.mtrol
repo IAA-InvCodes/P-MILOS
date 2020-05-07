@@ -39,5 +39,5 @@ Estimated S/N for I          :1000              !
 Continuum contrast           :                  ! Not used for the moment
 Initial diagonal element     :0.1               ! (DEFAULT value: 1.e-1)
 Use FFT for convolutions     :0                       ! (0 or blank = use direct convolution, 1 = use FFT)
-Diagonal element acceleration   :0                 ! (0 or blank=no, 1=yes)
+Diagonal element acceleration   :1                 ! (0 or blank=no, 1=yes)
 

@@ -67,7 +67,7 @@
 
 #define CLASSICAL_ESTIMATES_SAMPLE_REF 4 //Muestra referencia para cambio de cuadrante de azimuth. Depende del numero de muestras y posicion Continuo
 
-#define NTERMS 11 
+//#define NTERMS 11 
 
 #define PRECISION double //double 
 

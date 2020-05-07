@@ -7,5 +7,5 @@ gamma:          130
 phi:            25
 S_0:            0.25
 S_1:            0.75
-v_mac:          0
+v_mac:          1
 filling factor: 1

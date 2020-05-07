@@ -43,7 +43,7 @@ extern fftw_complex * fftw_G_PSF;
 
 
 extern Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
-
+extern int NTERMS;
 
 extern gsl_vector *eval;
 extern gsl_matrix *evec;
@@ -323,11 +323,11 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 
 	PRECISION epsilon;
 	
-	static PRECISION h1[NTERMS * NTERMS];
+	PRECISION h1[NTERMS * NTERMS];
 	
 	PRECISION *v, *w;
 	int i, j;
-	static PRECISION aux2[NTERMS];
+	PRECISION aux2[NTERMS];
 	int aux_nf, aux_nc;
 	
 	epsilon = 1e-12;
@@ -619,7 +619,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	//int iter;
 	int i, *fixed, nfree, n_ghots=0;
-	static PRECISION delta[NTERMS];
+	PRECISION delta[NTERMS];
 	
 	for(i=0;i<nlambda*NPARMS;i++){
 		if(spectro[i]<-1){ 
@@ -635,7 +635,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	}
 	
 	REAL flambda;
-	static REAL beta[NTERMS], alpha[NTERMS * NTERMS];
+	REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr, chisqr0;
 	int clanda, ind;
 	Init_Model model;	
@@ -651,7 +651,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	if (fix == NULL)
 	{
-		static int fixed_static[NTERMS];
+		int fixed_static[NTERMS];
 		fixed  = fixed_static;
 		for (i = 0; i < NTERMS; i++)
 		{
@@ -666,8 +666,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	clanda = 0;
 	*iter = 0;
 
-	static PRECISION covar[NTERMS * NTERMS];
-	static PRECISION betad[NTERMS];
+	PRECISION covar[NTERMS * NTERMS];
+	PRECISION betad[NTERMS];
 
 	
 
