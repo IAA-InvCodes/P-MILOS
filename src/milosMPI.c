@@ -247,6 +247,14 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+	if(configCrontrolFile.fix[10]==0) NTERMS--;
+	if(configCrontrolFile.fix[9]==0 && INITIAL_MODEL.mac==0) NTERMS--;
+
+	// allocate memory for eigen values
+	eval = gsl_vector_alloc (NTERMS);
+  	evec = gsl_matrix_alloc (NTERMS, NTERMS);
+	workspace = gsl_eigen_symmv_alloc (NTERMS);
+
 	/***************** READ WAVELENGHT FROM GRID OR FITS ********************************/
 	PRECISION * vGlobalLambda, *vOffsetsLambda;
 
