@@ -622,7 +622,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	PRECISION delta[NTERMS];
 	
 	for(i=0;i<nlambda*NPARMS;i++){
-		if(spectro[i]<-1){ 
+		if(spectro[i]<=-1){ 
 			//printf("\n sigma %i cambiada",i);
 			vSigma[i]= 1000000000000000000000.0;
 			//vSigma[i]= FLT_MAX;
