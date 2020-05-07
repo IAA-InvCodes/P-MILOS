@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 	nameInputFilePSF = configCrontrolFile.PSFFile;
 	FWHM = configCrontrolFile.FWHM;
 
-	// if don't invert filling factor and/or macroturbulence remove from NTERMS
+	
 
 
 
@@ -169,6 +169,8 @@ int main(int argc, char **argv)
 		printf("\nERROR READING GUESS MODEL 1 FILE\n");
 		exit(EXIT_FAILURE);
 	}
+	
+	// if don't invert filling factor and/or macroturbulence remove from NTERMS
 	
 	if(configCrontrolFile.fix[10]==0) NTERMS--;
 	if(configCrontrolFile.fix[9]==0 && INITIAL_MODEL.mac==0) NTERMS--;
