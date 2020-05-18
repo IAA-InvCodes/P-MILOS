@@ -619,10 +619,11 @@ int main(int argc, char **argv)
 	int myGroupRank;
 	int groupRoot = 0; // process 0 of group will be the root 
 	int myGroupSize;
-	MPI_Group_rank(vGroups[myGroup], &myGroupRank);		
-	MPI_Group_size(vGroups[myGroup], &myGroupSize);
+	if(numGroups>0){
+		MPI_Group_rank(vGroups[myGroup], &myGroupRank);		
+		MPI_Group_size(vGroups[myGroup], &myGroupSize);
+	}
 	MPI_Barrier(MPI_COMM_WORLD);
-	
 	//**************************************** END OF CREATE GROUPS FOR DIVIDE IMAGE IN 2 ********************************************/
 
 	if(idProc == root){
