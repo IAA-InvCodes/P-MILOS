@@ -695,9 +695,6 @@ int main(int argc, char **argv)
 			if(configCrontrolFile.fix[10] && access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
 				slight = readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
 			}
-			if(slight!=NULL){
-				printf("\n SLIGHT NO ES NULL \n");
-			}
 			// READ PIXELS FROM IMAGE 
 			PRECISION timeReadImage;
 			clock_t t;
