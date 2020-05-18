@@ -5,6 +5,6 @@ IMPORTANT: a) All items must be separated by commas.
 Line indices            :   Initial lambda     Step     Final lambda
 (in this order)                    (mA)          (mA)         (mA) 
 -----------------------------------------------------------------------
-1                       :        -350,            35,           665
+1                       :        -600,            25,           600
 
 

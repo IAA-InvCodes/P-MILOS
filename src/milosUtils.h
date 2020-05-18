@@ -61,7 +61,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 /**
  * 
  * */
-void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, PRECISION * slight);
+void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, REAL * slight);
 
 /*
  *
@@ -74,7 +74,7 @@ void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, PRECISION * slight
 
 int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda, float *spectro, int nspectro,
 				Init_Model *initModel, REAL *spectra, float *chisqrf,
-				PRECISION * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
+				REAL * slight, PRECISION toplim, int miter, REAL *weight, int *fix,
 				REAL *vSigma, REAL sigma, REAL ilambda, int * INSTRUMENTAL_CONVOLUTION, int * iter,REAL ah, int logclambda);
 
 /**

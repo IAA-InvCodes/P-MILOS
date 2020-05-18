@@ -1940,21 +1940,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	//if(printLog) printf("Invert macroturbulence 2 to apply: %d\n", trolConfig->fix2[9]);
 	if(printLog) printf("%s", LINE);
 
-	/*************************** STRAY LIGHT FACTOR ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[10],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Stray light Factor. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	trolConfig->fix2[10] = trolConfig->fix[10];
-	//if(printLog) printf("Stray light Factor  to apply: %d\n", trolConfig->fix[10]);
-	if(printLog) printf("%s", LINE);
-
-
 	/*************************** INVERT FILLING FACTOR ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -1968,6 +1953,20 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	//if(printLog) printf("Filling Factor  to apply: %d\n", trolConfig->InvertFillingFactor);
 	if(printLog) printf("%s", LINE);
 
+
+	/*************************** STRAY LIGHT FACTOR ********************************************/
+	
+	returnLine = fgets(LINE,4096,fReadParameters);
+	if(returnLine == NULL) return 0;						
+	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[10],comment);
+	if(rfscanf ==0 || rfscanf == EOF){
+		printf("Error reading the file of parameters, param Stray light Factor. Please verify it. \n");
+		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		return 0;		
+	}
+	trolConfig->fix2[10] = trolConfig->fix[10];
+	//if(printLog) printf("Stray light Factor  to apply: %d\n", trolConfig->fix[10]);
+	if(printLog) printf("%s", LINE);
 
 	/*************************** MU ********************************************/
 	
@@ -2092,8 +2091,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;
 	}
 	int rfscanf; 
-
-
 	/***************************  TROL FILE  ********************************************/
 
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2134,7 +2131,7 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	if(printLog) printf("%s", LINE);
 	/*************************** NX ********************************************/
 	
-	returnLine = fgets(LINE,4096,fReadParameters);
+	/*returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
 	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->nx,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
@@ -2143,10 +2140,11 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	//if(printLog) printf("NX to apply: %d\n", trolConfig->nx);
-	if(printLog) printf("%s", LINE);
+	if(printLog) printf("%s", LINE);*/
+
 	/*************************** NY ********************************************/
 	
-	returnLine = fgets(LINE,4096,fReadParameters);
+	/*returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
 	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->ny,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
@@ -2155,7 +2153,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	//if(printLog) printf("NY to apply: %d\n", trolConfig->ny);
-	if(printLog) printf("%s", LINE);
+	if(printLog) printf("%s", LINE);*/
+
 	/*************************** subx1 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
@@ -2206,18 +2205,12 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	//if(printLog) printf("suby2 to apply: %d\n", trolConfig->suby2);
 	if(printLog) printf("%s", LINE);
 	// CHECK SIZE IMAGE PARAMS
-
-	if(trolConfig->subx2 > trolConfig->nx || trolConfig->subx1>trolConfig->subx2 || trolConfig->suby2 > trolConfig->ny || trolConfig->suby1 > trolConfig->suby2){
-		printf("\n ERROR IN THE DIMENSIONS, PLEASE CHECK GIVEN VALUES \n ");
+	
+	/*if(trolConfig->subx1 < 0 || trolConfig->suby1 <0 || trolConfig->subx2 > trolConfig->nx || trolConfig->subx1>trolConfig->subx2 || trolConfig->suby2 > trolConfig->ny || trolConfig->suby1 > trolConfig->suby2){
+		if(printLog) printf("\n ERROR IN THE DIMENSIONS, PLEASE CHECK GIVEN VALUES \n ");
 		exit(1);
-	}
-	if(trolConfig->subx1 == 0 && trolConfig->subx2==0 && trolConfig->suby1==0 && trolConfig->suby2==0){ // invert entire image 
-		trolConfig->subx1 = 1;
-		trolConfig->suby1 = 1;
-		trolConfig->subx2 = trolConfig->nx;
-		trolConfig->suby2 = trolConfig->ny;
-	}
-
+	}*/	
+	 
 	/***************************  output file prefix  ********************************************/
 
 	returnLine = fgets(LINE,4096,fReadParameters);

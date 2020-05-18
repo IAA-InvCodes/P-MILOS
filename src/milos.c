@@ -46,9 +46,10 @@
 #include <gsl/gsl_eigen.h>
 
 
-int NTERMS=11;
-
+int NTERMS = 11;
 Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
+
+
 PRECISION **PUNTEROS_CALCULOS_COMPARTIDOS;
 int POSW_PUNTERO_CALCULOS_COMPARTIDOS;
 int POSR_PUNTERO_CALCULOS_COMPARTIDOS;
@@ -82,8 +83,7 @@ PRECISION * G = NULL;
 REAL * opa;
 int FGlobal, HGlobal, uuGlobal;
 
-//PRECISION *d_spectra, *spectra, *spectra_mac;
-REAL *d_spectra, *spectra, *spectra_mac;
+REAL *d_spectra, *spectra, *spectra_mac, *spectra_slight;
 
 
 
@@ -133,18 +133,13 @@ int main(int argc, char **argv)
 	int posWL=0;
 	//----------------------------------------------
 
-	PRECISION * slight = NULL;
-	int dimStrayLight;
-
+	float * slight = NULL;
+	int nl_straylight, ns_straylight, nx_straylight=0,ny_straylight=0;
 	const char  * nameInputFileSpectra ;
-	
 	char nameOutputFilePerfiles [4096];
-	
 	const char	* nameInputFileLines;
-	
 	const char	* nameInputFilePSF ;	
-
-   FitsImage * fitsImage;
+    FitsImage * fitsImage;
 	PRECISION  dat[7];
 
 	/********************* Read data input from file ******************************/
@@ -166,11 +161,12 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	
-	// if don't invert filling factor and/or macroturbulence remove from NTERMS
-
 	if(configCrontrolFile.fix[10]==0) NTERMS--;
-	if(configCrontrolFile.fix[9]==0 && INITIAL_MODEL.mac==0) NTERMS--;
+	if(INITIAL_MODEL.mac ==0 && configCrontrolFile.fix[9]==0){
+		 NTERMS--;
+	}
 
+	
 	// allocate memory for eigen values
 	eval = gsl_vector_alloc (NTERMS);
   	evec = gsl_matrix_alloc (NTERMS, NTERMS);
@@ -357,9 +353,6 @@ int main(int argc, char **argv)
 		planBackwardPSF_MAC_DERIV = fftw_plan_dft_1d(numln, inMulMacPSFDeriv, outConvFiltersDeriv, FFT_BACKWARD, FFTW_MEASURE );			
 
 	}		
-
-
-
 	/****************************************************************************************************/
 	//  IF NUMBER OF CYCLES IS LES THAN 0 THEN --> WE USE CLASSICAL ESTIMATES 
 	//  IF NUMBER OF CYCLES IS 0 THEN -->  DO SYNTHESIS FROM THE INIT MODEL 
@@ -398,8 +391,6 @@ int main(int argc, char **argv)
 			}
 			fclose(fReadSpectro);
 
-      	
-
 			Init_Model initModel;
 			initModel.eta0 = 0;
 			initModel.mac = 0;
@@ -421,19 +412,19 @@ int main(int argc, char **argv)
 			strcat(nameAuxOutputModel,MOD_FILE);
 			FILE * fptr = fopen(nameAuxOutputModel, "w");
 			if(fptr!=NULL){
-				fprintf(fptr,"eta_0:           %lf\n",initModel.eta0);
-				fprintf(fptr,"magnetic field:  %lf\n",initModel.B);
-				fprintf(fptr,"LOS velocity:    %lf\n",initModel.vlos);
-				fprintf(fptr,"Doppler width:   %lf\n",initModel.dopp);
-				fprintf(fptr,"damping:         %lf\n",initModel.aa);
-				fprintf(fptr,"gamma:           %lf\n",initModel.gm);
-				fprintf(fptr,"phi:             %lf\n",initModel.az);
-				fprintf(fptr,"S_0:             %lf\n",initModel.S0);
-				fprintf(fptr,"S_1:             %lf\n",initModel.S1);
-				fprintf(fptr,"v_mac:           %lf\n",initModel.mac);
-				fprintf(fptr,"filling factor:  %lf\n",initModel.alfa);
-				fprintf(fptr,"# Iterations:    %d\n",0);
-				fprintf(fptr,"chisqr:          %le\n",0.0);
+				fprintf(fptr,"eta_0               :%lf\n",initModel.eta0);
+				fprintf(fptr,"magnetic field [G]  :%lf\n",initModel.B);
+				fprintf(fptr,"LOS velocity[km/s]  :%lf\n",initModel.vlos);
+				fprintf(fptr,"Doppler width [A]   :%lf\n",initModel.dopp);
+				fprintf(fptr,"damping             :%lf\n",initModel.aa);
+				fprintf(fptr,"gamma [deg]         :%lf\n",initModel.gm);
+				fprintf(fptr,"phi  [deg]          :%lf\n",initModel.az);
+				fprintf(fptr,"S_0                 :%lf\n",initModel.S0);
+				fprintf(fptr,"S_1                 :%lf\n",initModel.S1);
+				fprintf(fptr,"v_mac               :%lf\n",initModel.mac);
+				fprintf(fptr,"filling factor      :%lf\n",initModel.alfa);
+				fprintf(fptr,"# Iterations        :%d\n",0);
+				fprintf(fptr,"chisqr              :%le\n",0.0);
 				fprintf(fptr,"\n\n");
 				fclose(fptr);
 			}
@@ -443,8 +434,8 @@ int main(int argc, char **argv)
 			free(spectroPER);
 		}
 		else if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)==0){ // invert image from fits file 
-			fitsImage = readFitsSpectroImage(configCrontrolFile.ObservedProfiles,0);
-			//fitsImage = readFitsSpectroImageRectangular(configCrontrolFile.ObservedProfiles,&configCrontrolFile,0);
+			fitsImage = readFitsSpectroImage(configCrontrolFile.ObservedProfiles,0,nlambda);
+			//fitsImage = readFitsSpectroImageRectangular(configCrontrolFile.ObservedProfiles,&configCrontrolFile,0,nlambda);
 			// ALLOCATE MEMORY FOR STORE THE RESULTS 
 			int indexPixel = 0;
 			vModels = calloc (fitsImage->numPixels , sizeof(Init_Model));
@@ -491,46 +482,41 @@ int main(int argc, char **argv)
 	}
 	else if(configCrontrolFile.NumberOfCycles==0){ // synthesis
 	
-      if(access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
-         slight = readFitsStrayLightFile(configCrontrolFile.StrayLightFile,&dimStrayLight,nlambda);
-         printf("\n STRAY LIGHT READ \n");
-      }
-      else{
-         printf("\n STRAY LIGHT NOT USED \n");
-      }      
-      Init_Model initModel;
-      initModel.eta0 = INITIAL_MODEL.eta0;
-      initModel.B = INITIAL_MODEL.B; //200 700
-      initModel.gm = INITIAL_MODEL.gm;
-      initModel.az = INITIAL_MODEL.az;
-      initModel.vlos = INITIAL_MODEL.vlos; //km/s 0
-      initModel.mac = INITIAL_MODEL.mac;
-      initModel.dopp = INITIAL_MODEL.dopp;
-      initModel.aa = INITIAL_MODEL.aa;
-      initModel.alfa = INITIAL_MODEL.alfa; //0.38; //stray light factor
-      initModel.S0 = INITIAL_MODEL.S0;
-      initModel.S1 = INITIAL_MODEL.S1;
-      printf("\n MODEL ATMOSPHERE: \n");
-      printf("\n ETA0: %lf",initModel.eta0);
-      printf("\n B: %lf",initModel.B);
-      printf("\n vlos: %lf",initModel.vlos);
-      printf("\n dopp: %lf",initModel.dopp);
-      printf("\n aa: %lf",initModel.aa);
-      printf("\n gm: %lf",initModel.gm);
-      printf("\n az: %lf",initModel.az);
-      printf("\n S0: %lf",initModel.S0);
-      printf("\n S1: %lf",initModel.S1);      
-      printf("\n mac: %lf",initModel.mac);
-      printf("\n alfa: %lf",initModel.alfa);
-		printf("\n");    
+		if(access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
+			slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+		}
 
-      
-      
-      AllocateMemoryDerivedSynthesis(nlambda);
+		Init_Model initModel;
+		initModel.eta0 = INITIAL_MODEL.eta0;
+		initModel.B = INITIAL_MODEL.B; //200 700
+		initModel.gm = INITIAL_MODEL.gm;
+		initModel.az = INITIAL_MODEL.az;
+		initModel.vlos = INITIAL_MODEL.vlos; //km/s 0
+		initModel.mac = INITIAL_MODEL.mac;
+		initModel.dopp = INITIAL_MODEL.dopp;
+		initModel.aa = INITIAL_MODEL.aa;
+		initModel.alfa = INITIAL_MODEL.alfa; //0.38; //stray light factor
+		initModel.S0 = INITIAL_MODEL.S0;
+		initModel.S1 = INITIAL_MODEL.S1;
+		printf("\n MODEL ATMOSPHERE: \n");
+		printf("eta_0               :%lf\n",initModel.eta0);
+		printf("magnetic field [G]  :%lf\n",initModel.B);
+		printf("LOS velocity[km/s]  :%lf\n",initModel.vlos);
+		printf("Doppler width [A]   :%lf\n",initModel.dopp);
+		printf("damping             :%lf\n",initModel.aa);
+		printf("gamma [deg]         :%lf\n",initModel.gm);
+		printf("phi  [deg]          :%lf\n",initModel.az);
+		printf("S_0                 :%lf\n",initModel.S0);
+		printf("S_1                 :%lf\n",initModel.S1);
+		printf("v_mac [km/s]        :%lf\n",initModel.mac);
+		printf("filling factor      :%lf\n",initModel.alfa);
+		printf("\n");
+
+		AllocateMemoryDerivedSynthesis(nlambda);
 
 		// synthesis
-      mil_sinrf(cuantic, &initModel, wlines, vLambda, nlambda, spectra, configCrontrolFile.mu, slight,spectra_mac, configCrontrolFile.ConvolveWithPSF);
-      me_der(cuantic, &initModel, wlines, vLambda, nlambda, d_spectra, spectra_mac, spectra, configCrontrolFile.mu, slight, configCrontrolFile.ConvolveWithPSF);	
+		mil_sinrf(cuantic, &initModel, wlines, vLambda, nlambda, spectra, configCrontrolFile.mu, slight,spectra_mac,spectra_slight, configCrontrolFile.ConvolveWithPSF);
+		me_der(cuantic, &initModel, wlines, vLambda, nlambda, d_spectra, spectra_mac, spectra_slight, configCrontrolFile.mu, slight, configCrontrolFile.ConvolveWithPSF,configCrontrolFile.fix);	
 
 		// in this case basenamefile is from initmodel
 		char nameAux [4096];
@@ -609,6 +595,9 @@ int main(int argc, char **argv)
 			}
 			fclose(fReadSpectro);
 
+			if(configCrontrolFile.fix[10] &&  access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
+				slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+			}
       
       	
 			AllocateMemoryDerivedSynthesis(nlambda);
@@ -643,19 +632,19 @@ int main(int argc, char **argv)
 
 			FILE *fptr = fopen(nameAuxOutputModel, "w");
 			if(fptr!=NULL){
-				fprintf(fptr,"eta_0:           %lf\n",initModel.eta0);
-				fprintf(fptr,"magnetic field:  %lf\n",initModel.B);
-				fprintf(fptr,"LOS velocity:    %lf\n",initModel.vlos);
-				fprintf(fptr,"Doppler width:   %lf\n",initModel.dopp);
-				fprintf(fptr,"damping:         %lf\n",initModel.aa);
-				fprintf(fptr,"gamma:           %lf\n",initModel.gm);
-				fprintf(fptr,"phi:             %lf\n",initModel.az);
-				fprintf(fptr,"S_0:             %lf\n",initModel.S0);
-				fprintf(fptr,"S_1:             %lf\n",initModel.S1);
-				fprintf(fptr,"v_mac:           %lf\n",initModel.mac);
-				fprintf(fptr,"filling factor:  %lf\n",initModel.alfa);
-				fprintf(fptr,"# Iterations:    %d\n",numIter);
-				fprintf(fptr,"chisqr:          %le\n",chisqrf);
+				fprintf(fptr,"eta_0               :%lf\n",initModel.eta0);
+				fprintf(fptr,"magnetic field [G]  :%lf\n",initModel.B);
+				fprintf(fptr,"LOS velocity[km/s]  :%lf\n",initModel.vlos);
+				fprintf(fptr,"Doppler width [A]   :%lf\n",initModel.dopp);
+				fprintf(fptr,"damping             :%lf\n",initModel.aa);
+				fprintf(fptr,"gamma [deg]         :%lf\n",initModel.gm);
+				fprintf(fptr,"phi  [deg]          :%lf\n",initModel.az);
+				fprintf(fptr,"S_0                 :%lf\n",initModel.S0);
+				fprintf(fptr,"S_1                 :%lf\n",initModel.S1);
+				fprintf(fptr,"v_mac [km/s]        :%lf\n",initModel.mac);
+				fprintf(fptr,"filling factor      :%lf\n",initModel.alfa);
+				fprintf(fptr,"# Iterations        :%d\n",numIter);
+				fprintf(fptr,"chisqr              :%le\n",chisqrf);
 
 
 
@@ -702,14 +691,18 @@ int main(int argc, char **argv)
 		}
 		else if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)==0){ // invert image from fits file 
 
+			// check if read stray light
+			if(configCrontrolFile.fix[10] && access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
+				slight = readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
+			}
+			if(slight!=NULL){
+				printf("\n SLIGHT NO ES NULL \n");
+			}
 			// READ PIXELS FROM IMAGE 
 			PRECISION timeReadImage;
 			clock_t t;
 			t = clock();
-			
-			
-			//fitsImage = readFitsSpectroImageRectangular(configCrontrolFile.ObservedProfiles,&configCrontrolFile,0);
-			fitsImage = readFitsSpectroImage(nameInputFileSpectra,0);
+			fitsImage = readFitsSpectroImage(nameInputFileSpectra,0,nlambda);
 			t = clock() - t;
 			timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
 			
@@ -730,14 +723,17 @@ int main(int argc, char **argv)
 					imageStokesAdjust->pos_stokes_parameters = fitsImage->pos_stokes_parameters;
 					imageStokesAdjust->numPixels = fitsImage->numPixels;
 					imageStokesAdjust->pixels = calloc(imageStokesAdjust->numPixels, sizeof(vpixels));
+					imageStokesAdjust->naxes = fitsImage->naxes;
+					imageStokesAdjust->vCard = fitsImage->vCard;
+					imageStokesAdjust->vKeyname = fitsImage->vKeyname;
+					imageStokesAdjust->nkeys = fitsImage->nkeys;
+					imageStokesAdjust->naxis = fitsImage->naxis;
+					imageStokesAdjust->bitpix = fitsImage->bitpix;
 					for( i=0;i<imageStokesAdjust->numPixels;i++){
 						imageStokesAdjust->pixels[i].spectro = calloc ((imageStokesAdjust->numStokes*imageStokesAdjust->nLambdas),sizeof(float));
 					}
 				}				
-				// check if read stray light
-				if(access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
-					slight = readFitsStrayLightFile(configCrontrolFile.StrayLightFile,&dimStrayLight,nlambda);
-				}
+
 
 				//***************************************** INIT MEMORY WITH SIZE OF LAMBDA ****************************************************//
 				AllocateMemoryDerivedSynthesis(nlambda);
@@ -780,14 +776,16 @@ int main(int argc, char **argv)
 						initModel.az = 1;
 					// INVERSION RTE
 
-					PRECISION * slightPixel;
+					float * slightPixel;
 					if(slight==NULL) 
 						slightPixel = NULL;
 					else{
-						if(dimStrayLight==nlambda) 
+						if(nx_straylight && ny_straylight){
+							slightPixel = slight+ (nlambda*NPARMS*indexPixel);
+						}
+						else {
 							slightPixel = slight;
-						else 
-							slightPixel = slight+nlambda*indexPixel;
+						}
 					}
 					lm_mils(cuantic, wlines, vLambda, nlambda, fitsImage->pixels[indexPixel].spectro, nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
 							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma,  configCrontrolFile.noise,configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu,configCrontrolFile.logclambda);						

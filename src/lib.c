@@ -11,15 +11,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-//#include <omp.h>
-//#include "mkl_cblas.h"
 
 
 
-extern int NTERMS;
+
 extern REAL * opa;
-
-
+extern int NTERMS;
 /*
 
  el tamaño de w es 	nlambda*NPARMS;
@@ -34,9 +31,10 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 	
 	int j,i,bt_nf,bt_nc,aux_nf,aux_nc;
 
+	REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
 	
 	REAL *BTaux,*APaux;
-	REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
+
 	//printf("\nVALORES DEL SIGMA SQUARE\n");
 
 	for(j=0;j<NPARMS;j++){

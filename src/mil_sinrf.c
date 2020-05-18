@@ -58,7 +58,7 @@ extern fftw_plan planForwardPSF, planBackwardPSF;
 extern ConfigControl configCrontrolFile;
 
 int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *spectra,
-			REAL ah,PRECISION * slight, REAL * spectra_mc, int filter)
+			REAL ah,REAL * slight, REAL * spectra_mc, REAL * spectra_slight, int filter)
 {
 
 	int offset,numl;
@@ -315,7 +315,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 		}
     }
 
-	 int macApplied = 0;
+	int macApplied = 0;
     if(MC > 0.0001 && spectra_mc!=NULL){
 
 		macApplied = 1;
@@ -401,12 +401,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
    }//end if(MC > 0.0001)
     
-	if(slight!=NULL){  //ADDING THE STRAY-LIGHT PROFILE
-		for(i=0;i<numl*NPARMS;i++){
-			spectra[i] = spectra[i]*ALF+slight[i]*(1.0-ALF);
-		}
 
-	}
 
 	if(!macApplied && filter){
 		if(configCrontrolFile.useFFT){
@@ -461,6 +456,15 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 				convCircular(spectra + nlambda * i, nlambda, G, nlambda,spectra + nlambda * i); */
 			
 		}
+	}
+
+	if(slight!=NULL){  //ADDING THE STRAY-LIGHT PROFILE
+
+		for(i=0;i<numl*NPARMS;i++){
+			spectra_slight[i] = spectra[i];
+			spectra[i] = spectra[i]*ALF+slight[i]*(1.0-ALF);
+		}
+
 	}
 
 	return 1;

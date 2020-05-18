@@ -1,10 +1,10 @@
 Number of cycles          (*):100         		! 0 = synthesis, n= max num of iterations, -1 = use classical estimates
-Observed profiles          (*):run/obs.per    !   
-Stray light file             :run/stray.per                  ! (none=no stray light contam)
+Observed profiles          (*):run/straylight_60.fits    !   
+Stray light file             :run/straylight2.fits                  ! (none=no stray light contam)
 PSF file                     :            ! .psf file -> read file; number -> FWHM (mA) of gaussian filter; empty -> NO FILTER
 Wavelength grid file      (s):run/malla.grid 	! (automatic selection, grid, or wavelength file)
 Atomic parameters file       :run/LINES      	! 
-Abundances file		         : 					    ! not used
+Abundances file		         : 					! not used
 Initial guess model 1     (*):run/guess.mod !                  
 Initial guess model 2        :					! not used for the moment
 Weight for Stokes I          :1               	! (DEFAULT=1; 0=not inverted)

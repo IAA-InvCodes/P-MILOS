@@ -144,10 +144,10 @@ void FreeMemoryDerivedSynthesis();
 
 Cuantic * create_cuantic(PRECISION * dat, int log);
 
-int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda, REAL *d_spectra,REAL *spectra, REAL * spectra_slight,REAL ah,PRECISION * slight,int filter);
+int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda, REAL *d_spectra,REAL *spectra, REAL * spectra_slight,REAL ah,REAL * slight,int filter, int * fix);
 
 int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *spectra,
-			REAL ah,PRECISION * slight,REAL * spectra_mc, int filter);
+			REAL ah,REAL * slight,REAL * spectra_mc, REAL * spectra_slight, int filter);
 			
 
 PRECISION * fgauss(PRECISION MC, PRECISION * eje,int neje,PRECISION landa,int deriv);
@@ -199,8 +199,8 @@ typedef struct VPIXEL vpixels;
 
 struct FITS_IMAGE{  
 
-	int rows;  // number of rows in the image
-	int cols;  // number of cols in the image
+	int rows, rows_original;  // number of rows in the image
+	int cols, cols_original;  // number of cols in the image
 	int nLambdas; // number of lambdas in the image 
 	int numStokes; // number of stokes paramters, normally is 4
 
@@ -223,6 +223,12 @@ struct FITS_IMAGE{
 	vpixels * pixels;
 	PRECISION * vLambdaImagen;
 	float * spectroImagen;
+	long * naxes, * naxes_original;
+	char ** vCard;
+	char ** vKeyname;
+	int nkeys;
+	int naxis;
+	int bitpix;
 };
 
 typedef struct FITS_IMAGE FitsImage;
