@@ -183,7 +183,7 @@ The sequential program must be controlled with a configuration file of type **.t
 The program must be executed by passing the configuration file as a parameter:
 
 ```
-./milos run/cmilos.trol
+./milos run/pmilos.trol
 ```
 
 ### milosMPI
@@ -193,5 +193,5 @@ For the parallel program the execution is a bit different. In this case the file
 The program must be executed using the command of **mpirun** or **mpiexec**. a simple use of parallelization on the local machine, would be to specify the number of processes with the *-np* option:
 
 ```
-mpiexec -np 12 ./milosMPI run/cmilos.init
+mpiexec -np 12 ./milosMPI run/pmilos.init
 ```
