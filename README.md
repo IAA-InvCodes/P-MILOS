@@ -178,20 +178,20 @@ make clean
 
 ### milos
 
-The sequential program must be controlled with a configuration file of type **.trol** . Inside the run folder, you can find an example of this type of file [pmilos.trol](run/pmilos.trol). We refer you to the pdf documentation to know in detail how each parameter works. 
+The sequential program must be controlled with a configuration file of type **.trol** . Inside the run folder, you can find an example of this type of file [pmilos.mtrol](run/pmilos.mtrol). We refer you to the pdf documentation to know in detail how each parameter works. 
 
 The program must be executed by passing the configuration file as a parameter:
 
 ```
-./milos run/pmilos.trol
+./milos run/pmilos.mtrol
 ```
 
 ### milosMPI
 
-For the parallel program the execution is a bit different. In this case the file that we must pass as a parameter to the executable will be of type **.init** . As for the **.trol** file, we leave you an example inside the run folder [pmilos.init](run/pmilos.init)
+For the parallel program the execution is a bit different. In this case the file that we must pass as a parameter to the executable will be of type **.init** . As for the **.trol** file, we leave you an example inside the run folder [pmilos.minit](run/pmilos.minit)
 
 The program must be executed using the command of **mpirun** or **mpiexec**. a simple use of parallelization on the local machine, would be to specify the number of processes with the *-np* option:
 
 ```
-mpiexec -np 12 ./milosMPI run/pmilos.init
+mpiexec -np 12 ./milosMPI run/pmilos.minit
 ```
