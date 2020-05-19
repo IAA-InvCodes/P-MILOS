@@ -178,7 +178,7 @@ make clean
 
 ### milos
 
-The sequential program must be controlled with a configuration file of type **.trol** . Inside the run folder, you can find an example of this type of file [cmilos.trol](run/cmilos.trol). We refer you to the pdf documentation to know in detail how each parameter works. 
+The sequential program must be controlled with a configuration file of type **.trol** . Inside the run folder, you can find an example of this type of file [pmilos.trol](run/pmilos.trol). We refer you to the pdf documentation to know in detail how each parameter works. 
 
 The program must be executed by passing the configuration file as a parameter:
 
