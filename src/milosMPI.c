@@ -309,11 +309,17 @@ int main(int argc, char **argv)
 	/**************************************** READ FITS  STRAY LIGHT ******************************/
 	
 	if( configCrontrolFile.fix[10] && access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
-		if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
-			slight= readFitsStrayLightFileSubSet(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);	
+		if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
+			slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+			nl_straylight = nlambda;
 		}
-		else{
-			slight= readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);	
+		else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
+			if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
+				slight= readFitsStrayLightFileSubSet(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);	
+			}
+			else{
+				slight= readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);	
+			}
 		}
 	}
 
@@ -606,6 +612,7 @@ int main(int argc, char **argv)
 		}
 	}
 	// Create the new communicator from that group of processes.
+	
 	MPI_Comm vCommunicators[numGroups];
 	for(i=0;i<numGroups;i++){
 		MPI_Comm_create(MPI_COMM_WORLD, vGroups[i], &vCommunicators[i]);

@@ -483,7 +483,27 @@ int main(int argc, char **argv)
 	else if(configCrontrolFile.NumberOfCycles==0){ // synthesis
 	
 		if(access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
-			slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+			if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
+				slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+			}
+			else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
+				slight= readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
+				if(nx_straylight!=0 || ny_straylight!=0){
+					printf("\n Stray light file has 4 dimensions and for Synthesis only 2 dimensiones file is accepted, henceforth, stray light will not used for synthesis. \n");
+					free(slight);
+					slight= NULL;
+				}
+				if(nl_straylight!=nlambda){
+					printf("\n The number of wavelengths is different in the stray light file: %d and malla grid file %d. \n. Stray light will not used for synthesis.", nl_straylight,nlambda);
+					free(slight);
+					slight= NULL;
+				}
+			}
+			else{
+				printf("\n Stray light file hasn't extension .PER or .FITS, review it. \n. Stray light will not used for synthesis.\n");
+				free(slight);
+				slight= NULL;				
+			}
 		}
 
 		Init_Model initModel;
@@ -596,7 +616,27 @@ int main(int argc, char **argv)
 			fclose(fReadSpectro);
 
 			if(configCrontrolFile.fix[10] &&  access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
-				slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+				if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
+					slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+				}
+				else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
+					slight= readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
+					if(nx_straylight!=0 || ny_straylight!=0){
+						printf("\n Stray light file has 4 dimensions and for Inversion pixel only 2 dimensiones file is accepted, henceforth, stray light will not used for inversion pixel. \n");
+						free(slight);
+						slight= NULL;
+					}
+					if(nl_straylight!=nlambda){
+						printf("\n The number of wavelengths is different in the stray light file: %d and malla grid file %d. \n. Stray light will not used for inversion pixel.", nl_straylight,nlambda);
+						free(slight);
+						slight= NULL;
+					}
+				}
+				else{
+					printf("\n Stray light file hasn't extension .PER or .FITS, review it. \n. Stray light will not used for inversion pixel.\n");
+					free(slight);
+					slight= NULL;				
+				}				
 			}
       
       	
@@ -693,7 +733,22 @@ int main(int argc, char **argv)
 
 			// check if read stray light
 			if(configCrontrolFile.fix[10] && access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
-				slight = readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
+				if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
+					slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
+				}
+				else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
+					slight = readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
+					if(nl_straylight!=nlambda){
+						printf("\n The number of wavelengths is different in the stray light file: %d and malla grid file %d. \n. Stray light will not used for inversion.", nl_straylight,nlambda);
+						free(slight);
+						slight= NULL;
+					}
+				}
+				else{
+					printf("\n Stray light file hasn't extension .PER or .FITS, review it. \n. Stray light will not used for inversion.\n");
+					free(slight);
+					slight= NULL;				
+				}				
 			}
 			// READ PIXELS FROM IMAGE 
 			PRECISION timeReadImage;
