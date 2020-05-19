@@ -136,17 +136,17 @@ These files will be used for three purposes:
 The order of parameters in the file must be always the same. This is an example: 
 
 ```
-INITIAL_MODEL_ETHA0         :20
-INITIAL_MODEL_B             :1100
-INITIAL_MODEL_VLOS          :0.2
-INITIAL_MODEL_LAMBDADOPP    :0.03
-INITIAL_MODEL_AA            :0.05
-INITIAL_MODEL_GM            :120
-INITIAL_MODEL_AZI           :150
-INITIAL_MODEL_S0            :0.35
-INITIAL_MODEL_S1            :0.5
-INITIAL_MODEL_MAC           :0
-INITIAL_MODEL_ALFA          :1
+eta_0:          14
+magnetic field: 1200
+LOS velocity:   0
+Doppler width:  0.07
+damping:        0.05
+gamma:          130
+phi:            25
+S_0:            0.25
+S_1:            0.75
+v_mac:          1
+filling factor: 1
 ```
 
 
@@ -188,7 +188,7 @@ The program must be executed by passing the configuration file as a parameter:
 
 ### milosMPI
 
-For the parallel program the execution is a bit different. In this case the file that we must pass as a parameter to the executable will be of type **.init** . As for the **.trol** file, we leave you an example inside the run folder [cmilos.init](run/cmilos.init)
+For the parallel program the execution is a bit different. In this case the file that we must pass as a parameter to the executable will be of type **.init** . As for the **.trol** file, we leave you an example inside the run folder [pmilos.init](run/pmilos.init)
 
 The program must be executed using the command of **mpirun** or **mpiexec**. a simple use of parallelization on the local machine, would be to specify the number of processes with the *-np* option:
 
