@@ -590,7 +590,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	double sum_u =0.0, sum_q = 0.0;
 	for(i=0;i<nlambda;i++){
 		if(spectroU[i]>-1 && spectroQ[i]>-1){
-			if( fabs(spectroU[i]>0.0001 || fabs(spectroQ[i])>0.0001  )){
+			if( fabs(spectroU[i])>0.0001 || fabs(spectroQ[i])>0.0001  ){
 				sum_u += spectroU[i];
 				sum_q += spectroQ[i];
 			}
