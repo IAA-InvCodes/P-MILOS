@@ -441,7 +441,7 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise)
 void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel, int forInitialUse)
 {
 
-	double x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, beta_B, Ic, Icmax, Vlos;
+	double x, y, aux, LM_lambda_plus, LM_lambda_minus, Blos, Ic, Icmax, Vlos;
 	double aux_vlos,x_vlos,y_vlos;
 	float *spectroI, *spectroQ, *spectroU, *spectroV;
 	double L, m, gamma, gamma_rad, tan_gamma, C;
@@ -532,7 +532,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 		LM_lambda_minus = 0;
 
 	C = (CTE4_6_13 * (lambda_0*lambda_0) * cuantic->GEFF);
-	beta_B = 1 / C;
+	
 
 	Blos = (1 / C) * ((LM_lambda_plus - LM_lambda_minus) / 2);
 	//Vlos = (VLIGHT / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
