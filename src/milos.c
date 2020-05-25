@@ -525,7 +525,7 @@ int main(int argc, char **argv)
 		printf("Doppler width [A]   :%lf\n",initModel.dopp);
 		printf("damping             :%lf\n",initModel.aa);
 		printf("gamma [deg]         :%lf\n",initModel.gm);
-		printf("phi  [deg]          :%lf\n",initModel.az);
+		printf("phi   [deg]         :%lf\n",initModel.az);
 		printf("S_0                 :%lf\n",initModel.S0);
 		printf("S_1                 :%lf\n",initModel.S1);
 		printf("v_mac [km/s]        :%lf\n",initModel.mac);
@@ -678,7 +678,7 @@ int main(int argc, char **argv)
 				fprintf(fptr,"Doppler width [A]   :%lf\n",initModel.dopp);
 				fprintf(fptr,"damping             :%lf\n",initModel.aa);
 				fprintf(fptr,"gamma [deg]         :%lf\n",initModel.gm);
-				fprintf(fptr,"phi  [deg]          :%lf\n",initModel.az);
+				fprintf(fptr,"phi   [deg]         :%lf\n",initModel.az);
 				fprintf(fptr,"S_0                 :%lf\n",initModel.S0);
 				fprintf(fptr,"S_1                 :%lf\n",initModel.S1);
 				fprintf(fptr,"v_mac [km/s]        :%lf\n",initModel.mac);
