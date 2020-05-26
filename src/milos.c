@@ -865,6 +865,7 @@ int main(int argc, char **argv)
 				if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
 					slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
 					printf("\nSTRAY LIGHT FILE READ: %s\n ", configCrontrolFile.StrayLightFile);
+					exit(EXIT_FAILURE);
 				}
 				else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
 					slight = readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
@@ -872,6 +873,7 @@ int main(int argc, char **argv)
 						printf("\n The number of wavelengths is different in the stray light file: %d and malla grid file %d. \n. Stray light will not used for inversion.", nl_straylight,nlambda);
 						free(slight);
 						slight= NULL;
+						exit(EXIT_FAILURE);
 					}
 					printf("\nSTRAY LIGHT FILE READ: %s\n", configCrontrolFile.StrayLightFile);
 				}
@@ -879,6 +881,7 @@ int main(int argc, char **argv)
 					printf("\n Stray light file hasn't extension .PER or .FITS, review it. \n. Stray light will not used for inversion.\n");
 					free(slight);
 					slight= NULL;				
+					exit(EXIT_FAILURE);
 				}				
 			}
 			// READ PIXELS FROM IMAGE 
