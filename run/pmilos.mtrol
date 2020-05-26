@@ -1,7 +1,7 @@
 Number of cycles          (*):100         		! 0 = synthesis, n= max num of iterations, -1 = use classical estimates
-Observed profiles          (*):run/obs.per    !   
-Stray light file             :run/stray.per                  ! (none=no stray light contam)
-PSF file                     :            ! .psf file -> read file; number -> FWHM (mA) of gaussian filter; empty -> NO FILTER
+Observed profiles          (*):run/obs.per      !   
+Stray light file             :                  ! (none=no stray light contam)
+PSF file                     :49.2              ! .psf file -> read file; number -> FWHM (mA) of gaussian filter; empty -> NO FILTER
 Wavelength grid file      (s):run/malla.grid 	! (automatic selection, grid, or wavelength file)
 Atomic parameters file       :run/LINES      	! 
 Abundances file		         : 					    ! not used
@@ -21,7 +21,7 @@ Nodes for gamma 1            :1                 ! (0 or blank=no, 1=yes)
 Nodes for phi 1              :1                 ! (0 or blank=no, 1=yes)
 Nodes for lambda_doppler 1   :1                 ! (0 or blank=no, 1=yes)
 Nodes for damping 1	         :1                 ! (0 or blank=no, 1=yes)
-Invert macroturbulence 1     :0                	! (0 or blank=no, 1=yes)
+Invert macroturbulence 1     :1                	! (0 or blank=no, 1=yes)
 Nodes for S_0 2     	     :                 ! not used for the moment
 Nodes for S_1 2  	         :                 ! not used for the moment                     
 Nodes for eta0 2             :                 ! not used for the moment
@@ -33,7 +33,7 @@ Nodes for lambda_doppler 2   :                 ! not used for the moment
 Nodes for damping 2	         :                 ! not used for the moment
 Invert macroturbulence 2?    :                 ! not used for the moment
 Invert filling factor?       :                 ! not used for the moment
-Invert stray light factor?   :1                 ! (0 or blank=no, 1=yes)
+Invert stray light factor?   :0                 ! (0 or blank=no, 1=yes)
 mu=cos (theta)               :                  ! (DEFAULT: mu=1. mu<0 => West)
 Estimated S/N for I          :1000              ! 
 Continuum contrast           :                  ! Not used for the moment

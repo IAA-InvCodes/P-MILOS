@@ -219,9 +219,9 @@ int main(int argc, char **argv)
 	if(configCrontrolFile.t1 == 0 && configCrontrolFile.t2 ==0){ // then process only one file
 		if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)!=0){ 
 			if(idProc==root){
-				printf("\n**********************************************************\n");
+				printf("\n--------------------------------------------------------------------------------\n");
 				printf("\nERROR, without specify timeseries the value of control parameter 'Observed Profiles' must be a fits file\n");
-				printf("\n**********************************************************\n");
+				printf("\n--------------------------------------------------------------------------------\n");
 			}
 			exit(EXIT_FAILURE);
 		}
@@ -234,6 +234,12 @@ int main(int argc, char **argv)
 		printf("\n\n ¡¡¡ ERROR READING INIT MODEL !!! \n\n");
 		exit(EXIT_FAILURE);
 	}
+	checkInitialModel(&INITIAL_MODEL);
+	if(INITIAL_MODEL.alfa<1 && access(configCrontrolFile.StrayLightFile,F_OK)){
+		printf("\nERROR. Filling factor in Initial model is less than 1 and Stray Light file  %s can not be accessed\n",configCrontrolFile.StrayLightFile);
+		exit(EXIT_FAILURE);
+	}
+
 
 	if(configCrontrolFile.fix[10]==0) NTERMS--;
 	if(INITIAL_MODEL.mac ==0 && configCrontrolFile.fix[9]==0){
@@ -335,7 +341,9 @@ int main(int argc, char **argv)
 			vMask=readFitsMaskFile (configCrontrolFile.MaskFile,&numRowsMask,&numColsMask);
 		}
 		if(vMask==NULL){
+			printf("\n--------------------------------------------------------------------------------");
 			printf("\n Mask file can not be read or its dimensions are incorrect. Mask will not be applied to the inversion. ");
+			printf("\n--------------------------------------------------------------------------------\n");
 		}
 		else{
 			// readsub set of VMAS
@@ -391,8 +399,9 @@ int main(int argc, char **argv)
 				fp=fopen(nameInputFilePSF,"r");
 				if(fp==NULL)
 				{
-					printf("File \"%s\" does not exist!!!\n",nameInputFilePSF);
-					//slog_error(0,"File \"%s\" does not exist!!!\n",nameInputFilePSF);
+					printf("\n--------------------------------------------------------------------------------");
+					printf("File \"%s\" does not exist!!!",nameInputFilePSF);
+					printf("\n--------------------------------------------------------------------------------");
 					return 0;
 				}
 				//read character by character and check for new line	
@@ -795,7 +804,9 @@ int main(int argc, char **argv)
 
 					// CHECK SIZE MASK FILE 
 					if(vMask!=NULL && (numRowsMask!=fitsImages[indexInputFits]->rows || numColsMask!=fitsImages[indexInputFits]->cols) ){
+						printf("\n--------------------------------------------------------------------------------");
 						printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND MASK FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraParalell[indexInputFits].name, fitsImages[indexInputFits]->rows, fitsImages[indexInputFits]->cols,configCrontrolFile.MaskFile,numRowsMask,numColsMask);
+						printf("\n--------------------------------------------------------------------------------\n");
 						exit(EXIT_FAILURE);
 					}
 
@@ -806,12 +817,16 @@ int main(int argc, char **argv)
 					if(slight!=NULL){
 
 						if(nl_straylight!=nlambda){
+							printf("\n--------------------------------------------------------------------------------");
 							printf("\n Number of wavelenghts in Straylight file %d is different to Malla Grid file %d",nl_straylight,nlambda);
+							printf("\n--------------------------------------------------------------------------------\n");
 							exit(EXIT_FAILURE);
 						}
 						if(nx_straylight!=0 && ny_straylight!=0){
 							if(nx_straylight!= fitsImages[indexInputFits]->rows || ny_straylight !=fitsImages[indexInputFits]->cols ){
+								printf("\n--------------------------------------------------------------------------------");
 								printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND STRAYLIGHT FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraParalell[indexInputFits].name, fitsImages[indexInputFits]->rows, fitsImages[indexInputFits]->cols,configCrontrolFile.StrayLightFile,nx_straylight,ny_straylight);
+								printf("\n--------------------------------------------------------------------------------\n");
 								exit(EXIT_FAILURE);
 							}
 						}
@@ -819,7 +834,9 @@ int main(int argc, char **argv)
 					
 					t = clock() - t;
 					PRECISION timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
-					printf("\n TIME TO READ FITS IMAGE %s:  %f seconds to execute . NUMBER OF PIXELS READ: %d \n",vInputFileSpectraParalell[indexInputFits].name, timeReadImage,fitsImages[indexInputFits]->numPixels); 
+					printf("\n--------------------------------------------------------------------------------");
+					printf("\n TIME TO READ FITS IMAGE %s:  %f seconds to execute . NUMBER OF PIXELS READ: %d ",vInputFileSpectraParalell[indexInputFits].name, timeReadImage,fitsImages[indexInputFits]->numPixels); 
+					printf("\n--------------------------------------------------------------------------------\n");
 					vNumPixelsImage[indexInputFits] = fitsImages[indexInputFits]->numPixels;
 				}
 				
@@ -833,7 +850,9 @@ int main(int argc, char **argv)
 			if(vNumPixelsImage[indexInputFits] > 0){
 				
 				if(idProc == root){
-					printf("\n***********************  DOING INVERSION: %s *******************************\n\n",vInputFileSpectraParalell[indexInputFits].name );
+					printf("\n--------------------------------------------------------------------------------");
+					printf("\n------------  DOING INVERSION: %s",vInputFileSpectraParalell[indexInputFits].name );
+					printf("\n--------------------------------------------------------------------------------\n");
 					
 					resultsInitModelTotal_L[indexInputFits] = calloc (vNumPixelsImage[indexInputFits] , sizeof(Init_Model));
 					chisqrfTotal_L[indexInputFits] = calloc (vNumPixelsImage[indexInputFits] , sizeof(float));
@@ -894,14 +913,18 @@ int main(int argc, char **argv)
 				vNumIter_L[indexInputFits] = calloc(sendcountsPixels_L[indexInputFits][idProc], sizeof(int));
 			}
 			else if (idProc==root){
-				printf("\n\n ***************************** FITS FILE CAN NOT BE READ IT %s ******************************",vInputFileSpectraParalell[indexInputFits].name);
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\n---------------------- FITS FILE CAN NOT BE READ IT %s ",vInputFileSpectraParalell[indexInputFits].name);
+				printf("\n--------------------------------------------------------------------------------\n");
 			}
 		}
 		MPI_Waitall(numFilesPerProcessParallel,vMpiRequestScatter,MPI_STATUSES_IGNORE);
 		if(idProc==root){
 			t = clock() - t;
 			PRECISION timeTotalExecution = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
+			printf("\n--------------------------------------------------------------------------------");
 			printf("\n TOTAL TIME TO READ AND SCATTER IMAGES: %f",timeTotalExecution);
+			printf("\n--------------------------------------------------------------------------------\n");
 		}
 	}
 
@@ -960,6 +983,7 @@ int main(int argc, char **argv)
 								
 							}
 						}
+						vNumIter_L[indexInputFits][indexPixel] = -1;
 						lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &(vChisqrf_L[indexInputFits][indexPixel]), slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
 							configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.noise, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&(vNumIter_L[indexInputFits][indexPixel]),configCrontrolFile.mu,configCrontrolFile.logclambda);																		
 						
@@ -1025,12 +1049,16 @@ int main(int argc, char **argv)
 
 					if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
 						if(!writeFitsImageModelsSubSet(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows_original,fitsImages[indexInputFits]->cols_original,configCrontrolFile,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
+								printf("\n--------------------------------------------------------------------------------");
 								printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+								printf("\n--------------------------------------------------------------------------------\n");
 						}
 					}
 					else{
 						if(!writeFitsImageModels(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows,fitsImages[indexInputFits]->cols,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
+								printf("\n--------------------------------------------------------------------------------");
 								printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+								printf("\n--------------------------------------------------------------------------------\n");
 						}
 					}
 					t = clock() - t;
@@ -1054,12 +1082,16 @@ int main(int argc, char **argv)
 						// WRITE SINTHETIC PROFILES TO FITS FILE
 						if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){							
 							if(!writeFitsImageProfilesSubSet(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits],configCrontrolFile)){
+								printf("\n--------------------------------------------------------------------------------");
 								printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
+								printf("\n--------------------------------------------------------------------------------\n");
 							}
 						}
 						else{
 							if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits])){
+								printf("\n--------------------------------------------------------------------------------");
 								printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
+								printf("\n--------------------------------------------------------------------------------\n");
 							}
 						}
 						
@@ -1079,11 +1111,11 @@ int main(int argc, char **argv)
 						free(vSpectraAjustedTotal_L[indexInputFits]);
 					}
 					
-					printf("\n************************************************************************************************************************\n");
-					printf("\n INVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f *********************\n", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
+					printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
+					printf("\nINVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f ", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
 					//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
-					printf("\n TIME TO WRITE FITS IMAGE:  %f seconds to execute \n", timeWriteImage);
-					printf("\n************************************************************************************************************************\n\n");
+					printf("\nTIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
+					printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
 					freeFitsImage(fitsImages[indexInputFits]);
 				/*}
 				else{
@@ -1154,18 +1186,24 @@ int main(int argc, char **argv)
 				fitsImage = readFitsSpectroImage(vInputFileSpectraLocal[indexInputFits].name,0,nlambda);
 
 			if(vMask!=NULL && (numRowsMask!=fitsImage->rows || numColsMask!=fitsImage->cols)){
+				printf("\n--------------------------------------------------------------------------------");
 				printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND MASK FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraLocal[indexInputFits].name, fitsImage->rows, fitsImage->cols,configCrontrolFile.MaskFile,numRowsMask,numColsMask);
+				printf("\n--------------------------------------------------------------------------------\n");
 				exit(EXIT_FAILURE);
 			}
 			// CHECK SIZE STRAY LIGHT 
 			if(slight!=NULL){
 				if(nl_straylight!=nlambda){
+					printf("\n--------------------------------------------------------------------------------");
 					printf("\n Number of wavelenghts in Straylight file %d is different to Malla Grid file %d",nl_straylight,nlambda);
+					printf("\n--------------------------------------------------------------------------------\n");
 					exit(EXIT_FAILURE);
 				}
 				if(nx_straylight!=0 && ny_straylight!=0){
 					if(nx_straylight!= fitsImage->rows || ny_straylight !=fitsImage->cols ){
+						printf("\n--------------------------------------------------------------------------------");
 						printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND STRAYLIGHT FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraParalell[indexInputFits].name, fitsImage->rows, fitsImage->cols,configCrontrolFile.StrayLightFile,nx_straylight,ny_straylight);
+						printf("\n--------------------------------------------------------------------------------\n");
 						exit(EXIT_FAILURE);
 					}
 				}
@@ -1173,9 +1211,9 @@ int main(int argc, char **argv)
 			t = clock() - t;
 			timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
 			
-			printf("\n************************************************************************************************************************");
-			printf("\n\n IDPROC: %d -->  TIME TO READ FITS IMAGE (%s):  %f seconds to execute. NUMBERS OF PIXELS READ %d \n",idProc, vInputFileSpectraLocal[indexInputFits].name, timeReadImage,fitsImage->numPixels); 
-			printf("\n************************************************************************************************************************");
+			printf("\n-------------------------------------------------------------------------------------------------------------------------");
+			printf("\nIDPROC: %d -->  TIME TO READ FITS IMAGE (%s):  %f seconds to execute. NUMBERS OF PIXELS READ %d ",idProc, vInputFileSpectraLocal[indexInputFits].name, timeReadImage,fitsImage->numPixels); 
+			printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
 
 			if(fitsImage!=NULL){
 
@@ -1218,9 +1256,9 @@ int main(int argc, char **argv)
 				vNumIter = calloc (fitsImage->numPixels, sizeof(int));
 				//t = clock();
 				
-				printf("\n************************************************************************************************************************\n");
-				printf("\nIDPROC: %d -->  DOING INVERSION: %s  \n",idProc,vInputFileSpectraLocal[indexInputFits].name);
-				printf("\n************************************************************************************************************************");
+				printf("\n-------------------------------------------------------------------------------------------------------------------------");
+				printf("\nIDPROC: %d -->  DOING INVERSION: %s  ",idProc,vInputFileSpectraLocal[indexInputFits].name);
+				printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
 				//slog_info(0,"\n***********************  DOING INVERSION *******************************\n\n");
 
 				for(indexPixel = 0; indexPixel < fitsImage->numPixels; indexPixel++){
@@ -1267,6 +1305,7 @@ int main(int argc, char **argv)
 								slightPixel = slight;
 							}
 						}
+						vNumIter[indexPixel] = -1;
 						lm_mils(cuantic, wlines, vGlobalLambda, nlambda, fitsImage->pixels[indexPixel].spectro, nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
 								configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.noise, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu,configCrontrolFile.logclambda);						
 
@@ -1306,23 +1345,31 @@ int main(int argc, char **argv)
 				clock_t t_write = clock();
 				if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
 					if(!writeFitsImageModelsSubSet(vOutputNameModelsLocal[indexInputFits].name,fitsImage->rows_original,fitsImage->cols_original,configCrontrolFile,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){	
+							printf("\n--------------------------------------------------------------------------------");
 							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
 					}
 					if(configCrontrolFile.SaveSynthesisAdjusted){
 					// WRITE SINTHETIC PROFILES TO FITS FILE
 						if(!writeFitsImageProfilesSubSet(vOutputNameSynthesisAdjustedLocal[indexInputFits].name,vInputFileSpectraLocal[indexInputFits].name,imageStokesAdjust,configCrontrolFile)){
+							printf("\n--------------------------------------------------------------------------------");
 							printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedLocal[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
 						}
 					}					
 				}
 				else{
 					if(!writeFitsImageModels(vOutputNameModelsLocal[indexInputFits].name,fitsImage->rows,fitsImage->cols,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){
+						printf("\n--------------------------------------------------------------------------------");
 						printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsLocal[indexInputFits].name);
+						printf("\n--------------------------------------------------------------------------------\n");
 					}
 					if(configCrontrolFile.SaveSynthesisAdjusted){
 					// WRITE SINTHETIC PROFILES TO FITS FILE
 						if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedLocal[indexInputFits].name,vInputFileSpectraLocal[indexInputFits].name,imageStokesAdjust)){
+							printf("\n--------------------------------------------------------------------------------");
 							printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedLocal[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
 						}
 					}
 				}
@@ -1332,15 +1379,15 @@ int main(int argc, char **argv)
 				t_write = clock() - t_write;
 				PRECISION timeTotalExecution = ((PRECISION)timeTotal)/CLOCKS_PER_SEC; // in seconds 
 				
-				printf("\n************************************************************************************************************************\n");
-				printf(" \n IDPROC: %d --> IMAGE INVERSION FOR IMAGE %s ¡¡¡DONE!!!. TIME: %f *********************\n", idProc, vInputFileSpectraLocal[indexInputFits].name,timeTotalExecution);
-				printf("\n************************************************************************************************************************\n");				
+				printf("\n-------------------------------------------------------------------------------------------------------------------------");
+				printf("\n IDPROC: %d --> IMAGE INVERSION FOR IMAGE %s ¡¡¡DONE!!!. TIME: %f *********************", idProc, vInputFileSpectraLocal[indexInputFits].name,timeTotalExecution);
+				printf("\n-------------------------------------------------------------------------------------------------------------------------\n");			
 				
 				PRECISION timeToWriteImage = ((PRECISION)t_write)/CLOCKS_PER_SEC; // in seconds 
 				
-				printf("\n************************************************************************************************************************\n");
-				printf(" \n IDPROC: %d --> TIME TO WRITE OUTPUT FILES %s . TIME: %f *********************\n", idProc, vInputFileSpectraLocal[indexInputFits].name,timeToWriteImage);
-				printf("\n************************************************************************************************************************\n");				
+				printf("\n-------------------------------------------------------------------------------------------------------------------------");
+				printf("\n IDPROC: %d --> TIME TO WRITE OUTPUT FILES %s . TIME: %f *********************", idProc, vInputFileSpectraLocal[indexInputFits].name,timeToWriteImage);
+				printf("\n-------------------------------------------------------------------------------------------------------------------------\n");			
 				if(imageStokesAdjust!=NULL){
 					for( i=0;i<imageStokesAdjust->numPixels;i++){
 						free(imageStokesAdjust->pixels[i].spectro);
@@ -1355,8 +1402,10 @@ int main(int argc, char **argv)
 
 			}
 			else{
-				printf("\n\n IDPROC: %d --> FITS FILE: %s WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************\n",idProc, vInputFileSpectraLocal[indexInputFits].name);
-				//slog_error(0,"\n\n ***************************** FITS FILE WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************\n");
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\nIDPROC: %d --> FITS FILE: %s WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************",idProc, vInputFileSpectraLocal[indexInputFits].name);
+				printf("\n--------------------------------------------------------------------------------\n");
+				
 			}
 
 			freeFitsImage(fitsImage);
@@ -1392,25 +1441,33 @@ int main(int argc, char **argv)
 				fitsImage = readFitsSpectroImage(vInputFileSpectraDiv2Parallel[myGroup].name,1,nlambda);
 			
 			if(vMask!=NULL && (numRowsMask!=fitsImage->rows || numColsMask!=fitsImage->cols)){
+				printf("\n--------------------------------------------------------------------------------");
 				printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND MASK FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraDiv2Parallel[myGroup].name, fitsImage->rows, fitsImage->cols,configCrontrolFile.MaskFile,numRowsMask,numColsMask);
+				printf("\n--------------------------------------------------------------------------------\n");
 				exit(EXIT_FAILURE);
 			}
 			// CHECK SIZE STRAY LIGHT 
 			if(slight!=NULL){
 				if(nl_straylight!=nlambda){
+					printf("\n--------------------------------------------------------------------------------");
 					printf("\n Number of wavelenghts in Straylight file %d is different to Malla Grid file %d",nl_straylight,nlambda);
+					printf("\n--------------------------------------------------------------------------------\n");
 					exit(EXIT_FAILURE);
 				}
 				if(nx_straylight!=0 && ny_straylight!=0){
 					if(nx_straylight!= fitsImage->rows || ny_straylight !=fitsImage->cols ){
+						printf("\n--------------------------------------------------------------------------------");
 						printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND STRAYLIGHT FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraParalell[indexInputFits].name, fitsImage->rows, fitsImage->cols,configCrontrolFile.StrayLightFile,nx_straylight,ny_straylight);
+						printf("\n--------------------------------------------------------------------------------\n");
 						exit(EXIT_FAILURE);
 					}
 				}
 			}				
 			t = clock() - t;
-			PRECISION timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
-			printf("\n TIME TO READ FITS IMAGE %s:  %f seconds to execute . NUMBER OF PIXELS READ: %d \n",vInputFileSpectraDiv2Parallel[myGroup].name, timeReadImage,fitsImage->numPixels); 
+			PRECISION timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds
+			printf("\n--------------------------------------------------------------------------------"); 
+			printf("\n TIME TO READ FITS IMAGE %s:  %f seconds to execute . NUMBER OF PIXELS READ: %d ",vInputFileSpectraDiv2Parallel[myGroup].name, timeReadImage,fitsImage->numPixels); 
+			printf("\n--------------------------------------------------------------------------------\n");
 			numPixels = fitsImage->numPixels;
 		}
 
@@ -1422,7 +1479,9 @@ int main(int argc, char **argv)
 
 		if(numPixels > 0){
 			if(myGroupRank==groupRoot){
-				printf("\n***********************  DOING INVERSION: %s *******************************\n\n",vInputFileSpectraDiv2Parallel[myGroup].name );
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\n----------------------  DOING INVERSION: %s ",vInputFileSpectraDiv2Parallel[myGroup].name );
+				printf("\n--------------------------------------------------------------------------------");
 				resultsInitModelTotal = calloc (numPixels , sizeof(Init_Model));
 				chisqrfTotal = calloc (numPixels , sizeof(float));
 				vNumIterTotal = calloc (numPixels, sizeof(int));
@@ -1522,7 +1581,7 @@ int main(int argc, char **argv)
 							slightPixel = slight;
 						}
 					}
-					
+					vNumIter[indexPixel] = -1;
 					lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &vChisqrf[indexPixel], slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
 						configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma,  configCrontrolFile.noise,configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&vNumIter[indexPixel],configCrontrolFile.mu,configCrontrolFile.logclambda);																							
 					
@@ -1581,30 +1640,37 @@ int main(int argc, char **argv)
 
 			if(myGroupRank==groupRoot){
 				/*printf("\n Elapsed SCATTER time = %lf seconds\n", elapsed_scatter);
-				printf("\n***********************************\n");
+				printf("\n-----------------------------------\n");
 				printf("\n Elapsed GATHER time = %lf seconds\n", elapsed_gather);
-				printf("\n***********************************\n");			*/
-				printf("\n MAX EXECUTION time = %lf seconds\n", elapsed_execution);
-				printf("\n***********************************\n");
+				printf("\n-----------------------------------\n");			*/
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\n MAX EXECUTION time = %lf seconds", elapsed_execution);
+				printf("\n--------------------------------------------------------------------------------\n");
 				/*printf("\n Elapsed TOTAL time = %lf seconds\n", elapsed);
-				printf("\n***********************************\n");*/
+				printf("\n-----------------------------------\n");*/
 				double timeWriteImage;
 				clock_t t;
 				t = clock();
 				if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
 					if(!writeFitsImageModelsSubSet(vOutputNameModelsDiv2Parallel[myGroup].name,fitsImage->rows_original,fitsImage->cols_original,configCrontrolFile,resultsInitModelTotal,chisqrfTotal,vNumIterTotal,configCrontrolFile.saveChisqr)){	
-							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+						printf("\n--------------------------------------------------------------------------------");
+						printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+						printf("\n--------------------------------------------------------------------------------\n");
 					}
 				}
 				else{
 					if(!writeFitsImageModels(vOutputNameModelsDiv2Parallel[myGroup].name,fitsImage->rows,fitsImage->cols,resultsInitModelTotal,chisqrfTotal,vNumIterTotal,configCrontrolFile.saveChisqr)){
-							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsDiv2Parallel[myGroup].name);
+						printf("\n--------------------------------------------------------------------------------");
+						printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsDiv2Parallel[myGroup].name);
+						printf("\n--------------------------------------------------------------------------------\n");
 					}
 				}
 
 				t = clock() - t;
 				timeWriteImage = ((double)t)/CLOCKS_PER_SEC; // in seconds 
-				printf("\n TIME TO WRITE FITS IMAGE:  %f seconds to execute \n", timeWriteImage);
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\n TIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
+				printf("\n--------------------------------------------------------------------------------\n");
 				if(configCrontrolFile.SaveSynthesisAdjusted){
 					fitsImage->pixels = calloc(fitsImage->numPixels, sizeof(vpixels));
 					for( i=0;i<fitsImage->numPixels;i++){
@@ -1621,7 +1687,9 @@ int main(int argc, char **argv)
 					}					
 					// WRITE SINTHETIC PROFILES TO FITS FILE
 					if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedDiv2Parallel[myGroup].name,vInputFileSpectraDiv2Parallel[myGroup].name,fitsImage)){
+						printf("\n--------------------------------------------------------------------------------");
 						printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedDiv2Parallel[myGroup].name);
+						printf("\n--------------------------------------------------------------------------------\n");
 					}
 					
 					for( i=0;i<fitsImage->numPixels;i++){
@@ -1640,9 +1708,9 @@ int main(int argc, char **argv)
 				if(configCrontrolFile.SaveSynthesisAdjusted){
 					free(vSpectraAjustedTotal);
 				}
-				printf("\n************************************************************************************************************************\n");
-				printf("\n INVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME: %f *********************\n", vInputFileSpectraDiv2Parallel[myGroup].name,timeTotalExecution);
-				printf("\n************************************************************************************************************************\n");					
+				printf("\n-------------------------------------------------------------------------------------------------------------------------");
+				printf("\n INVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME: %f  ", vInputFileSpectraDiv2Parallel[myGroup].name,timeTotalExecution);
+				printf("\n-------------------------------------------------------------------------------------------------------------------------\n");				
 			}
 			else{
 				if(configCrontrolFile.SaveSynthesisAdjusted)
@@ -1656,7 +1724,9 @@ int main(int argc, char **argv)
 		else
 		{
 			if(myGroupRank==groupRoot){
-				printf("\n\n ***************************** FITS FILE CAN NOT BE READ IT %s ******************************",vInputFileSpectraDiv2Parallel[myGroup].name);
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\nFITS FILE CAN NOT BE READ IT %s ",vInputFileSpectraDiv2Parallel[myGroup].name);
+				printf("\n--------------------------------------------------------------------------------\n");
 			}
 		}
 		if(myGroupRank==groupRoot){

@@ -108,14 +108,15 @@ PRECISION readFileCuanticLines(const char * inputLineFile, PRECISION * cuanticDa
 	cuanticDat[6] = JUPI;
 	
 	if(printLog){
-		printf("\n***********************************");
-		printf("\n\n QUANTUM NUMBERS READ FROM FILE, FOR CENTRAL WAVELENGTH %lf: \n",lambdaLine);
+		printf("\n--------------------------------------------------------------------------------");
+		printf("\n QUANTUM NUMBERS READ FROM FILE, FOR CENTRAL WAVELENGTH %lf: \n",lambdaLine);
 		printf("\n\tSLOI: %fd",cuanticDat[1]);
 		printf("\n\tLLOI: %fd",cuanticDat[2]);
 		printf("\n\tJLOI: %fd",cuanticDat[3]);
 		printf("\n\tSUPI: %fd",cuanticDat[4]);
 		printf("\n\tLUPI: %fd",cuanticDat[5]);
 		printf("\n\tJUPI: %fd",cuanticDat[6]);
+		printf("\n--------------------------------------------------------------------------------\n");
 		
 	}
 	if(!found)
@@ -187,6 +188,95 @@ int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel){
 	return 1;
 }
 
+/**
+ * 
+ * Check if the initial model is inside a range.
+ * 
+ *  Si alguno está mal, abortar con un mensaje de error diciendo cuál es el parámetro problemático:
+	Todos los parámetros deben ser positivos (mayores o iguales que cero), excepto la velocidad LOS, que puede ser positiva o negativa
+	El filling factor debe ir entre 0 y 1
+	Gamma y azimuth van entre 0 y 360 grados. Aquí me había confundido: los valores de gamma y azimuth iniciales tienen que estar entre 0 y 180 grados.
+	Si el filling factor es menor que uno, debe haber un fichero de perfiles de luz difusa. Si no, el programa aborta con un mensaje de error.
+
+ * */
+int checkInitialModel (Init_Model * INIT_MODEL){
+
+	if (INIT_MODEL->B < 0 || INIT_MODEL->B > 5000)
+	{
+		printf("\n Value of magnetic field [G] is out of range [0,5000], review it please. Current value: %f", INIT_MODEL->B);
+		exit(EXIT_FAILURE);
+
+	}
+
+	//Inclination
+	if (INIT_MODEL->gm < 0 || INIT_MODEL->gm > 180)
+	{
+		printf("\n Value of gamma [deg] is out of range [0,180], review it please. Current value: %f", INIT_MODEL->gm);
+		exit(EXIT_FAILURE);
+	}
+
+	//azimuth
+	if (INIT_MODEL->az < 0 || INIT_MODEL->az > 180)
+	{
+		printf("\n Value of phi [deg] is out of range [0,180], review it please. Current value: %f", INIT_MODEL->az);
+		exit(EXIT_FAILURE);
+	}
+
+	//RANGOS
+	//Eta0
+	if (INIT_MODEL->eta0 < 1 || INIT_MODEL->eta0 > 2500) {
+		printf("\n Value of eta_0 is out of range [1,2500], review it please. Current value: %f", INIT_MODEL->eta0);
+		exit(EXIT_FAILURE);		
+	}
+
+	//velocity
+	if (INIT_MODEL->vlos < (-20) || INIT_MODEL->vlos > 20){
+		printf("\n Value of LOS velocity [km/s] is out of range [-20,20], review it please. Current value: %f", INIT_MODEL->vlos);
+		exit(EXIT_FAILURE);		
+	}
+
+
+	//doppler width ;Do NOT CHANGE THIS
+	if (INIT_MODEL->dopp < 0.0001 || INIT_MODEL->dopp > 0.6){
+		printf("\n Value of Doppler width [A] is out of range [0.0001,0.6], review it please. Current value: %f", INIT_MODEL->dopp);
+		exit(EXIT_FAILURE);
+	}
+
+
+	// damping  idl 1e-4
+	if (INIT_MODEL->aa < 0.0001 || INIT_MODEL->aa > 10.0){
+		printf("\n Value of damping is out of range [0.0001,10.0], review it please. Current value: %f", INIT_MODEL->aa);
+		exit(EXIT_FAILURE);
+	} 
+
+
+	//S0
+	if (INIT_MODEL->S0 <0 || INIT_MODEL->S0 > 2.00){
+		printf("\n Value of S0 is out of range [0.0,2.0], review it please. Current value: %f", INIT_MODEL->S0);
+		exit(EXIT_FAILURE);
+	}
+
+
+	//S1
+	if (INIT_MODEL->S1 <0 || INIT_MODEL->S1 > 2.00){
+		printf("\n Value of S1 is out of range [0.0001,10.0], review it please. Current value: %f", INIT_MODEL->S1);
+		exit(EXIT_FAILURE);
+	}
+
+	//macroturbulence
+	if (INIT_MODEL->mac <0 || INIT_MODEL->mac > 4){
+		printf("\n Value of v_mac [km/s] is out of range [0,4], review it please. Current value: %f", INIT_MODEL->mac);
+		exit(EXIT_FAILURE);
+	}
+
+	// filling factor 
+	if(INIT_MODEL->alfa<0 || INIT_MODEL->alfa>1.0){
+		printf("\n Value of filling factor is out of range [0,1.0], review it please. Current value: %f", INIT_MODEL->alfa);
+		exit(EXIT_FAILURE);
+	}
+
+
+}
 
 
 /**
@@ -232,7 +322,7 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 	}
 
 	if(printLog){	
-		printf("\n\n MALLA GRID --- indexline %d , initial lambda: %lf, step: %lf, finallambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
+		printf("\nMALLA GRID --- indexline %d , initial lambda: %lf, step: %lf, finallambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
 	}
 
 	if(dataRead)

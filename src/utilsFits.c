@@ -769,7 +769,7 @@ FitsImage * readFitsSpectroNPixels (const char * fitsFileSpectra, int rowInit, i
 					}					
 				}
 				printf("\n IDPROD %d Número de pixeles: %d",forParallel, image->numPixels);
-				printf("\n ***********************************************");
+				
 
 				int currentLambda = 0, currentRow = 0, currentStokeParameter=0, currentCol = 0, currentPixel;
 				//PRECISION pixel;

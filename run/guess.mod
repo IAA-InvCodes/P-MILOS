@@ -1,11 +1,11 @@
-eta_0:          20
-magnetic field: 1900
-LOS velocity:   0.5
-Doppler width:  0.15
-damping:        0.1
-gamma:          50
-phi:            115
-S_0:            0.5
-S_1:            1
-v_mac:          2
-filling factor: 1
+eta_0                :14.
+magnetic field [G]   :1800.
+LOS velocity [km/s]  :0.5
+Doppler width [A]    :0.07
+damping              :0.05
+gamma [deg]          :100.
+phi   [deg]          :50.
+S_0                  :0.25
+S_1                  :0.75
+v_mac [km/s]         :2.
+filling factor       :1

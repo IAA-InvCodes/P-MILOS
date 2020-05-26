@@ -7,5 +7,5 @@ gamma [deg]          :130.
 phi   [deg]          :25.
 S_0                  :0.25
 S_1                  :0.75
-v_mac [km/s]         :0.
-filling factor       :0.85
+v_mac [km/s]         :1.
+filling factor       :1

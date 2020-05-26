@@ -24,3 +24,4 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 char* file_ext(const char *string);
 
 char * get_basefilename (const char * fname);
+int checkInitialModel (Init_Model * INIT_MODEL);

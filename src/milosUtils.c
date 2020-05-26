@@ -241,8 +241,8 @@ int check(Init_Model *model)
 		model->B = -(model->B);
 		model->gm = 180.0 - (model->gm);
 	}
-	if (model->B > 4500)
-		model->B = 4500;
+	if (model->B > 5000)
+		model->B = 5000;
 
 	//Inclination
 	if (model->gm < 0)
@@ -288,14 +288,14 @@ int check(Init_Model *model)
 	//S0
 	if (model->S0 < 0.0001)
 		model->S0 = 0.0001;
-	if (model->S0 > 10.00)
-		model->S0 = 10.00;
+	if (model->S0 > 2.00)
+		model->S0 = 2.00;
 
 	//S1
 	if (model->S1 < 0.0001)
 		model->S1 = 0.0001;
-	if (model->S1 > 10.00)
-		model->S1 = 10.00;
+	if (model->S1 > 2.00)
+		model->S1 = 2.00;
 
 	//macroturbulence
 	if (model->mac < 0)
@@ -657,30 +657,34 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
   	REAL PARBETA_FACTOR = 1.0;
 
 	//int iter;
-	int i, *fixed, nfree, n_ghots=0;
+	int i, *fixed, nfree, n_ghosts=0, log = 0;
+	
 	PRECISION delta[NTERMS];
 	
 	for(i=0;i<nlambda*NPARMS;i++){
 		if(spectro[i]<=-1){ 
-			//printf("\n sigma %i cambiada",i);
 			vSigma[i]= 1000000000000000000000.0;
-			//vSigma[i]= FLT_MAX;
-			//vSigma[i]= -1;
-			n_ghots++;
+			n_ghosts++;
 		}
 		else{
 			vSigma[i] = sigma;
 		}
 	}
-	
-	REAL flambda;
+	// we use *iter to know if we are in the first pixel inverted 
+	if(*iter==0){
+		printf("\n--------------------------------------------------------------------------------");
+		printf("\n %d points in the profiles not inverted because they are smaller than -1",n_ghosts);
+		printf("\n--------------------------------------------------------------------------------\n");
+		log=1;
+	}
+	REAL flambda,s_n;
 	REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr, chisqr0;
 	int clanda, ind;
 	Init_Model model;	
 	
 	nfree = CalculaNfree(nspectro);
-	nfree = nfree - n_ghots;	
+	nfree = nfree - n_ghosts;	
 	if (nfree == 0)
 	{
 		return -1; //'NOT ENOUGH POINTS'
@@ -708,35 +712,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	PRECISION covar[NTERMS * NTERMS];
 	PRECISION betad[NTERMS];
 
-	
 
 	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac, spectra_slight, *INSTRUMENTAL_CONVOLUTION);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra_slight,ah, slight, *INSTRUMENTAL_CONVOLUTION,fixed);	
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
 	covarm(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
@@ -753,7 +730,10 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	chisqr0 = ochisqr;
 
 	model = *initModel;
-	
+	if(log){
+		printf("\nit\tDE      \ts/n         \tchi**2      \tmac     \tfill\n");
+	}
+
 	do
 	{
 		
@@ -767,14 +747,15 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		mil_svd(covar, betad, delta);
 		AplicaDelta(initModel, delta, fixed, &model);
 
-		check(&model);
+		check(&model);		
 		mil_sinrf(cuantic, &model, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac,spectra_slight,*INSTRUMENTAL_CONVOLUTION);
 	
 		chisqr = fchisqr(spectra, nspectro, spectro, weight, vSigma, nfree);
-		
+
 		/**************************************************************************/
 
 		//printf("\n CHISQR EN LA ITERACION %d,: %e",*iter,chisqr);
+		
 		
 		/**************************************************************************/
 		if ((FABS((ochisqr-chisqr)*100/chisqr) < toplim) || (chisqr < 0.0001)) // condition to exit of the loop 
@@ -796,12 +777,23 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 				covar[i] = alpha[i];
 
 			ochisqr = chisqr;
-			
+			if(log){
+				float suma_aux =0;
+				float f_aux;
+				for(i=0;i<nspectro;i++){
+					f_aux = (spectro[i]-spectra[i]);
+					suma_aux = suma_aux + (f_aux*f_aux); 
+				}
+
+				s_n= (nlambda*(nspectro-n_ghosts))/suma_aux;
+				printf("\n%d\t%f\t%e\t%e\t%f\t%f",*iter,flambda,s_n,ochisqr,initModel->mac,initModel->alfa);
+			}	
 		}
 		else
 		{
 			//flambda = flambda * 10; //10;
 			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
+			printf("\n%d\t%f\tincreases\t----------------------------------------",*iter,flambda);
 		}
 
 		if ((flambda > 1e+7) || (flambda < 1e-25)) 
