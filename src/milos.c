@@ -891,7 +891,7 @@ int main(int argc, char **argv)
 			printf("\n--------------------------------------------------------------------------------");
 			printf("\nOBSERVED PROFILES FILE READ: %s", nameInputFileSpectra);
 			printf("\n--------------------------------------------------------------------------------");
-			printf("\n TIME TO READ FITS IMAGE:  %f seconds to execute ", timeReadImage); 
+			printf("\nTIME TO READ FITS IMAGE:  %f seconds to execute ", timeReadImage); 
 			printf("\n--------------------------------------------------------------------------------\n");
 			
 

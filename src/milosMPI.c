@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 {
 	int i;  // indexes 
 	
-	int indexLine; // index to identify central line to read it 
+	int indexLine, free_params; // index to identify central line to read it 
 	PRECISION initialLambda, step, finalLambda;
 	// INIT MPI  PROGRAM 
 	int numProcs, idProc;
@@ -255,7 +255,15 @@ int main(int argc, char **argv)
 	PRECISION * vGlobalLambda, *vOffsetsLambda;
 
 	if(configCrontrolFile.useMallaGrid){ // read lambda from grid file
+		if(idProc==root){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nMALLA GRID FILE READ: %s",configCrontrolFile.MallaGrid);
+			printf("\n--------------------------------------------------------------------------------");
+		}
 		indexLine = readMallaGrid(configCrontrolFile.MallaGrid, &initialLambda, &step, &finalLambda, (idProc==root));      
+		if(idProc==root){
+			printf("--------------------------------------------------------------------------------\n");
+		}
 		nlambda = ((finalLambda-initialLambda)/step)+1;
 		vOffsetsLambda = calloc(nlambda,sizeof(PRECISION));
 		vOffsetsLambda[0] = initialLambda;
@@ -267,6 +275,12 @@ int main(int argc, char **argv)
 		step = step/1000;
 		finalLambda = finalLambda/1000;
 		vGlobalLambda = calloc(nlambda,sizeof(PRECISION));
+		if(idProc==root){
+			printf("Number of wavelengths in the wavelength grid: %d",nlambda);
+			printf("\n--------------------------------------------------------------------------------\n");
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nATMOSPHERE LINES FILE READ: %s",configCrontrolFile.AtomicParametersFile);		
+		}
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(configCrontrolFile.AtomicParametersFile,dat,indexLine,(idProc==root));
 		if(configCrontrolFile.CentralWaveLenght==0){
 			printf("\n QUANTUM LINE NOT FOUND, REVIEW IT. INPUT CENTRAL WAVELENGHT: %f",configCrontrolFile.CentralWaveLenght);
@@ -278,11 +292,22 @@ int main(int argc, char **argv)
      	}
 	}
 	else{
+		if(idProc==root){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nWAVELENGTH FILE READ: %s",configCrontrolFile.WavelengthFile);
+		}
 		vGlobalLambda = readFitsLambdaToArray(configCrontrolFile.WavelengthFile,&indexLine,&nlambda);
 		if(vGlobalLambda==NULL){
 			printf("\n FILE WITH WAVELENGHT HAS NOT BEEN READ PROPERLY, please check it.\n");
 			free(vGlobalLambda);
 			exit(EXIT_FAILURE);
+		}
+		if(idProc==root){
+			printf("--------------------------------------------------------------------------------\n");
+			printf("Number of wavelengths in the wavelength file: %d",nlambda);
+			printf("\n--------------------------------------------------------------------------------\n");
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nATMOSPHERE LINES FILE READ: %s",configCrontrolFile.AtomicParametersFile);			
 		}
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(configCrontrolFile.AtomicParametersFile,dat,indexLine,(idProc==root));
 		if(configCrontrolFile.CentralWaveLenght==0){
@@ -365,6 +390,13 @@ int main(int argc, char **argv)
 		MPI_Barrier(MPI_COMM_WORLD);
 	}
 
+	if(idProc==root){
+		free_params=0;
+		for(i=0;i<11;i++){
+			if(configCrontrolFile.fix[i])
+				free_params++;
+		}
+	}
 	
 	// ************************** DEFINE PLANS TO EXECUTE MACROTURBULENCE IF NECESSARY **********************************************//
 	// MACROTURBULENCE PLANS
@@ -392,60 +424,65 @@ int main(int argc, char **argv)
 		}
 		else if(access(nameInputFilePSF,F_OK) != -1){
 			// read the number of lines 
-				FILE *fp;
-				char ch;
-				N_SAMPLES_PSF=0;
-				//open file in read more
-				fp=fopen(nameInputFilePSF,"r");
-				if(fp==NULL)
-				{
-					printf("\n--------------------------------------------------------------------------------");
-					printf("File \"%s\" does not exist!!!",nameInputFilePSF);
-					printf("\n--------------------------------------------------------------------------------");
-					return 0;
-				}
-				//read character by character and check for new line	
-				while((ch=fgetc(fp))!=EOF)
-				{
-					if(ch=='\n')
-						N_SAMPLES_PSF++;
-				}
-				
-				//close the file
-				fclose(fp);
-				if(N_SAMPLES_PSF>0){
-					deltaLambda = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
-					PSF = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
-					readPSFFile(deltaLambda,PSF,nameInputFilePSF,configCrontrolFile.CentralWaveLenght);
-					// CHECK if values of deltaLambda are in the same range of vLambda. For do that we truncate to 4 decimal places 
-					if( (trunc(vOffsetsLambda[0])) < (trunc(deltaLambda[0]))  || (trunc(vOffsetsLambda[nlambda-1])) > (trunc(deltaLambda[N_SAMPLES_PSF-1])) ){
-						if(idProc==root){
-							printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vOffsetsLambda[0],deltaLambda[N_SAMPLES_PSF-1],vOffsetsLambda[nlambda-1]);
-						}
-						exit(EXIT_FAILURE);
+			FILE *fp;
+			char ch;
+			N_SAMPLES_PSF=0;
+			//open file in read more
+			fp=fopen(nameInputFilePSF,"r");
+			if(fp==NULL)
+			{
+				printf("\n--------------------------------------------------------------------------------");
+				printf("File \"%s\" does not exist!!!",nameInputFilePSF);
+				printf("\n--------------------------------------------------------------------------------");
+				return 0;
+			}
+			//read character by character and check for new line	
+			while((ch=fgetc(fp))!=EOF)
+			{
+				if(ch=='\n')
+					N_SAMPLES_PSF++;
+			}
+			
+			//close the file
+			fclose(fp);
+			if(N_SAMPLES_PSF>0){
+				deltaLambda = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
+				PSF = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
+				readPSFFile(deltaLambda,PSF,nameInputFilePSF,configCrontrolFile.CentralWaveLenght);
+				// CHECK if values of deltaLambda are in the same range of vLambda. For do that we truncate to 4 decimal places 
+				if( (trunc(vOffsetsLambda[0])) < (trunc(deltaLambda[0]))  || (trunc(vOffsetsLambda[nlambda-1])) > (trunc(deltaLambda[N_SAMPLES_PSF-1])) ){
+					if(idProc==root){
+						printf("\n\n ERROR: The wavelength range given in the PSF file is smaller than the range in the mesh file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vOffsetsLambda[0],deltaLambda[N_SAMPLES_PSF-1],vOffsetsLambda[nlambda-1]);
 					}
-					G = calloc(nlambda,sizeof(PRECISION));
-					double offset =0;
-					int posWL = 0;
-					for(i=0;i<nlambda && !posWL;i++){
-						//if( (trunc(vGlobalLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
-						if( fabs(trunc(vOffsetsLambda[i]))==0)
-							posWL = i;
-					}
-					if(posWL!= (nlambda/2)){ // move center to the middle of samples
-						//printf("\nPOS CENTRAL WL %i",posWL);
-						offset = (((nlambda/2)-posWL)*step)*1000;
-						//printf ("\n OFFSET IS %f\n",offset);
-					}					
-					interpolationLinearPSF(deltaLambda,  PSF, vOffsetsLambda , N_SAMPLES_PSF, G, nlambda,offset);		
-					sizeG=nlambda;	
-				}
-				else{
-					//G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
-					if(idProc==root)
-						printf("\n****************** ERROR THE PSF FILE is empty or damaged.******************\n");
 					exit(EXIT_FAILURE);
 				}
+				G = calloc(nlambda,sizeof(PRECISION));
+				double offset =0;
+				int posWL = 0;
+				for(i=0;i<nlambda && !posWL;i++){
+					//if( (trunc(vGlobalLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
+					if( fabs(trunc(vOffsetsLambda[i]))==0)
+						posWL = i;
+				}
+				if(posWL!= (nlambda/2)){ // move center to the middle of samples
+					//printf("\nPOS CENTRAL WL %i",posWL);
+					offset = (((nlambda/2)-posWL)*step)*1000;
+					//printf ("\n OFFSET IS %f\n",offset);
+				}					
+				interpolationLinearPSF(deltaLambda,  PSF, vOffsetsLambda , N_SAMPLES_PSF, G, nlambda,offset);		
+				sizeG=nlambda;	
+			}
+			else{
+				//G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
+				if(idProc==root)
+					printf("\n****************** ERROR THE PSF FILE is empty or damaged.******************\n");
+				exit(EXIT_FAILURE);
+			}
+			if(idProc==root){
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\nPSF FILE READ: %s", nameInputFilePSF);
+				printf("\n--------------------------------------------------------------------------------\n");
+			}
 		}
 
 		
@@ -928,6 +965,27 @@ int main(int argc, char **argv)
 		}
 	}
 
+	// PRINT INFORMATION 
+	if(idProc==root){
+		printf("\n--------------------------------------------------------------------------------");
+		printf("\nNumber of free parameters for inversion: %d", free_params);
+		printf("\n--------------------------------------------------------------------------------\n");		
+		if(configCrontrolFile.ConvolveWithPSF && INITIAL_MODEL.mac>0){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nThe program needs to use convolution. Filter PSF actived and macroturbulence greater than zero. ");
+			printf("\n--------------------------------------------------------------------------------\n");
+		}
+		else if(configCrontrolFile.ConvolveWithPSF){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nThe program needs to use convolution. Filter PSF actived. ");
+			printf("\n--------------------------------------------------------------------------------\n");
+		}
+		else if(INITIAL_MODEL.mac>0){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nThe program needs to use convolution. Macroturbulence in initial atmosphere model greater than zero.");
+			printf("\n--------------------------------------------------------------------------------\n");
+		}
+	}
 	AllocateMemoryDerivedSynthesis(nlambda);
 	//*************************************** ONE IMAGE PER PROCESSOR *********************************
 
@@ -1111,7 +1169,7 @@ int main(int argc, char **argv)
 						free(vSpectraAjustedTotal_L[indexInputFits]);
 					}
 					
-					printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
+					printf("\n-------------------------------------------------------------------------------------------------------------------------");
 					printf("\nINVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f ", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
 					//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
 					printf("\nTIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
