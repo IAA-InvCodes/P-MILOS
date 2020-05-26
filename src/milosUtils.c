@@ -677,6 +677,9 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		printf("\n--------------------------------------------------------------------------------\n");
 		log=1;
 	}
+	else{
+		log=0;
+	}
 	REAL flambda,s_n;
 	REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr, chisqr0;

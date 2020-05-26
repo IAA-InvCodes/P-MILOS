@@ -345,7 +345,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 				
 				if(bitpix != FLOAT_IMG){
 					printf("\n ERROR: the datatype of FITS spectro image must be FLOAT\n");
-					printf("\n EXITING THE PROGRAM");
+					printf("\n EXITING THE PROGRAM\n");
 					fits_close_file(fptr, &status);
 					exit(EXIT_FAILURE);
 				}
@@ -404,7 +404,7 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
 
 				if(naxes[pos_lambda] != nLambdaGrid){
 					printf("\n ERROR: The dimension of wavelenght is different in FITS file  %ld to give dimension in grid file %d \n",naxes[pos_lambda],nLambdaGrid);
-					printf("\n EXITING THE PROGRAM");
+					printf("\n EXITING THE PROGRAM\n");
 					fits_close_file(fptr, &status);
 					exit(EXIT_FAILURE);
 				}
@@ -990,7 +990,7 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 
 				if(bitpix != FLOAT_IMG){
 					printf("\n ERROR: the datatype of FITS spectro image must be FLOAT\n");
-					printf("\n EXITING THE PROGRAM");
+					printf("\n EXITING THE PROGRAM\n");
 					fits_close_file(fptr, &status);
 					exit(EXIT_FAILURE);
 				}
@@ -1042,7 +1042,7 @@ FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, Confi
 
 				if(naxes[pos_lambda] != nLambdaGrid){
 					printf("\n ERROR: The dimension of wavelenght is different in FITS file  %ld to give dimension in grid file %d \n",naxes[pos_lambda],nLambdaGrid);
-					printf("\n EXITING THE PROGRAM");
+					printf("\n EXITING THE PROGRAM\n");
 					fits_close_file(fptr, &status);
 					exit(EXIT_FAILURE);
 				}
@@ -1575,7 +1575,7 @@ float * readFitsStrayLightFile (ConfigControl * configCrontrolFile,int * nl_stra
 		if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
 			if(bitpix != FLOAT_IMG){
 				printf("\n ERROR: the datatype of FITS spectro image must be FLOAT\n");
-				printf("\n EXITING THE PROGRAM");
+				printf("\n EXITING THE PROGRAM\n");
 				fits_close_file(fptr, &status);
 				exit(EXIT_FAILURE);
 			}
@@ -1895,7 +1895,7 @@ float * readFitsStrayLightFileSubSet (ConfigControl * configCrontrolFile,int * n
 		if (!fits_get_img_param(fptr, 4, &bitpix, &naxis, naxes, &status) ){
 			if(bitpix != FLOAT_IMG){
 				printf("\n ERROR: the datatype of FITS spectro image must be FLOAT\n");
-				printf("\n EXITING THE PROGRAM");
+				printf("\n EXITING THE PROGRAM\n");
 				fits_close_file(fptr, &status);
 				exit(EXIT_FAILURE);
 			}
