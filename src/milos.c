@@ -890,9 +890,10 @@ int main(int argc, char **argv)
 			timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
 			printf("\n--------------------------------------------------------------------------------");
 			printf("\nOBSERVED PROFILES FILE READ: %s", nameInputFileSpectra);
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\n TIME TO READ FITS IMAGE:  %f seconds to execute ", timeReadImage); 
 			printf("\n--------------------------------------------------------------------------------\n");
-			printf("\n\n TIME TO READ FITS IMAGE:  %f seconds to execute \n", timeReadImage); 
-			//slog_info(0,"\n\n TIME TO READ FITS IMAGE:  %f seconds to execute \n", timeReadImage);
+			
 
 			if(fitsImage!=NULL){
 				FitsImage * imageStokesAdjust = NULL;
@@ -1023,7 +1024,7 @@ int main(int argc, char **argv)
 				}
 				t = clock() - t;
 				timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
-				printf("\n--------------------------------------------------------------------------------");
+				printf("\n\n--------------------------------------------------------------------------------");
 				printf("\nFINISH EXECUTION OF INVERSION: %f seconds to execute ", timeReadImage);
 				printf("\n--------------------------------------------------------------------------------");
 				
@@ -1065,9 +1066,9 @@ int main(int argc, char **argv)
 				printf("\n\n ***************************** FITS FILE WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************\n");
 			}			
 
-			printf("\n--------------------------------------------------------------------------------");
+			/*printf("\n--------------------------------------------------------------------------------");
 			printf("\n------------------------  IMAGE INVERSION DONE, CLEANING MEMORY ----------------");
-			printf("\n--------------------------------------------------------------------------------\n");
+			printf("\n--------------------------------------------------------------------------------\n");*/
 
 			freeFitsImage(fitsImage);
 		}
