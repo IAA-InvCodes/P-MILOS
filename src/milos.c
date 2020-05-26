@@ -545,7 +545,9 @@ int main(int argc, char **argv)
 		if(access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
 			if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
 				slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
-				printf("\nSTRAY LIGHT FILE READ: %s\n ", configCrontrolFile.StrayLightFile);
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\nSTRAY LIGHT FILE READ: %s ", configCrontrolFile.StrayLightFile);
+				printf("\n--------------------------------------------------------------------------------\n");
 			}
 			else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
 				slight= readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
@@ -559,7 +561,9 @@ int main(int argc, char **argv)
 					free(slight);
 					slight= NULL;
 				}
-				printf("\nSTRAY LIGHT FILE READ: %s\n ", configCrontrolFile.StrayLightFile);
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\nSTRAY LIGHT FILE READ: %s ", configCrontrolFile.StrayLightFile);
+				printf("\n--------------------------------------------------------------------------------\n");
 			}
 			else{
 				printf("\n Stray light file hasn't extension .PER or .FITS, review it. \n. Stray light will not used for synthesis.\n");
@@ -711,7 +715,9 @@ int main(int argc, char **argv)
 			if(configCrontrolFile.fix[10] &&  access(configCrontrolFile.StrayLightFile,F_OK)!=-1){ //  IF NOT EMPTY READ stray light file 
 				if(strcmp(file_ext(configCrontrolFile.StrayLightFile),PER_FILE)==0){
 					slight = readPerStrayLightFile(configCrontrolFile.StrayLightFile,nlambda,vOffsetsLambda);
-					printf("\nSTRAY LIGHT FILE READ: %s\n ", configCrontrolFile.StrayLightFile);
+					printf("\n--------------------------------------------------------------------------------");
+					printf("\nSTRAY LIGHT FILE READ: %s ", configCrontrolFile.StrayLightFile);
+					printf("\n--------------------------------------------------------------------------------\n");
 				}
 				else if(strcmp(file_ext(configCrontrolFile.StrayLightFile),FITS_FILE)==0){
 					slight= readFitsStrayLightFile(&configCrontrolFile,&nl_straylight,&ns_straylight,&nx_straylight, &ny_straylight);
@@ -725,7 +731,9 @@ int main(int argc, char **argv)
 						free(slight);
 						slight= NULL;
 					}
-					printf("\nSTRAY LIGHT FILE READ: %s\n ", configCrontrolFile.StrayLightFile);
+					printf("\n--------------------------------------------------------------------------------");
+					printf("\nSTRAY LIGHT FILE READ: %s ", configCrontrolFile.StrayLightFile);
+					printf("\n--------------------------------------------------------------------------------\n");
 				}
 				else{
 					printf("\n Stray light file hasn't extension .PER or .FITS, review it. \n. Stray light will not used for inversion pixel.\n");
