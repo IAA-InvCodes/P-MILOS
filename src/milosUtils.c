@@ -677,9 +677,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		printf("\n--------------------------------------------------------------------------------\n");
 		log=1;
 	}
-	else{
-		log=0;
-	}
+
 	REAL flambda,s_n;
 	REAL beta[NTERMS], alpha[NTERMS * NTERMS];
 	REAL chisqr, ochisqr, chisqr0;
@@ -796,7 +794,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		{
 			//flambda = flambda * 10; //10;
 			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
-			printf("\n%d\t%f\tincreases\t----------------------------------------",*iter,flambda);
+			if(log)
+				printf("\n%d\t%f\tincreases\t----------------------------------------",*iter,flambda);
 		}
 
 		if ((flambda > 1e+7) || (flambda < 1e-25)) 
