@@ -911,7 +911,7 @@ int main(int argc, char **argv)
 				
 				if(idProc == root){
 					printf("\n--------------------------------------------------------------------------------");
-					printf("\n------------  DOING INVERSION: %s",vInputFileSpectraParalell[indexInputFits].name );
+					printf("\nDOING INVERSION: %s",vInputFileSpectraParalell[indexInputFits].name );
 					printf("\n--------------------------------------------------------------------------------\n");
 					
 					resultsInitModelTotal_L[indexInputFits] = calloc (vNumPixelsImage[indexInputFits] , sizeof(Init_Model));
@@ -1541,7 +1541,7 @@ int main(int argc, char **argv)
 		if(numPixels > 0){
 			if(myGroupRank==groupRoot){
 				printf("\n--------------------------------------------------------------------------------");
-				printf("\n----------------------  DOING INVERSION: %s ",vInputFileSpectraDiv2Parallel[myGroup].name );
+				printf("\nDOING INVERSION: %s ",vInputFileSpectraDiv2Parallel[myGroup].name );
 				printf("\n--------------------------------------------------------------------------------");
 				resultsInitModelTotal = calloc (numPixels , sizeof(Init_Model));
 				chisqrfTotal = calloc (numPixels , sizeof(float));
