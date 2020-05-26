@@ -791,6 +791,27 @@ int main(int argc, char **argv)
 		MPI_Barrier(MPI_COMM_WORLD);		
 	}
 
+	// PRINT INFORMATION 
+	if(idProc==root){
+		printf("\n--------------------------------------------------------------------------------");
+		printf("\nNumber of free parameters for inversion: %d", free_params);
+		printf("\n--------------------------------------------------------------------------------\n");		
+		if(configCrontrolFile.ConvolveWithPSF && INITIAL_MODEL.mac>0){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nThe program needs to use convolution. Filter PSF actived and macroturbulence greater than zero. ");
+			printf("\n--------------------------------------------------------------------------------\n");
+		}
+		else if(configCrontrolFile.ConvolveWithPSF){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nThe program needs to use convolution. Filter PSF actived. ");
+			printf("\n--------------------------------------------------------------------------------\n");
+		}
+		else if(INITIAL_MODEL.mac>0){
+			printf("\n--------------------------------------------------------------------------------");
+			printf("\nThe program needs to use convolution. Macroturbulence in initial atmosphere model greater than zero.");
+			printf("\n--------------------------------------------------------------------------------\n");
+		}
+	}
 	
 	// MEMORY IF SCATTER IMAGES 
 
@@ -820,6 +841,8 @@ int main(int argc, char **argv)
 	int displsPixels_L [numFilesPerProcessParallel][numProcs];  // array describing the displacements where each segment begins
 	int displsSpectro_L [numFilesPerProcessParallel][numProcs];
 	//int displsLambda [numProcs];
+	
+
 	
 	double * vElapsed_execution = calloc(numFilesPerProcessParallel,sizeof(double));
 	int indexInputFits;
@@ -965,27 +988,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// PRINT INFORMATION 
-	if(idProc==root){
-		printf("\n--------------------------------------------------------------------------------");
-		printf("\nNumber of free parameters for inversion: %d", free_params);
-		printf("\n--------------------------------------------------------------------------------\n");		
-		if(configCrontrolFile.ConvolveWithPSF && INITIAL_MODEL.mac>0){
-			printf("\n--------------------------------------------------------------------------------");
-			printf("\nThe program needs to use convolution. Filter PSF actived and macroturbulence greater than zero. ");
-			printf("\n--------------------------------------------------------------------------------\n");
-		}
-		else if(configCrontrolFile.ConvolveWithPSF){
-			printf("\n--------------------------------------------------------------------------------");
-			printf("\nThe program needs to use convolution. Filter PSF actived. ");
-			printf("\n--------------------------------------------------------------------------------\n");
-		}
-		else if(INITIAL_MODEL.mac>0){
-			printf("\n--------------------------------------------------------------------------------");
-			printf("\nThe program needs to use convolution. Macroturbulence in initial atmosphere model greater than zero.");
-			printf("\n--------------------------------------------------------------------------------\n");
-		}
-	}
+
 	AllocateMemoryDerivedSynthesis(nlambda);
 	//*************************************** ONE IMAGE PER PROCESSOR *********************************
 
