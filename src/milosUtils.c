@@ -732,7 +732,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	model = *initModel;
 	if(log){
-		printf("\n________________________________________________________________________________");
+		printf("\n______________________________________________________________________");
 		printf("\nit\tDE      \t s/n         \t chi**2      \t mac\t fill\n");
 	}
 
@@ -796,7 +796,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			//flambda = flambda * 10; //10;
 			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
 			if(log)
-				printf("\n%d\t%f\t increases\t________________________________________",*iter,flambda);
+				printf("\n%d\t%f\t increases\t______________________________",*iter,flambda);
 		}
 
 		if ((flambda > 1e+7) || (flambda < 1e-25)) 
@@ -810,7 +810,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	*chisqrf = ochisqr;
 	
 	if(log){
-		printf("\n________________________________________________________________________________\n");
+		printf("\n______________________________________________________________________\n");
 	
 	}
 	if (fix == NULL)
