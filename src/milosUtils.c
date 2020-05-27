@@ -732,6 +732,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	model = *initModel;
 	if(log){
+		printf("\n--------------------------------------------------------------------------------");
 		printf("\nit\tDE      \ts/n         \tchi**2      \tmac     \tfill\n");
 	}
 
@@ -808,6 +809,10 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	*chisqrf = ochisqr;
 	
+	if(log){
+		printf("\n--------------------------------------------------------------------------------\n");
+	
+	}
 	if (fix == NULL)
 		free(fixed);
 
