@@ -798,12 +798,12 @@ int main(int argc, char **argv)
 		printf("\n--------------------------------------------------------------------------------\n");		
 		if(configCrontrolFile.ConvolveWithPSF && INITIAL_MODEL.mac>0){
 			printf("\n--------------------------------------------------------------------------------");
-			printf("\nThe program needs to use convolution. Filter PSF actived and macroturbulence greater than zero. ");
+			printf("\nThe program needs to use convolution. Filter PSF activactivateded and macroturbulence greater than zero. ");
 			printf("\n--------------------------------------------------------------------------------\n");
 		}
 		else if(configCrontrolFile.ConvolveWithPSF){
 			printf("\n--------------------------------------------------------------------------------");
-			printf("\nThe program needs to use convolution. Filter PSF actived. ");
+			printf("\nThe program needs to use convolution. Filter PSF activated. ");
 			printf("\n--------------------------------------------------------------------------------\n");
 		}
 		else if(INITIAL_MODEL.mac>0){

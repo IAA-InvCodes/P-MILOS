@@ -732,8 +732,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 
 	model = *initModel;
 	if(log){
-		printf("\n--------------------------------------------------------------------------------");
-		printf("\nit\tDE      \ts/n         \tchi**2      \tmac     \tfill\n");
+		printf("\n________________________________________________________________________________");
+		printf("\nit\tDE      \t s/n         \t chi**2      \t mac\t fill\n");
 	}
 
 	do
@@ -788,7 +788,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 				}
 
 				s_n= (nlambda*(nspectro-n_ghosts))/suma_aux;
-				printf("\n%d\t%f\t%e\t%e\t%f\t%f",*iter,flambda,s_n,ochisqr,initModel->mac,initModel->alfa);
+				printf("\n%d\t%f\t%9.2e\t%10.3e\t%6.3f\t%6.3f",*iter,flambda,s_n,ochisqr,initModel->mac,initModel->alfa);
 			}	
 		}
 		else
@@ -796,7 +796,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			//flambda = flambda * 10; //10;
 			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
 			if(log)
-				printf("\n%d\t%f\tincreases\t----------------------------------------",*iter,flambda);
+				printf("\n%d\t%f\t increases\t________________________________________",*iter,flambda);
 		}
 
 		if ((flambda > 1e+7) || (flambda < 1e-25)) 
@@ -810,7 +810,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	*chisqrf = ochisqr;
 	
 	if(log){
-		printf("\n--------------------------------------------------------------------------------\n");
+		printf("\n________________________________________________________________________________\n");
 	
 	}
 	if (fix == NULL)
