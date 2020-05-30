@@ -59,7 +59,7 @@ REAL **FGlobalInicial;
 
 PRECISION *GMAC,*GMAC_DERIV, *G; // GAUSSIAN MUST BE IN DOUBLE PRECISION 
 PRECISION *dirConvPar; // AUX GLOBAL VECTOR for calculate direct convolutions
-//REAL *resultConv; // aux global vector for store direct convolution
+REAL *resultConv; // aux global vector for store direct convolution
 
 REAL * opa;
 int FGlobal, HGlobal, uuGlobal;
@@ -844,6 +844,7 @@ int main(int argc, char **argv)
 	
 
 	
+
 	double * vElapsed_execution = calloc(numFilesPerProcessParallel,sizeof(double));
 	int indexInputFits;
 	if(numFilesPerProcessParallel){
@@ -987,8 +988,6 @@ int main(int argc, char **argv)
 			printf("\n--------------------------------------------------------------------------------\n");
 		}
 	}
-
-
 	AllocateMemoryDerivedSynthesis(nlambda);
 	//*************************************** ONE IMAGE PER PROCESSOR *********************************
 
