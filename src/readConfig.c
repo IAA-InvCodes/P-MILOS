@@ -275,7 +275,7 @@ int checkInitialModel (Init_Model * INIT_MODEL){
 		exit(EXIT_FAILURE);
 	}
 
-
+	return 1;
 }
 
 
