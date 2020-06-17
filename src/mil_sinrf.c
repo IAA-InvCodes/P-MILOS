@@ -471,8 +471,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 }
 
 
-int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REAL *fi_x,
-												REAL *shi_x,PRECISION A,PRECISION MF)
+int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REAL *fi_x, REAL *shi_x,PRECISION A,PRECISION MF)
 {
 	REAL *uu,*F,*H;
 	int i,j;
