@@ -60,6 +60,38 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 }
 
 
+int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_spectra,REAL *beta,REAL *alpha){	
+	
+	int j,i,bt_nf,bt_nc,aux_nf,aux_nc;
+
+	REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
+	
+	REAL *BTaux,*APaux;
+
+	//printf("\nVALORES DEL SIGMA SQUARE\n");
+
+	for(j=0;j<NPARMS;j++){
+		for(i=0;i<nspectro;i++){
+			opa[i]= w[j]*(spectra[i+nspectro*j]-spectro[i+nspectro*j]);
+		}
+
+		BTaux=BT+(j*NTERMS);
+		APaux=AP+(j*NTERMS*NTERMS);
+		
+		//multmatrixIDLValue(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig[j]); //bt de tam NTERMS x 1
+		multmatrixIDLValueSigma(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig+(nspectro*j)); //bt de tam NTERMS x 1
+		
+		//multmatrix_transpose(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j]/sig[j]);//ap de tam NTERMS x NTERMS
+		multmatrix_transpose_sigma(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j], sig+(nspectro*j));//ap de tam NTERMS x NTERMS
+		
+	}
+
+	totalParcialf(BT,NPARMS,NTERMS,beta); //beta de tam 1 x NTERMS
+	totalParcialMatrixf(AP,NTERMS,NTERMS,NPARMS,alpha); //alpha de tam NTERMS x NTERMS
+	
+	return 1;
+}
+
 /**
  * @param spectra: array with synthetic spectro 
  * @param nspectro: size of spectro
@@ -166,16 +198,17 @@ int multmatrixIDLValueSigma(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL
 		(*col)=nac;
 
 		for ( i = 0; i < nbf; i++){
-		    for ( j = 0; j < nac; j++){
+		    //for ( j = 0; j < nac; j++){
 				sum=0;
 				for ( k = 0;  k < naf; k++){
 					//printf("i: %d,j:%d,k=%d .. a[%d][%d]:%f  .. b[%d][%d]:%f\n",i,j,k,k,j,a[k*nac+j],i,k,b[i*nbc+k]);
 					//if(sigma[k]!=-1)
-						sum += (((a[k*nac+j] * b[i*nbc+k])))/sigma[k];
+						//sum += (((a[k*nac+j] * b[i*nbc+k])))/sigma[k];
+						sum += (((a[k] * b[i*nbc+k])))/sigma[k];
 				}
 				//printf("Sum, result[%d][%d] : %f \n",i,j,sum);
-				result[((nac)*i)+j] = sum;
-      		} 
+				result[i] = sum;
+      		//} 
 		}
 		return 1;
 	}
