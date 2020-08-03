@@ -139,10 +139,12 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			d_rq[i]=rhoqn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			d_ru[i]=d_ru[i]+rhoun[i]/E0;
+			//d_ru[i]=d_ru[i]+rhoun[i]/E0;
+			d_ru[i]=rhoun[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			d_rv[i]=d_rv[i]+rhovn[i]/E0;
+			//d_rv[i]=d_rv[i]+rhovn[i]/E0;
+			d_rv[i]=rhovn[i]/E0;
 		}
 
 		//dispersion profiles
@@ -185,10 +187,12 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 				REAL aux=dshi[(j-1)*numl+i]-(dshi[(j-1)*numl+i+(numl*4)]+dshi[(j-1)*numl+i+(numl*4*2)])/2.0;
 				//d_rq[j*numl+i]=d_rq[j*numl+i]+(aux)*sinis_cosa;
 				d_rq[j*numl+i]=(aux)*sinis_cosa;
-				d_ru[j*numl+i]=d_ru[j*numl+i]+(aux)*sinis_sina;
+				//d_ru[j*numl+i]=d_ru[j*numl+i]+(aux)*sinis_sina;
+				d_ru[j*numl+i]=(aux)*sinis_sina;
 			}
 			for(i=0;i<numl;i++){
-				d_rv[j*numl+i]=d_rv[j*numl+i]+((dshi[(j-1)*numl+i+(numl*4*2)]-dshi[(j-1)*numl+i+(numl*4)]))*cosi_2_E0;
+				//d_rv[j*numl+i]=d_rv[j*numl+i]+((dshi[(j-1)*numl+i+(numl*4*2)]-dshi[(j-1)*numl+i+(numl*4)]))*cosi_2_E0;
+				d_rv[j*numl+i]=((dshi[(j-1)*numl+i+(numl*4*2)]-dshi[(j-1)*numl+i+(numl*4)]))*cosi_2_E0;
 			}	
 		}
 		
@@ -218,10 +222,14 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			//d_rq[5*numl+i]=d_rq[5*numl+i]+parcial3[i]*sindi_cosa;
 			d_rq[5*numl+i]=parcial3[i]*sindi_cosa;
 		}
-		for(i=0;i<numl;i++)
-			d_ru[5*numl+i]=d_ru[5*numl+i]+parcial3[i]*sindi_sina;
-		for(i=0;i<numl;i++)
-			d_rv[5*numl+i]=d_rv[5*numl+i]+(shi_r[i]-shi_b[i])*cosdi_E0_2;
+		for(i=0;i<numl;i++){
+			//d_ru[5*numl+i]=d_ru[5*numl+i]+parcial3[i]*sindi_sina;
+			d_ru[5*numl+i]=parcial3[i]*sindi_sina;
+		}
+		for(i=0;i<numl;i++){
+			//d_rv[5*numl+i]=d_rv[5*numl+i]+(shi_r[i]-shi_b[i])*cosdi_E0_2;
+			d_rv[5*numl+i]=(shi_r[i]-shi_b[i])*cosdi_E0_2;
+		}
 		
 
 		//derivadas de los perfiles de dispersion respecto de AZI
@@ -242,7 +250,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			d_rq[6*numl+i]=parcial3[i]*sinis_cosda;
 		}
 		for(i=0;i<numl;i++){
-			d_ru[6*numl+i]=d_ru[6*numl+i]+parcial3[i]*sinis_sinda;
+			//d_ru[6*numl+i]=d_ru[6*numl+i]+parcial3[i]*sinis_sinda;
+			d_ru[6*numl+i]=parcial3[i]*sinis_sinda;
 		}
 
 	} //end for
@@ -740,8 +749,8 @@ void Resetear_Valores_Intermedios(int nlambda){
 	//memset(d_ev , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_eu , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
-	memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
-	memset(d_rv , 0, (nlambda*7)*sizeof(REAL));
+	//memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
+	//memset(d_rv , 0, (nlambda*7)*sizeof(REAL));
 	memset(dfi , 0, (nlambda*4*3)*sizeof(REAL));
 	memset(dshi , 0, (nlambda*4*3)*sizeof(REAL));
 
