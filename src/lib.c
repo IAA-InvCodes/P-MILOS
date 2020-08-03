@@ -72,9 +72,9 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 	//printf("\nVALORES DEL SIGMA SQUARE\n");
 
 	for(j=0;j<NPARMS;j++){
-		/*for(i=0;i<nspectro;i++){
+		for(i=0;i<nspectro;i++){
 			opa[i]= w[j]*(spectra[i+nspectro*j]-spectro[i+nspectro*j]);
-		}*/
+		}
 
 		BTaux=BT+(j*NTERMS);
 		APaux=AP+(j*NTERMS*NTERMS);
@@ -84,8 +84,8 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 		for ( h = 0; h < NTERMS; h++){
 			sum=0;
 			for ( k = 0;  k < nspectro; k++){
-				//sum += ((opa[k] * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))  ))/sig[nspectro*j+k];
-				sum += (((w[j]*(spectra[k+nspectro*j]-spectro[k+nspectro*j])) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))  ))/sig[nspectro*j+k];
+				sum += ((opa[k] * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))  ))/sig[nspectro*j+k];
+				//sum += (((w[j]*(spectra[k+nspectro*j]-spectro[k+nspectro*j])) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))  ))/sig[nspectro*j+k];
 			}
 			BTaux[h] = sum;
 		}
