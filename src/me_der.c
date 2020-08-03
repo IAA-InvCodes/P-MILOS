@@ -135,7 +135,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			d_ev[i]=etavn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			d_rq[i]=d_rq[i]+rhoqn[i]/E0;
+			//d_rq[i]=d_rq[i]+rhoqn[i]/E0;
+			d_rq[i]=rhoqn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
 			d_ru[i]=d_ru[i]+rhoun[i]/E0;
@@ -182,7 +183,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		for(j=1;j<5;j++){
 			for(i=0;i<numl;i++){
 				REAL aux=dshi[(j-1)*numl+i]-(dshi[(j-1)*numl+i+(numl*4)]+dshi[(j-1)*numl+i+(numl*4*2)])/2.0;
-				d_rq[j*numl+i]=d_rq[j*numl+i]+(aux)*sinis_cosa;
+				//d_rq[j*numl+i]=d_rq[j*numl+i]+(aux)*sinis_cosa;
+				d_rq[j*numl+i]=(aux)*sinis_cosa;
 				d_ru[j*numl+i]=d_ru[j*numl+i]+(aux)*sinis_sina;
 			}
 			for(i=0;i<numl;i++){
@@ -212,8 +214,10 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		}
 		
 
-		for(i=0;i<numl;i++)
-			d_rq[5*numl+i]=d_rq[5*numl+i]+parcial3[i]*sindi_cosa;
+		for(i=0;i<numl;i++){
+			//d_rq[5*numl+i]=d_rq[5*numl+i]+parcial3[i]*sindi_cosa;
+			d_rq[5*numl+i]=parcial3[i]*sindi_cosa;
+		}
 		for(i=0;i<numl;i++)
 			d_ru[5*numl+i]=d_ru[5*numl+i]+parcial3[i]*sindi_sina;
 		for(i=0;i<numl;i++)
@@ -234,7 +238,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			d_eu[6*numl+i]=parcial2[i]*sinis_sinda;
 		}
 		for(i=0;i<numl;i++){
-			d_rq[6*numl+i]=d_rq[6*numl+i]+parcial3[i]*sinis_cosda;
+			//d_rq[6*numl+i]=d_rq[6*numl+i]+parcial3[i]*sinis_cosda;
+			d_rq[6*numl+i]=parcial3[i]*sinis_cosda;
 		}
 		for(i=0;i<numl;i++){
 			d_ru[6*numl+i]=d_ru[6*numl+i]+parcial3[i]*sinis_sinda;
@@ -734,7 +739,7 @@ void Resetear_Valores_Intermedios(int nlambda){
 	//memset(d_eq , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_ev , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_eu , 0, (nlambda*7)*sizeof(REAL));
-	memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
+	//memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_rv , 0, (nlambda*7)*sizeof(REAL));
 	memset(dfi , 0, (nlambda*4*3)*sizeof(REAL));
