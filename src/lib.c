@@ -99,7 +99,7 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 					sum += (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))) * (w[j]/sig[nspectro*j+k]);
 				}
 
-				APaux[NTERMS*i+j] = sum;
+				APaux[NTERMS*i+h] = sum;
      		} 
 		
 		}		
