@@ -105,7 +105,7 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 					//sum += (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))) * (w[j]/sig[nspectro*j+k]);
 					sum += (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k) * dAux ) * (w[j]/sig[nspectro*j+k]);
 					if(i==0){
-						sum2= ((opa[k] * dAux  ))/sig[nspectro*j+k];
+						sum2+= ((opa[k] * dAux  ))/sig[nspectro*j+k];
 					}
 				}
 
