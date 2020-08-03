@@ -40,10 +40,10 @@ void direct_convolution_double(PRECISION *x, int nx, PRECISION *h, int nh)
 	int mitad_nh = nh / 2;
 
 	// rellenamos el vector auxiliar
-	for (k = 0; k < nx_aux; k++)
+	/*for (k = 0; k < nx_aux; k++)
 	{
 		dirConvPar[k] = 0;
-	}
+	}*/
 
 	for (k = 0; k < nx; k++)
 	{
