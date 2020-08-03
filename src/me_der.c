@@ -130,7 +130,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			d_eu[i]=d_eu[i]+etaun[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			d_ev[i]=d_ev[i]+etavn[i]/E0;
+			//d_ev[i]=d_ev[i]+etavn[i]/E0;
+			d_ev[i]=etavn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
 			d_rq[i]=d_rq[i]+rhoqn[i]/E0;
@@ -172,7 +173,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 				d_eu[j*numl+i]=d_eu[j*numl+i]+(aux)*sinis_sina;
 			}
 			for(i=0;i<numl;i++){
-				d_ev[j*numl+i]= d_ev[j*numl+i] +(dfi[(j-1)*numl+i+(numl*4*2)]-dfi[(j-1)*numl+i+(numl*4)])*cosi_2_E0;
+				//d_ev[j*numl+i]= d_ev[j*numl+i] +(dfi[(j-1)*numl+i+(numl*4*2)]-dfi[(j-1)*numl+i+(numl*4)])*cosi_2_E0;
+				d_ev[j*numl+i]= (dfi[(j-1)*numl+i+(numl*4*2)]-dfi[(j-1)*numl+i+(numl*4)])*cosi_2_E0;
 			}
 		}
 		for(j=1;j<5;j++){
@@ -200,8 +202,10 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		}
 		for(i=0;i<numl;i++)
 			d_eu[5*numl+i]=d_eu[5*numl+i]+parcial2[i]*sindi_sina;
-		for(i=0;i<numl;i++)
-			d_ev[5*numl+i]=d_ev[5*numl+i]+(fi_r[i]-fi_b[i])*cosdi_E0_2;
+		for(i=0;i<numl;i++){
+			//d_ev[5*numl+i]=d_ev[5*numl+i]+(fi_r[i]-fi_b[i])*cosdi_E0_2;
+			d_ev[5*numl+i]=(fi_r[i]-fi_b[i])*cosdi_E0_2;
+		}
 		
 
 		for(i=0;i<numl;i++)
@@ -723,7 +727,7 @@ void Resetear_Valores_Intermedios(int nlambda){
 		
 	//memset(d_ei , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_eq , 0, (nlambda*7)*sizeof(REAL));
-	memset(d_ev , 0, (nlambda*7)*sizeof(REAL));
+	//memset(d_ev , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_eu , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
