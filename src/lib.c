@@ -70,8 +70,8 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
  * */
 REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL nfree){
 	
-	REAL TOT,dif;	
-	REAL opa;
+	REAL TOT,dif1,dif2,dif3,dif4;	
+	REAL opa1,opa2,opa3,opa4;
 	int i,j;
 
 	TOT=0;
@@ -84,7 +84,7 @@ REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL n
 		TOT+=((w[j]*opa)/(sig[j]));
 	}*/
 
-	for(j=0;j<NPARMS;j++){
+	/*for(j=0;j<NPARMS;j++){
 		opa=0;
 		for(i=0;i<nspectro;i++){
 			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
@@ -93,7 +93,24 @@ REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL n
 				opa+= (((dif*dif)*w[j])/(sig[i+nspectro*j]));
 		}
 		TOT+= opa;
+	}*/
+
+	opa1=0;
+	opa2=0;
+	opa3=0;
+	opa4=0;
+	for(i=0;i<nspectro;i++){
+		dif1=spectra[i]-spectro[i];
+		dif2=spectra[i+nspectro]-spectro[i+nspectro];
+		dif3=spectra[i+nspectro*2]-spectro[i+nspectro*2];
+		dif4=spectra[i+nspectro*3]-spectro[i+nspectro*3];
+
+		opa1+= (((dif1*dif1)*w[0])/(sig[i]));
+		opa2+= (((dif2*dif2)*w[1])/(sig[i+nspectro]));
+		opa3+= (((dif3*dif3)*w[2])/(sig[i+nspectro*2]));
+		opa4+= (((dif4*dif4)*w[3])/(sig[i+nspectro*3]));
 	}
+	TOT+= opa1+opa2+opa3+opa4;
 
 	return TOT/nfree;
 	
