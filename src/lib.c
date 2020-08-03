@@ -91,8 +91,18 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 
 
 		//multmatrix_transpose(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j]/sig[j]);//ap de tam NTERMS x NTERMS
-		multmatrix_transpose_sigma(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j], sig+(nspectro*j));//ap de tam NTERMS x NTERMS
+		//multmatrix_transpose_sigma(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j], sig+(nspectro*j));//ap de tam NTERMS x NTERMS
+		for ( i = 0; i < NTERMS; i++){
+		    for ( h = 0; h < NTERMS; h++){
+				sum=0;
+				for ( k = 0;  k < nspectro; k++){
+					sum += (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))) * (w[j]/sig[nspectro*j+k]);
+				}
+
+				APaux[NTERMS*i+j] = sum;
+     		} 
 		
+		}		
 	}
 
 	totalParcialf(BT,NPARMS,NTERMS,beta); //beta de tam 1 x NTERMS
