@@ -62,11 +62,12 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 
 int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_spectra,REAL *beta,REAL *alpha){	
 	
-	int j,i,bt_nf,bt_nc,aux_nf,aux_nc;
+	int j,i,h,k,aux_nf,aux_nc;
 
 	REAL AP[NTERMS*NTERMS*NPARMS],BT[NPARMS*NTERMS];
 	
 	REAL *BTaux,*APaux;
+	REAL sum;
 
 	//printf("\nVALORES DEL SIGMA SQUARE\n");
 
@@ -79,8 +80,16 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 		APaux=AP+(j*NTERMS*NTERMS);
 		
 		//multmatrixIDLValue(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig[j]); //bt de tam NTERMS x 1
-		multmatrixIDLValueSigma(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig+(nspectro*j)); //bt de tam NTERMS x 1
-		
+		//multmatrixIDLValueSigma(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig+(nspectro*j)); //bt de tam NTERMS x 1
+		for ( h = 0; h < NTERMS; h++){
+			sum=0;
+			for ( k = 0;  k < nspectro; k++){
+				sum += ((opa[k] * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))  ))/sig[nspectro*j+k];
+			}
+			BTaux[h] = sum;
+		}
+
+
 		//multmatrix_transpose(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j]/sig[j]);//ap de tam NTERMS x NTERMS
 		multmatrix_transpose_sigma(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j], sig+(nspectro*j));//ap de tam NTERMS x NTERMS
 		
