@@ -1,4 +1,4 @@
-
+#include <math.h>
 #include "defines.h"
 #include "lib.h"
 #include <string.h>
@@ -7,6 +7,8 @@
 #include <complex.h>
 #include <fftw3.h> //siempre a continuacion de complex.h
 #include "readConfig.h"
+
+
 
 int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REAL *fi_x,
 												REAL *shi_x,PRECISION A,PRECISION MF);
@@ -115,12 +117,14 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 	sin_gm=SIN(GM);
 	cosi=COS(GM);
+	//SINCOS(GM,&sin_gm,&cosi);
 	sinis=sin_gm*sin_gm;
 	cosis=cosi*cosi;
 	cosis_2=(1+cosis)/2;
 	azi_2=2*AZI;
-	sina=SIN(azi_2);
-	cosa=COS(azi_2);
+	/*sina=SIN(azi_2);
+	cosa=COS(azi_2);*/
+	sincosf(azi_2,&sina,&cosa);
 	
 
 	sinda=cosa*CC_2;
