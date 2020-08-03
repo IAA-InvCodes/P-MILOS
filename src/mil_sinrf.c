@@ -115,9 +115,9 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 	AZI=AZI*CC;
 	GM=GM*CC;
 
-	sin_gm=SIN(GM);
-	cosi=COS(GM);
-	//SINCOS(GM,&sin_gm,&cosi);
+	/*sin_gm=SIN(GM);
+	cosi=COS(GM);*/
+	SINCOS(GM,&sin_gm,&cosi);
 	sinis=sin_gm*sin_gm;
 	cosis=cosi*cosi;
 	cosis_2=(1+cosis)/2;
