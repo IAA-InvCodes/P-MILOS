@@ -127,7 +127,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			d_eq[i]=etaqn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			d_eu[i]=d_eu[i]+etaun[i]/E0;
+			//d_eu[i]=d_eu[i]+etaun[i]/E0;
+			d_eu[i]=etaun[i]/E0;
 		}
 		for(i=0;i<numl;i++){
 			//d_ev[i]=d_ev[i]+etavn[i]/E0;
@@ -170,7 +171,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 				aux=dfi[(j-1)*numl+i]-dfisum/2;
 				//d_eq[j*numl+i]=d_eq[j*numl+i]+(aux)*sinis_cosa;
 				d_eq[j*numl+i]=(aux)*sinis_cosa;
-				d_eu[j*numl+i]=d_eu[j*numl+i]+(aux)*sinis_sina;
+				//d_eu[j*numl+i]=d_eu[j*numl+i]+(aux)*sinis_sina;
+				d_eu[j*numl+i]=(aux)*sinis_sina;
 			}
 			for(i=0;i<numl;i++){
 				//d_ev[j*numl+i]= d_ev[j*numl+i] +(dfi[(j-1)*numl+i+(numl*4*2)]-dfi[(j-1)*numl+i+(numl*4)])*cosi_2_E0;
@@ -200,8 +202,10 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			//d_eq[5*numl+i]=d_eq[5*numl+i]+parcial2[i]*sindi_cosa;
 			d_eq[5*numl+i]=parcial2[i]*sindi_cosa;
 		}
-		for(i=0;i<numl;i++)
-			d_eu[5*numl+i]=d_eu[5*numl+i]+parcial2[i]*sindi_sina;
+		for(i=0;i<numl;i++){
+			//d_eu[5*numl+i]=d_eu[5*numl+i]+parcial2[i]*sindi_sina;
+			d_eu[5*numl+i]=parcial2[i]*sindi_sina;
+		}
 		for(i=0;i<numl;i++){
 			//d_ev[5*numl+i]=d_ev[5*numl+i]+(fi_r[i]-fi_b[i])*cosdi_E0_2;
 			d_ev[5*numl+i]=(fi_r[i]-fi_b[i])*cosdi_E0_2;
@@ -226,7 +230,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		}
 
 		for(i=0;i<numl;i++){
-			d_eu[6*numl+i]=d_eu[6*numl+i]+parcial2[i]*sinis_sinda;
+			//d_eu[6*numl+i]=d_eu[6*numl+i]+parcial2[i]*sinis_sinda;
+			d_eu[6*numl+i]=parcial2[i]*sinis_sinda;
 		}
 		for(i=0;i<numl;i++){
 			d_rq[6*numl+i]=d_rq[6*numl+i]+parcial3[i]*sinis_cosda;
@@ -728,7 +733,7 @@ void Resetear_Valores_Intermedios(int nlambda){
 	//memset(d_ei , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_eq , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_ev , 0, (nlambda*7)*sizeof(REAL));
-	memset(d_eu , 0, (nlambda*7)*sizeof(REAL));
+	//memset(d_eu , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
 	memset(d_rv , 0, (nlambda*7)*sizeof(REAL));
