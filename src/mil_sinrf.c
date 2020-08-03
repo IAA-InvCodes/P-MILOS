@@ -97,7 +97,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 	lineas=(int)wlines[0];
 
-	for(j=0;j<numl;j++){
+	/*for(j=0;j<numl;j++){
 		etai[j]=1.0;
 		etaq[j]=0;
 		etau[j]=0;
@@ -105,7 +105,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 		rhoq[j]=0;
 		rhou[j]=0;
 		rhov[j]=0;
-	}
+	}*/
 
 	//Definicion de ctes.
 	//a radianes	
@@ -242,15 +242,30 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 		}
 
 		for(i=0;i<numl;i++){
-			etai[i]=etai[i]+etain[i];
-			etaq[i]=etaq[i]+etaqn[i];
-			etau[i]=etau[i]+etaun[i];
-			etav[i]=etav[i]+etavn[i];
+			if(i==0){
+				etai[i]=etain[i];
+				etaq[i]=etaqn[i];
+				etau[i]=etaun[i];
+				etav[i]=etavn[i];
+			}
+			else{
+				etai[i]=etai[i]+etain[i];
+				etaq[i]=etaq[i]+etaqn[i];
+				etau[i]=etau[i]+etaun[i];
+				etav[i]=etav[i]+etavn[i];				
+			}
 		}
 		for(i=0;i<numl;i++){
-			rhoq[i]=rhoq[i]+rhoqn[i];
-			rhou[i]=rhou[i]+rhoun[i];
-			rhov[i]=rhov[i]+rhovn[i];
+			if(i==0){
+				rhoq[i]=rhoqn[i];
+				rhou[i]=rhoun[i];
+				rhov[i]=rhovn[i];
+			}
+			else{
+				rhoq[i]=rhoq[i]+rhoqn[i];
+				rhou[i]=rhou[i]+rhoun[i];
+				rhov[i]=rhov[i]+rhovn[i];				
+			}
 		}
 		
 
