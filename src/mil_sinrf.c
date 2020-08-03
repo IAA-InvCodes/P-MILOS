@@ -124,7 +124,7 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 	azi_2=2*AZI;
 	/*sina=SIN(azi_2);
 	cosa=COS(azi_2);*/
-	sincosf(azi_2,&sina,&cosa);
+	SINCOS(azi_2,&sina,&cosa);
 	
 
 	sinda=cosa*CC_2;
