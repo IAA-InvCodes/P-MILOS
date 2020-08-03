@@ -242,30 +242,28 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 		}
 
 		for(i=0;i<numl;i++){
-			if(i==0){
-				etai[i]=etain[i];
-				etaq[i]=etaqn[i];
-				etau[i]=etaun[i];
-				etav[i]=etavn[i];
-			}
-			else{
-				etai[i]=etai[i]+etain[i];
-				etaq[i]=etaq[i]+etaqn[i];
-				etau[i]=etau[i]+etaun[i];
-				etav[i]=etav[i]+etavn[i];				
-			}
+			
+			etai[i]=1.0 + etain[i];
+			etaq[i]=etaqn[i];
+			etau[i]=etaun[i];
+			etav[i]=etavn[i];
+
+			/*etai[i]=etai[i]+etain[i];
+			etaq[i]=etaq[i]+etaqn[i];
+			etau[i]=etau[i]+etaun[i];
+			etav[i]=etav[i]+etavn[i];*/				
+			
 		}
 		for(i=0;i<numl;i++){
-			if(i==0){
-				rhoq[i]=rhoqn[i];
-				rhou[i]=rhoun[i];
-				rhov[i]=rhovn[i];
-			}
-			else{
-				rhoq[i]=rhoq[i]+rhoqn[i];
-				rhou[i]=rhou[i]+rhoun[i];
-				rhov[i]=rhov[i]+rhovn[i];				
-			}
+
+			rhoq[i]=rhoqn[i];
+			rhou[i]=rhoun[i];
+			rhov[i]=rhovn[i];
+
+			/*rhoq[i]=rhoq[i]+rhoqn[i];
+			rhou[i]=rhou[i]+rhoun[i];
+			rhov[i]=rhov[i]+rhovn[i];*/				
+			
 		}
 		
 
