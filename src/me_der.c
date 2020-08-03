@@ -693,22 +693,26 @@ int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,REAL *wex,REAL *nuxB
 		//dfi
 		for(j=0;j<numl;j++){
 			//(*,0,desp)=>0*numl+j+(numl*4*0)
-			dfi[j+(numl*4*desp)]=dfi[j+(numl*4*desp)]+dH_u[j]*(-nuxB[i]);
+			//dfi[j+(numl*4*desp)]=dfi[j+(numl*4*desp)]+dH_u[j]*(-nuxB[i]);
+			dfi[j+(numl*4*desp)]=dH_u[j]*(-nuxB[i]);
 		}
 		
 		for(j=0;j<numl;j++){
 			//(*,1,desp)=>1*numl+j+(numl*4*0)
-			dfi[numl+j+(numl*4*desp)]=dfi[numl+j+(numl*4*desp)]+dH_u[j]*auxCte[j];
+			//dfi[numl+j+(numl*4*desp)]=dfi[numl+j+(numl*4*desp)]+dH_u[j]*auxCte[j];
+			dfi[numl+j+(numl*4*desp)]=dH_u[j]*auxCte[j];
 		}
 
 		for(j=0;j<numl;j++){
 			//(*,2,desp)=>1*numl+j+(numl*4*0)
-			dfi[2*numl+j+(numl*4*desp)]=dfi[2*numl+j+(numl*4*desp)]+(dH_u[j]*uu[j]); 											
+			//dfi[2*numl+j+(numl*4*desp)]=dfi[2*numl+j+(numl*4*desp)]+(dH_u[j]*uu[j]);
+			dfi[2*numl+j+(numl*4*desp)]=(dH_u[j]*uu[j]); 											
 		}								
 
 		for(j=0;j<numl;j++){
 			//(*,3,desp)=>1*numl+j+(numl*4*0)
-			dfi[3*numl+j+(numl*4*desp)]=dfi[3*numl+j+(numl*4*desp)]+(-2*dF_u[j]);//dH_a[j];						
+			//dfi[3*numl+j+(numl*4*desp)]=dfi[3*numl+j+(numl*4*desp)]+(-2*dF_u[j]);//dH_a[j];
+			dfi[3*numl+j+(numl*4*desp)]=(-2*dF_u[j]);//dH_a[j];						
 		}
 		
 		//dshi
@@ -751,7 +755,7 @@ void Resetear_Valores_Intermedios(int nlambda){
 	//memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
 	//memset(d_rv , 0, (nlambda*7)*sizeof(REAL));
-	memset(dfi , 0, (nlambda*4*3)*sizeof(REAL));
+	//memset(dfi , 0, (nlambda*4*3)*sizeof(REAL));
 	memset(dshi , 0, (nlambda*4*3)*sizeof(REAL));
 
 }
