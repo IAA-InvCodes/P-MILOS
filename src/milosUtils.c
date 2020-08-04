@@ -371,17 +371,18 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	
 
 
-	for (j = 0; j < NTERMS * NTERMS; j++)
+	/*for (j = 0; j < NTERMS * NTERMS; j++)
 	{
 		h1[j] = h[j];
-	}
+	}*/
 
-	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h1, NTERMS, NTERMS);
+	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h, NTERMS, NTERMS);
 	gsl_eigen_symmv(&gsl_h1.matrix, eval, evec, workspace);
 	w = gsl_vector_ptr(eval,0);
 	v = gsl_matrix_ptr(evec,0,0);
 
 	multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
+
 
 	for (i = 0; i < NTERMS; i++)
 	{
@@ -793,6 +794,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		}
 		else
 		{
+			for (i = 0; i < NTERMS * NTERMS; i++)
+				covar[i] = alpha[i];
 			//flambda = flambda * 10; //10;
 			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
 			if(log)
