@@ -573,10 +573,10 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		else{ // DIRECT CONVOLUTION 
 			REAL Ic;
 						
-			if(spectra[0]>spectra[nlambda - 1])
+			/*if(spectra[0]>spectra[nlambda - 1])
 				Ic = spectra[0];
 			else				
-				Ic = spectra[nlambda - 1];
+				Ic = spectra[nlambda - 1];*/
 			for (i = 0; i < NTERMS; i++)
 			{
 				// invert continuous
