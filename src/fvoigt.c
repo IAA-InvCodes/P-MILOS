@@ -20,7 +20,8 @@ int fvoigt(PRECISION damp, REAL *vv, int nvv, REAL *h, REAL *f)
 
 	for (i = 0; i < nvv; i++)
 	{
-		z[i] = damp - FABS(vv[i]) * _Complex_I;
+		//z[i] = damp - FABS(vv[i]) * _Complex_I;
+		z[i] = damp - vv[i] * _Complex_I;
 	}
 
 	//
@@ -64,7 +65,8 @@ int fvoigt(PRECISION damp, REAL *vv, int nvv, REAL *h, REAL *f)
 
 	for (i = 0; i < nvv; i++)
 	{
-		f[i] = vv[i] >= 0 ? (PRECISION)cimag(z[i]) * 0.5 : (PRECISION)cimag(z[i]) * -0.5;
+		//f[i] = vv[i] >= 0 ? (PRECISION)cimag(z[i]) * 0.5 : (PRECISION)cimag(z[i]) * -0.5;
+		f[i] = (PRECISION)cimag(z[i]) * 0.5;
 	}
 
 	return 1;
