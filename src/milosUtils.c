@@ -358,7 +358,7 @@ void FijaACeroDerivadasNoNecesarias(REAL *d_spectra, int *fixed, int nlambda)
 	return en delta tam 1xNTERMS
 */
 
-int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
+int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 {
 
 	const PRECISION epsilon = 1e-12;
@@ -734,8 +734,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
 	covarm2(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
 
-	for (i = 0; i < NTERMS; i++)
-		betad[i] = beta[i];
+	/*for (i = 0; i < NTERMS; i++)
+		betad[i] = beta[i];*/
 
 	for (i = 0; i < NTERMS * NTERMS; i++){
 		covar[i] = alpha[i];
@@ -761,7 +761,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			covar[ind] = alpha[ind] * (1.0 + flambda);
 		}
 
-		mil_svd(covar, betad, delta);
+		mil_svd(covar, beta, delta);
 		AplicaDelta(initModel, delta, fixed, &model);
 
 		check(&model);		
@@ -787,8 +787,8 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
 			covarm2(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
 			
-			for (i = 0; i < NTERMS; i++)
-				betad[i] = beta[i];
+			/*for (i = 0; i < NTERMS; i++)
+				betad[i] = beta[i];*/
 
 			for (i = 0; i < NTERMS * NTERMS; i++)
 				covar[i] = alpha[i];

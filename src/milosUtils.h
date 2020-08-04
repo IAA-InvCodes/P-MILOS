@@ -29,7 +29,7 @@ void FijaACeroDerivadasNoNecesarias(REAL *d_spectra, int *fixed, int nlambda);
 /**
  * 
  */
-int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta);
+int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta);
 
 /**
  * 
