@@ -127,9 +127,12 @@ void direct_convolution_ic(REAL *x, int nx, PRECISION *h, int nh, REAL Ic)
 	{
 		//x[k] = 0;
 		aux = 0;
+		int N_start_point=k-(nh/2);
 		for (j = 0; j < nh; j++)
 		{
-			aux += h[j] * dirConvPar[j + k];
+			if(((N_start_point+j)>=0) && ((N_start_point+j)<nh))
+				aux += h[j] * (Ic-x[N_start_point+j]);
+			//aux += h[j] * dirConvPar[j + k];
 		}
 		x[k] = Ic - aux;
 	}
