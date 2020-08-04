@@ -32,10 +32,10 @@ extern REAL *resultConv;
 void direct_convolution_double(PRECISION *x, int nx, PRECISION *h, int nh)
 {
 
-	int nx_aux;
+	//int nx_aux;
 	int k, j;
 
-	nx_aux = nx + nh - 1; // tamano de toda la convolucion
+	//nx_aux = nx + nh - 1; // tamano de toda la convolucion
 
 	int mitad_nh = nh / 2;
 
@@ -67,10 +67,10 @@ void direct_convolution_double(PRECISION *x, int nx, PRECISION *h, int nh)
 void direct_convolution(REAL *x, int nx, PRECISION *h, int nh)
 {
 
-	int nx_aux;
+	//int nx_aux;
 	int k, j;
 
-	nx_aux = nx + nh - 1; // tamano de toda la convolucion
+	//nx_aux = nx + nh - 1; // tamano de toda la convolucion
 
 	int mitad_nh = nh / 2;
 
