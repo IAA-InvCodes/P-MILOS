@@ -86,35 +86,16 @@ void direct_convolution(REAL *x, int nx, PRECISION *h, int nh)
 	}
 
 	// vamos a tomar solo la convolucion central
-	double aux,aux2;
+	double aux;
 	for (k = 0; k < nx; k++)
 	{
 		//x[k] = 0;
 		aux = 0;
-		aux2=0;
-		/*for (j = 0; j < nh; j++)
+		for (j = 0; j < nh; j++)
 		{
 			aux += h[j] * dirConvPar[j + k];
 		}
-		x[k] = aux;*/
-
-		if(nh%2==0){
-			
-			for (j = 0; j < nh; j=j+2)
-			{
-				aux += h[j] * dirConvPar[j + k];
-				aux2 += h[j+1] * dirConvPar[(j+1) + k];
-			}			
-		}
-		else{
-			for (j = 0; j < nh-1; j=j+2)
-			{
-				aux += h[j] * dirConvPar[j + k];
-				aux2 += h[j+1] * dirConvPar[(j+1) + k];
-			}				
-			aux += h[nh-1] * dirConvPar[(nh-1) + k];
-		}		
-		x[k] = aux+aux2;
+		x[k] = aux;
 	}
 }
 
