@@ -110,12 +110,6 @@ void direct_convolution_ic(REAL *x, int nx, PRECISION *h, int nh, REAL Ic)
 
 	int mitad_nh = nh / 2;
 
-	// rellenamos el vector auxiliar
-	/*for (k = 0; k < nx_aux; k++)
-	{
-		dirConvPar[k] = 0;
-	}*/
-
 	for (k = 0; k < nx; k++)
 	{
 		dirConvPar[k + mitad_nh] = Ic - x[k];
@@ -125,13 +119,9 @@ void direct_convolution_ic(REAL *x, int nx, PRECISION *h, int nh, REAL Ic)
 	double aux;
 	for (k = 0; k < nx; k++)
 	{
-		//x[k] = 0;
 		aux = 0;
-		//int N_start_point=k-mitad_nh;
 		for (j = 0; j < nh; j++)
 		{
-			/*if(((N_start_point+j)>=0) && ((N_start_point+j)<nh))
-				aux += h[j] * (Ic-x[N_start_point+j]);*/
 			aux += h[j] * dirConvPar[j + k];
 		}
 		x[k] = Ic - aux;
