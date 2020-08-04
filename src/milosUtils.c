@@ -726,7 +726,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	*iter = 0;
 
 	PRECISION covar[NTERMS * NTERMS];
-	PRECISION betad[NTERMS];
+	//PRECISION betad[NTERMS];
 
 
 	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac, spectra_slight, *INSTRUMENTAL_CONVOLUTION);
