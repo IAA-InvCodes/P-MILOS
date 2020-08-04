@@ -99,6 +99,42 @@ void direct_convolution(REAL *x, int nx, PRECISION *h, int nh)
 	}
 }
 
+
+void direct_convolution_ic(REAL *x, int nx, PRECISION *h, int nh, REAL Ic)
+{
+
+	//int nx_aux;
+	int k, j;
+
+	//nx_aux = nx + nh - 1; // tamano de toda la convolucion
+
+	int mitad_nh = nh / 2;
+
+	// rellenamos el vector auxiliar
+	/*for (k = 0; k < nx_aux; k++)
+	{
+		dirConvPar[k] = 0;
+	}*/
+
+	for (k = 0; k < nx; k++)
+	{
+		dirConvPar[k + mitad_nh] = Ic - x[k];
+	}
+
+	// vamos a tomar solo la convolucion central
+	double aux;
+	for (k = 0; k < nx; k++)
+	{
+		//x[k] = 0;
+		aux = 0;
+		for (j = 0; j < nh; j++)
+		{
+			aux += h[j] * dirConvPar[j + k];
+		}
+		x[k] = Ic - aux;
+	}
+}
+
 void direct_convolution2(REAL *x, int nx, PRECISION *h, int nh, REAL *result, int delta)
 {
 

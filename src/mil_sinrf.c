@@ -454,13 +454,15 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 			else				
 				Ic = spectra[nlambda - 1];
 
-			for (i = 0; i < nlambda; i++)
+			/*for (i = 0; i < nlambda; i++)
 				spectra[i] = Ic - spectra[i];
 
 			direct_convolution(spectra, nlambda, G, nlambda); 
 
 			for (i = 0; i < nlambda; i++)
-				spectra[i] = Ic - spectra[i];
+				spectra[i] = Ic - spectra[i];*/
+			
+			direct_convolution_ic(spectra, nlambda, G, nlambda,Ic);
 
 			//convolucion QUV
 			for (i = 1; i < NPARMS; i++){

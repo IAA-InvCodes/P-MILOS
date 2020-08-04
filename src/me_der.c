@@ -585,13 +585,15 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 						Ic = d_spectra[(nlambda * i)];	
 					else
 						Ic = d_spectra[(nlambda * i) + (nlambda - 1)];
-					for(h=0;h<nlambda;h++){
+					/*for(h=0;h<nlambda;h++){
 						d_spectra[(nlambda * i) + h] = Ic - d_spectra[(nlambda * i) +h];
 					}																													
 					direct_convolution(d_spectra + (nlambda * i), nlambda, G, nlambda); 
 					for(h=0;h<nlambda;h++){
 						d_spectra[(nlambda * i) +h] = Ic - d_spectra[(nlambda * i) + h];
-					}
+					}*/
+
+					direct_convolution_ic(d_spectra + (nlambda * i), nlambda, G, nlambda,Ic);
 				}	
 			}
 
