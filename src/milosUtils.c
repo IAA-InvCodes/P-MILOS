@@ -367,7 +367,7 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	PRECISION *v, *w;
 	int i, j;
 	PRECISION aux2[NTERMS];
-	int aux_nf, aux_nc;
+	//int aux_nf, aux_nc;
 	
 
 
@@ -381,16 +381,30 @@ int mil_svd(PRECISION *h, PRECISION *beta, PRECISION *delta)
 	w = gsl_vector_ptr(eval,0);
 	v = gsl_matrix_ptr(evec,0,0);
 
-	multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
-
+	//multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
+	PRECISION sum;
+		
+	for ( j = 0; j < NTERMS; j++){
+		sum=0;
+		for ( i = 0;  i < NTERMS; i++){
+			sum += beta[i] * v[i*NTERMS+j];
+		}
+		aux2[j] = sum;
+	}
 
 	for (i = 0; i < NTERMS; i++)
 	{
 		aux2[i]= aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
 	}
 
-	multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
-	
+	//multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
+	for ( i = 0; i < NTERMS; i++){		
+		sum=0;
+		for ( j = 0;  j < NTERMS; j++){
+			sum += v[i*NTERMS+j] * aux2[j];
+		}
+		delta[i] = sum;
+	}
 	return 1;
 }
 
