@@ -116,10 +116,10 @@ void direct_convolution_ic(REAL *x, int nx, PRECISION *h, int nh, REAL Ic)
 		dirConvPar[k] = 0;
 	}*/
 
-	for (k = 0; k < nx; k++)
+	/*for (k = 0; k < nx; k++)
 	{
 		dirConvPar[k + mitad_nh] = Ic - x[k];
-	}
+	}*/
 
 	// vamos a tomar solo la convolucion central
 	double aux;
