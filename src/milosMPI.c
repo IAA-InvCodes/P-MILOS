@@ -65,7 +65,6 @@ REAL * opa;
 int FGlobal, HGlobal, uuGlobal;
 
 REAL *d_spectra, *spectra, *spectra_mac, *spectra_slight;
-REAL *d_spectra_keep;
 
 // GLOBAL variables to use for FFT calculation 
 

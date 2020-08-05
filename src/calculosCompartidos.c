@@ -8,7 +8,7 @@ extern REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
 extern REAL *dfi, *dshi;
 extern REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
 extern REAL *spectra, *d_spectra,*spectra_mac, *spectra_slight;
-extern REAL *d_spectra_keep;
+
 extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
 extern REAL *parcial1, *parcial2, *parcial3;
@@ -55,7 +55,7 @@ void AllocateMemoryDerivedSynthesis(int numl)
 	spectra_mac = calloc(numl * NPARMS, sizeof(REAL));
 	spectra_slight = calloc(numl * NPARMS, sizeof(REAL));
 	d_spectra = calloc(numl * NTERMS * NPARMS, sizeof(REAL));
-	d_spectra_keep = calloc(numl * NTERMS * NPARMS, sizeof(REAL));
+	
 	
 	opa = calloc(numl,sizeof(REAL));
 
@@ -200,7 +200,7 @@ void FreeMemoryDerivedSynthesis()
 	free(spectra_mac);
 	free(spectra_slight);
 	free(d_spectra);
-	free(d_spectra_keep);
+	
 	
 
 	free(fi_p);

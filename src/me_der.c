@@ -64,7 +64,7 @@ extern fftw_plan planForwardPSF, planBackwardPSF;
 extern ConfigControl configCrontrolFile;
 extern int NTERMS;
 
-extern REAL * d_spectra_keep;
+
 
 int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *d_spectra,REAL *spectra, REAL * spectra_slight, REAL ah,REAL * slight,int filter, int * fix)
 {
@@ -649,7 +649,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	    	}
     	}
 	}
-	memcpy(d_spectra_keep,d_spectra,nlambda * NTERMS * NPARMS* sizeof(REAL));
+
 	
 	return 1;
 	
