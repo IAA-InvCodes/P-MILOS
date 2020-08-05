@@ -85,7 +85,7 @@ int FGlobal, HGlobal, uuGlobal;
 
 REAL *d_spectra, *spectra, *spectra_mac, *spectra_slight;
 
-
+REAL * svd_aux2;
 
 
 // GLOBAL variables to use for FFT calculation 

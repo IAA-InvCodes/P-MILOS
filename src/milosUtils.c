@@ -39,8 +39,8 @@ extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpe
 extern fftw_plan planForwardPSF, planBackwardPSF;
 
 extern fftw_complex * fftw_G_PSF;
-//extern VSLConvTaskPtr taskConv;
 
+extern REAL * svd_aux2;
 
 extern Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
 
@@ -363,10 +363,10 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 
 	const PRECISION epsilon = 1e-12;
 	//PRECISION h1[NTERMS * NTERMS];
-	PRECISION v[NTERMS * NTERMS], w[NTERMS];
-	//PRECISION *v, *w;
+	//PRECISION v[NTERMS * NTERMS], w[NTERMS];
+	PRECISION *v, *w;
 	int i, j;
-	PRECISION aux2[NTERMS];
+	//PRECISION aux2[NTERMS];
 	//int aux_nf, aux_nc;
 	
 
@@ -376,12 +376,12 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		h1[j] = h[j];
 	}*/
 
-	/*gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h, NTERMS, NTERMS);
+	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h, NTERMS, NTERMS);
 	gsl_eigen_symmv(&gsl_h1.matrix, eval, evec, workspace);
 	w = gsl_vector_ptr(eval,0);
-	v = gsl_matrix_ptr(evec,0,0);*/
+	v = gsl_matrix_ptr(evec,0,0);
 
-	svdcmp(h,NTERMS,NTERMS,w,v);
+	//svdcmp(h,NTERMS,NTERMS,w,v);
 	//multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
 	PRECISION sum;
 		
@@ -390,19 +390,19 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		for ( i = 0;  i < NTERMS; i++){
 			sum += beta[i] * v[i*NTERMS+j];
 		}
-		aux2[j] = sum;
+		svd_aux2[j] = sum;
 	}
 
 	for (i = 0; i < NTERMS; i++)
 	{
-		aux2[i]= aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
+		svd_aux2[i]= svd_aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
 	}
 
 	//multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
 	for ( i = 0; i < NTERMS; i++){		
 		sum=0;
 		for ( j = 0;  j < NTERMS; j++){
-			sum += v[i*NTERMS+j] * aux2[j];
+			sum += v[i*NTERMS+j] * svd_aux2[j];
 		}
 		delta[i] = sum;
 	}
