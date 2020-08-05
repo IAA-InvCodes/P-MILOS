@@ -29,6 +29,7 @@ extern REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
 
 
 extern REAL *spectra, *d_spectra, *spectra_mac, *spectra_slight;
+extern REAL * d_spectra_keep;
 extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
 extern REAL *parcial1, *parcial2, *parcial3;

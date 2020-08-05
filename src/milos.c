@@ -84,6 +84,7 @@ REAL * opa;
 int FGlobal, HGlobal, uuGlobal;
 
 REAL *d_spectra, *spectra, *spectra_mac, *spectra_slight;
+REAL *d_spectra_keep;
 
 
 

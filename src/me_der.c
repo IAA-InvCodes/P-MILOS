@@ -63,6 +63,9 @@ extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpe
 extern fftw_plan planForwardPSF, planBackwardPSF;
 extern ConfigControl configCrontrolFile;
 extern int NTERMS;
+
+extern REAL * d_spectra_keep;
+
 int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *d_spectra,REAL *spectra, REAL * spectra_slight, REAL ah,REAL * slight,int filter, int * fix)
 {
 
@@ -95,7 +98,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	//DEFINO UN VECTOR DE DERIVADAS
 	//POR ORDEN SERAN param=[eta0,magnet,vlos,landadopp,aa,gamma,azi]	
 	
-	Resetear_Valores_Intermedios(nlambda);
+	//Resetear_Valores_Intermedios(nlambda);
 
     
     for(il=0;il<lineas;il++) {
@@ -646,7 +649,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	    	}
     	}
 	}
-	
+	memcpy(d_spectra_keep,d_spectra,nlambda * NTERMS * NPARMS* sizeof(REAL));
 	
 	return 1;
 	
