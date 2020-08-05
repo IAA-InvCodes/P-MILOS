@@ -40,7 +40,7 @@ extern fftw_plan planForwardPSF, planBackwardPSF;
 
 extern fftw_complex * fftw_G_PSF;
 
-extern PRECISION * svd_aux2;
+
 
 extern Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
 
@@ -366,7 +366,7 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 	//PRECISION v[NTERMS * NTERMS], w[NTERMS];
 	PRECISION *v, *w;
 	int i, j;
-	//PRECISION aux2[NTERMS];
+	PRECISION aux2[NTERMS];
 	//int aux_nf, aux_nc;
 	
 
@@ -390,19 +390,19 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		for ( i = 0;  i < NTERMS; i++){
 			sum += beta[i] * v[i*NTERMS+j];
 		}
-		svd_aux2[j] = sum;
+		aux2[j] = sum;
 	}
 
 	for (i = 0; i < NTERMS; i++)
 	{
-		svd_aux2[i]= svd_aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
+		aux2[i]= aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
 	}
 
 	//multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
 	for ( i = 0; i < NTERMS; i++){		
 		sum=0;
 		for ( j = 0;  j < NTERMS; j++){
-			sum += v[i*NTERMS+j] * svd_aux2[j];
+			sum += v[i*NTERMS+j] * aux2[j];
 		}
 		delta[i] = sum;
 	}
