@@ -390,13 +390,14 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		for ( i = 0;  i < NTERMS; i++){
 			sum += beta[i] * v[i*NTERMS+j];
 		}
-		aux2[j] = sum;
+		//aux2[j] = sum;
+		aux2[j] = sum * ((fabs(w[j]) > epsilon) ? (1/w[j]): 0.0);
 	}
 
-	for (i = 0; i < NTERMS; i++)
+	/*for (i = 0; i < NTERMS; i++)
 	{
 		aux2[i]= aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
-	}
+	}*/
 
 	//multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
 	for ( i = 0; i < NTERMS; i++){		
