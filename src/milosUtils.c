@@ -12,7 +12,7 @@
 #include <complex.h>
 #include <fftw3.h> //siempre a continuacion de complex.h
 #include "convolution.h"
-
+#include "svdcmp.h"
 
 
 extern PRECISION **PUNTEROS_CALCULOS_COMPARTIDOS;
@@ -29,7 +29,6 @@ extern REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
 
 
 extern REAL *spectra, *d_spectra, *spectra_mac, *spectra_slight;
-extern REAL * d_spectra_keep;
 extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
 extern REAL *parcial1, *parcial2, *parcial3;
@@ -363,9 +362,9 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 {
 
 	const PRECISION epsilon = 1e-12;
-	PRECISION h1[NTERMS * NTERMS];
-	
-	PRECISION *v, *w;
+	//PRECISION h1[NTERMS * NTERMS];
+	PRECISION v[NTERMS * NTERMS], w[NTERMS];
+	//PRECISION *v, *w;
 	int i, j;
 	PRECISION aux2[NTERMS];
 	//int aux_nf, aux_nc;
@@ -377,11 +376,12 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		h1[j] = h[j];
 	}*/
 
-	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h, NTERMS, NTERMS);
+	/*gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h, NTERMS, NTERMS);
 	gsl_eigen_symmv(&gsl_h1.matrix, eval, evec, workspace);
 	w = gsl_vector_ptr(eval,0);
-	v = gsl_matrix_ptr(evec,0,0);
+	v = gsl_matrix_ptr(evec,0,0);*/
 
+	svdcmp(h,NTERMS,NTERMS,w,v);
 	//multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
 	PRECISION sum;
 		
