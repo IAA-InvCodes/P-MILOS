@@ -8,7 +8,7 @@ extern REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
 extern REAL *dfi, *dshi;
 extern REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
 extern REAL *spectra, *d_spectra,*spectra_mac, *spectra_slight;
-extern REAL * svd_aux2;
+extern PRECISION * svd_aux2;
 extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
 extern REAL *parcial1, *parcial2, *parcial3;
@@ -30,7 +30,7 @@ void AllocateMemoryDerivedSynthesis(int numl)
 {
 
 	/************* SVD VARIABLES *************************************/
-	svd_aux2 = calloc(NTERMS,sizeof(REAL));
+	svd_aux2 = calloc(NTERMS,sizeof(PRECISION));
 	/************* ME DER *************************************/
 	dtaux = calloc(numl,sizeof(REAL));
 	etai_gp3 = calloc(numl,sizeof(REAL));

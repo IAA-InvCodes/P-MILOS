@@ -40,7 +40,7 @@ extern fftw_plan planForwardPSF, planBackwardPSF;
 
 extern fftw_complex * fftw_G_PSF;
 
-extern REAL * svd_aux2;
+extern PRECISION * svd_aux2;
 
 extern Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
 
