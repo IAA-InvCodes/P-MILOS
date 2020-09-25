@@ -5,7 +5,7 @@ CC=mpicc
 
 CFLAGS=
 ifeq ($(comp),icc)
-	CFLAGS+=-ipo -xHost -no-multibyte-chars
+	CFLAGS+=-ipo -xHost -no-multibyte-chars -qopt-dynamic-align -ansi-alias -fno-alias -parallel -fma -ipp -align
 endif
 ifeq ($(comp),gcc)
 	CFLAGS+=-march=native
