@@ -406,6 +406,8 @@ void loadInitialValues(ConfigControl * configControlFile){
 	configControlFile->useFFT = 0; // by default direct convolution
 
 	configControlFile->logclambda = 0; // by default don't use fast convergence
+	configControlFile->loopInversion = 0;
+	configControlFile->invertDirectory = 0;
 }
 
 int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, int printLog){
@@ -1921,24 +1923,40 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	/*************************** t1 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->t1,comment);
+	if(returnLine == NULL) return 0;
+	char stringt1 [256];							
+	//rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->t1,comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, stringt1,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param t1. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
+	if(strcmp(stringt1,"*")==0){
+		trolConfig->invertDirectory=1;
+	}
+	else{
+		trolConfig->t1=atoi(stringt1);
+	}	
 	//if(printLog) printf("t1 to apply: %d\n", trolConfig->t1);
 	if(printLog) printf("%s", LINE);
 	/*************************** t2 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->t2,comment);
+	char stringt2 [256];	
+	//rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->t2,comment);
+	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, stringt2,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param t2. Please verify it. \n");
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
+	}
+	if(strcmp(stringt2,"*")==0){
+		trolConfig->loopInversion=1;
+	}
+	else{
+		trolConfig->t2=atoi(stringt2);
 	}
 	//if(printLog) printf("t2 to apply: %d\n", trolConfig->t2);
 	if(printLog) printf("%s", LINE);
@@ -2003,4 +2021,32 @@ char * get_basefilename (const char * fname) // returns the filename minus the e
 		}
 	}
 	return ext;
+}
+
+int checkSubString(char * source, char * searched){
+
+	int find = 0;
+	int nCharfind =0;
+	int i;
+	for(i=0;i<strlen(searched);i++){
+		if(source[i]==searched[i])
+			nCharfind++;
+	}
+	if(nCharfind==strlen(searched))
+		find = 1;
+	return find;
+}
+
+
+char* mySubString (char* input, int offset, int len, char* dest)
+{
+  int input_len = strlen (input);
+
+  if (offset + len > input_len)
+  {
+     return NULL;
+  }
+
+  strncpy (dest, input + offset, len);
+  return dest;
 }

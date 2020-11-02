@@ -291,6 +291,8 @@ struct CONFIG_CONTROL{
 	int t1;
 	int t2;
 	int logclambda;
+	int loopInversion;
+	int invertDirectory;	
 };
 
 typedef struct CONFIG_CONTROL ConfigControl;
@@ -363,6 +365,10 @@ typedef struct CONFIG_CONTROL ConfigControl;
 
 #define CONVOLUTION_FFT "FFT"
 #define CONVOLUTION_DIRECT "DIRECT"
+
+// TIMEOUT FILE READ 
+
+#define TIMEOUT_FILE 600 // SECONDS
 
 // PERCENTAGE OF ITERATION
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"

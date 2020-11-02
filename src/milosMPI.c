@@ -34,7 +34,7 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_eigen.h>
-
+#include <libgen.h>
 
 // ***************************** FUNCTIONS TO READ FITS FILE *********************************************************
 
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 	PRECISION * deltaLambda, * PSF;
 	int N_SAMPLES_PSF;
 	
-	
+	time_t newestFileTimeInitial; // time for newest file in case invert all directory
 	// CONFIGURACION DE PARAMETROS A INVERTIR
 	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
 	//----------------------------------------------
@@ -215,17 +215,18 @@ int main(int argc, char **argv)
 	}
 
 	// CHECK IF ONLY RECEIVED ONE FILE AND THE EXTENSION IS .FITS 
-	if(configCrontrolFile.t1 == 0 && configCrontrolFile.t2 ==0){ // then process only one file
-		if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)!=0){ 
-			if(idProc==root){
-				printf("\n--------------------------------------------------------------------------------\n");
-				printf("\nERROR, without specify timeseries the value of control parameter 'Observed Profiles' must be a fits file\n");
-				printf("\n--------------------------------------------------------------------------------\n");
+	if(!configCrontrolFile.invertDirectory && !configCrontrolFile.loopInversion){
+		if(configCrontrolFile.t1 == 0 && configCrontrolFile.t2 ==0){ // then process only one file
+			if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)!=0){ 
+				if(idProc==root){
+					printf("\n--------------------------------------------------------------------------------\n");
+					printf("\nERROR, without specify timeseries the value of control parameter 'Observed Profiles' must be a fits file\n");
+					printf("\n--------------------------------------------------------------------------------\n");
+				}
+				exit(EXIT_FAILURE);	
 			}
-			exit(EXIT_FAILURE);
 		}
 	}
-	
 	nameInputFilePSF = configCrontrolFile.PSFFile;
 	FWHM = configCrontrolFile.FWHM;
 	/***************** READ INIT MODEL ********************************/
@@ -530,63 +531,243 @@ int main(int argc, char **argv)
 	MPI_Barrier(MPI_COMM_WORLD);
 	// ROOT PROCESS READ IMAGE FROM FILE TO KNOW LIST OF FILES
 	if(idProc==root){
+		if(configCrontrolFile.loopInversion){
+			if(configCrontrolFile.invertDirectory){ // read all directory 
 
-      	// CHECK IF INPUT OBSERVED PROFILES COMES IN A DIRECTORY OR IS A FILE
-		if(configCrontrolFile.t1 == 0 && configCrontrolFile.t2 ==0){ // then process only one file
-			numberOfFileSpectra = 1;
-        	vInputFileSpectra = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
-        	strcpy(vInputFileSpectra[0].name,configCrontrolFile.ObservedProfiles);
+				struct dirent **namelist;
+				char observedProAux[256];
+				strcpy(observedProAux,configCrontrolFile.ObservedProfiles);
+				char * dname = dirname(observedProAux);
+				int numFileDirectory = scandir(dname, &namelist, 0, alphasort);
+    			if (numFileDirectory < 0)
+        			perror("scandir");
+				else{
+					if(numFileDirectory>2){
+						numberOfFileSpectra=numFileDirectory-2;
+						//printf("\n NUMERO DE FICHEROS EN EL DIRECTORIO LEIDO %d",numberOfFileSpectra);
+						vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+						vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+						vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+						int first =1;
+						for(i=2;i<numFileDirectory;i++){
+							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
+								struct stat filestat;
+								char pathAux[256];
+								strcpy(pathAux,dname);
+								strcat(pathAux,"/");
+								strcat(pathAux,namelist[i]->d_name);
+								stat(pathAux,&filestat);
+								if(first){
+									newestFileTimeInitial = filestat.st_mtime;
+									first = 0;
+								}
+								else{
+									if(difftime(filestat.st_mtime,newestFileTimeInitial)>0){
+										newestFileTimeInitial = filestat.st_mtime;
+									}
+								}
+								strcpy(vInputFileSpectra[i-2].name, dname);
+								strcat(vInputFileSpectra[i-2].name,"/");
+								strcat(vInputFileSpectra[i-2].name, namelist[i]->d_name);
+								
+								//printf("\n%s",vInputFileSpectra[i-2].name);
+								// FILE NAME FOR OUTPUT MODELS 
+								strcpy(vOutputNameModels[i-2].name, dname);
+								strcat(vOutputNameModels[i-2].name,"/");
 
-        	vOutputNameModels = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
-        	strcpy(vOutputNameModels[0].name,get_basefilename(configCrontrolFile.InitialGuessModel));	
-			//strcat(vOutputNameModels[0].name,"_mod");
-			strcat(vOutputNameModels[0].name,MOD_FITS);
+								strcat(vOutputNameModels[i-2].name,get_basefilename(namelist[i]->d_name));
+								strcat(vOutputNameModels[i-2].name, "_mod");
+								if(configCrontrolFile.outputPrefix[0]!='\0'){
+									strcat(vOutputNameModels[i-2].name, "_");
+									strcat(vOutputNameModels[i-2].name, configCrontrolFile.outputPrefix);
+								}
+								strcat(vOutputNameModels[i-2].name,FITS_FILE);
+								//printf("\n%s",vOutputNameModels[i-2].name);
+								// FILE NAME FOR ADJUSTED SYNTHESIS 
+								strcpy(vOutputNameSynthesisAdjusted[i-2].name, dname);
+								strcat(vOutputNameSynthesisAdjusted[i-2].name,"/");
 
-			vOutputNameSynthesisAdjusted = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
-			strcpy(vOutputNameSynthesisAdjusted[0].name,get_basefilename(configCrontrolFile.ObservedProfiles));
-			strcat(vOutputNameSynthesisAdjusted[0].name,STOKES_FIT_EXT);
-			
+								strcat(vOutputNameSynthesisAdjusted[i-2].name,get_basefilename(namelist[i]->d_name));
+								strcat(vOutputNameSynthesisAdjusted[i-2].name, "_stokes");
+								if(configCrontrolFile.outputPrefix[0]!='\0'){
+									strcat(vOutputNameSynthesisAdjusted[i-2].name, "_");
+									strcat(vOutputNameSynthesisAdjusted[i-2].name, configCrontrolFile.outputPrefix);
+								}
+								strcat(vOutputNameSynthesisAdjusted[i-2].name,FITS_FILE);	
+								//printf("\n%s",vOutputNameSynthesisAdjusted[i-2].name);							
+							}
+							
+						}
+					}
+				}
+			}
+			else{  // read directory from number in t1 
+				struct dirent **namelist;
+				
+				char observedProAux[256];
+				char observedProAux2[256];
+				strcpy(observedProAux,configCrontrolFile.ObservedProfiles);
+				strcpy(observedProAux2,configCrontrolFile.ObservedProfiles);
+				char * dname = dirname(observedProAux);
+				char * bname = basename(observedProAux2);
+
+				
+				int numFileDirectory = scandir(dname, &namelist, 0, alphasort);
+    			if (numFileDirectory < 0){
+        			perror("scandir");
+					exit(1);
+				}
+				int maxNumber = -1;
+				for(i=2;i<numFileDirectory;i++){
+					if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
+						char pathAux [256];
+						strcpy(pathAux,dname);
+						strcat(pathAux,"/");
+						strcat(pathAux,namelist[i]->d_name);
+						char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
+						if(subString!=NULL){
+							char numChar [80];
+							//printf("\n%s len %d \t %s len %d",get_basefilename(namelist[i]->d_name),strlen(get_basefilename(namelist[i]->d_name)),bname,strlen(bname));
+							mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
+							//printf("\n NUM CHAR %s ",numChar);
+							int numAux = atoi(numChar);
+							//printf("\n NUMERO DE FICHERO ACTUAL ES : %d",numAux);
+							if(numAux>maxNumber)
+								maxNumber  = numAux;
+						}
+					}
+				}
+				//printf("\n MAX NUMBER IN DIRECTORY ES %d\n",maxNumber);				
+				
+				//printf("\n El directorio es: %s",dname);
+				/*DIR *d;
+				struct dirent *dir;
+				d = opendir(dname);
+				if (d)
+				{
+					while ((dir = readdir(d)) != NULL)
+					{
+						char pathAux [256];
+						strcpy(pathAux,dname);
+						strcat(pathAux,"/");
+						strcat(pathAux,dir->d_name);
+						char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
+						//int check = checkSubString(path)
+						//printf("\n path aux %s %s  %s ",pathAux,configCrontrolFile.ObservedProfiles,subString);
+						if(subString!=NULL)
+							numFileDirectory++;
+						//printf("%s\n", dir->d_name);
+					}
+					closedir(d);
+				}*/
+				/*numFileDirectory = scandir(dname, &namelist, 0, alphasort);
+    			if (numFileDirectory < 0)
+        			perror("scandir");*/
+				
+				//printf("\n el numero de ficheros en el directorio es %d",numFileDirectory);
+
+				if((maxNumber-configCrontrolFile.t1)+1>0){
+					//numberOfFileSpectra = numFileDirectory-2;
+					numberOfFileSpectra = (maxNumber - configCrontrolFile.t1)+1;
+					//printf("\n NUMERO DE FICHEROS EN EL DIRECTORIO LEIDO %d",numberOfFileSpectra);
+					vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+					vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+					vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+
+
+					int indexName =0;
+					for(i=configCrontrolFile.t1;i<=maxNumber;i++){
+						char strIndex[5];
+						if(i>=0 && i<10)
+							sprintf(strIndex, "0%d", i);
+						else
+							sprintf(strIndex, "%d", i);
+						strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
+						strcat(vInputFileSpectra[indexName].name, strIndex);
+						strcat(vInputFileSpectra[indexName].name, FITS_FILE);
+						//printf("\n vInputFileSpectra %s\n", vInputFileSpectra[indexName].name);
+						// FILE NAME FOR OUTPUT MODELS 
+						strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+						strcat(vOutputNameModels[indexName].name, strIndex);
+						strcat(vOutputNameModels[indexName].name, "_mod");
+						if(configCrontrolFile.outputPrefix[0]!='\0'){
+							strcat(vOutputNameModels[indexName].name, "_");
+							strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
+						}
+						strcat(vOutputNameModels[indexName].name,FITS_FILE);
+						//printf("\n vOutputNameModels %s\n", vOutputNameModels[indexName].name);
+						// FILE NAME FOR ADJUSTED SYNTHESIS 
+						strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+						strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
+						strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
+						if(configCrontrolFile.outputPrefix[0]!='\0'){
+							strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
+							strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
+						}
+						strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
+						//printf("\n vOutputNameSynthesisAdjusted %s\n", vOutputNameSynthesisAdjusted[indexName].name);
+						indexName++;	
+					}
+				}
+			}
 		}
-		else
-		{
-			
-			numberOfFileSpectra = (configCrontrolFile.t2 - configCrontrolFile.t1)+1;
-			vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
-			vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
-			vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
-			
-			int indexName = 0;
+		else{
+			// CHECK IF INPUT OBSERVED PROFILES COMES IN A DIRECTORY OR IS A FILE
+			if(configCrontrolFile.t1 == 0 && configCrontrolFile.t2 ==0){ // then process only one file
+				numberOfFileSpectra = 1;
+				vInputFileSpectra = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
+				strcpy(vInputFileSpectra[0].name,configCrontrolFile.ObservedProfiles);
 
-			for(i=configCrontrolFile.t1;i<=configCrontrolFile.t2;i++){
-				char strIndex[5];
-				if(i>=0 && i<10)
-					sprintf(strIndex, "0%d", i);
-				else
-					sprintf(strIndex, "%d", i);
-				// FILE NAMES FOR INPUT IMAGES
-				strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
-				strcat(vInputFileSpectra[indexName].name,strIndex);
-				strcat(vInputFileSpectra[indexName].name,FITS_FILE);
-				// FILE NAME FOR OUTPUT MODELS 
-				strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
-				strcat(vOutputNameModels[indexName].name, strIndex);
-				strcat(vOutputNameModels[indexName].name, "_mod");
-				if(configCrontrolFile.outputPrefix[0]!='\0'){
-					strcat(vOutputNameModels[indexName].name, "_");
-					strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
-				}
-				strcat(vOutputNameModels[indexName].name,FITS_FILE);
-				// FILE NAME FOR ADJUSTED SYNTHESIS 
-				strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
-				strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
-				strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
-				if(configCrontrolFile.outputPrefix[0]!='\0'){
-					strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
-					strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
-				}
-				strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
+				vOutputNameModels = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
+				strcpy(vOutputNameModels[0].name,get_basefilename(configCrontrolFile.InitialGuessModel));	
+				//strcat(vOutputNameModels[0].name,"_mod");
+				strcat(vOutputNameModels[0].name,MOD_FITS);
 
-				indexName++;
+				vOutputNameSynthesisAdjusted = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
+				strcpy(vOutputNameSynthesisAdjusted[0].name,get_basefilename(configCrontrolFile.ObservedProfiles));
+				strcat(vOutputNameSynthesisAdjusted[0].name,STOKES_FIT_EXT);
+				
+			}
+			else
+			{
+				
+				numberOfFileSpectra = (configCrontrolFile.t2 - configCrontrolFile.t1)+1;
+				vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+				vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+				vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
+				
+				int indexName = 0;
+
+				for(i=configCrontrolFile.t1;i<=configCrontrolFile.t2;i++){
+					char strIndex[5];
+					if(i>=0 && i<10)
+						sprintf(strIndex, "0%d", i);
+					else
+						sprintf(strIndex, "%d", i);
+					// FILE NAMES FOR INPUT IMAGES
+					strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
+					strcat(vInputFileSpectra[indexName].name,strIndex);
+					strcat(vInputFileSpectra[indexName].name,FITS_FILE);
+					// FILE NAME FOR OUTPUT MODELS 
+					strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+					strcat(vOutputNameModels[indexName].name, strIndex);
+					strcat(vOutputNameModels[indexName].name, "_mod");
+					if(configCrontrolFile.outputPrefix[0]!='\0'){
+						strcat(vOutputNameModels[indexName].name, "_");
+						strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
+					}
+					strcat(vOutputNameModels[indexName].name,FITS_FILE);
+					// FILE NAME FOR ADJUSTED SYNTHESIS 
+					strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+					strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
+					strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
+					if(configCrontrolFile.outputPrefix[0]!='\0'){
+						strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
+						strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
+					}
+					strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
+					indexName++;
+				}
 			}
 		}
 	}
@@ -872,8 +1053,6 @@ int main(int argc, char **argv)
 
 					// CHECK SIZE STRAY LIGHT 
 
-
-
 					if(slight!=NULL){
 
 						if(nl_straylight!=nlambda){
@@ -929,9 +1108,9 @@ int main(int argc, char **argv)
 				int sumLambda = 0;
 				sendcountsPixels_L[indexInputFits][0] = 0;
 				sendcountsSpectro_L[indexInputFits][0] = 0;
-				sendcountsLambda_L[indexInputFits][0] =0;
-				displsPixels_L[indexInputFits][0] =0;
-				displsSpectro_L[indexInputFits][0] =0;
+				sendcountsLambda_L[indexInputFits][0] = 0;
+				displsPixels_L[indexInputFits][0] = 0;
+				displsSpectro_L[indexInputFits][0] = 0;
 				for ( i = 0; i < numProcs; i++) {
 					sendcountsPixels_L[indexInputFits][i] = numPixelsProceso;
 					if (resto > 0) {
@@ -1793,7 +1972,454 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if(configCrontrolFile.loopInversion){
+		MPI_Barrier(MPI_COMM_WORLD);
+		newestFileTimeInitial = time(0);
+		int fileNew = 0;
+		int exitProgram = 0;
+		char newestFileName [256];
+		do{
+			if(idProc==root){
+				/*int addSlax = 0;
+				if(configCrontrolFile.ObservedProfiles[strlen(configCrontrolFile.ObservedProfiles)-1]!='/')
+					addSlax = 1;*/
+				time_t start_time,current_time;
+				
+				fileNew = 0;
+				int directory = 1;
+				time(&start_time);
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\n\tWAITING A NEW FILE IN DIRECTORY");
+				printf("\n--------------------------------------------------------------------------------");
+				printf("\n");
+				do{
+					DIR *d;
+					struct dirent *dir;
+					char observedProfilesAux[256];
+					strcpy(observedProfilesAux,configCrontrolFile.ObservedProfiles);
+					char * dname = dirname(observedProfilesAux);
+					d = opendir(dname);
+					if(d){
+						time_t newestFileTime;
+						ino_t newestFileInode;
+						
+						int first = 1;
+						while ((dir = readdir(d)) != NULL){
+							
+							if(strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 && strstr(dir->d_name,"_mod_")==NULL && strstr(dir->d_name,"_stokes_")==NULL){
+								struct stat filestat;
+								char pathAux[256];
+								//strcpy(pathAux,configCrontrolFile.ObservedProfiles);
+								strcpy(pathAux,dname);
+								strcat(pathAux,"/");
+								strcat(pathAux,dir->d_name);
+								stat(pathAux,&filestat);
+								if(first){
+									newestFileInode = filestat.st_ino;
+									newestFileTime = filestat.st_mtime;
+									strcpy(newestFileName,pathAux);
+									first = 0;
+								}
+								else{
+									if(difftime(filestat.st_mtime,newestFileTime)>0){
+										newestFileInode = filestat.st_ino;
+										newestFileTime = filestat.st_mtime;
+										strcpy(newestFileName,pathAux);
+									}
+								}
+							}
+						}
 
+						closedir(d);
+						//printf("\n newestFileTimeInitial %ld  newestFileTime %ld newestFileName %s\n",newestFileTimeInitial,newestFileTime,newestFileName);
+						if(difftime(newestFileTimeInitial,newestFileTime)<0){
+							fileNew = 1;
+							newestFileTimeInitial = newestFileTime;
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n THERE IS A NEW FILE IN DIRECTORY  %s",newestFileName);
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n");
+						}
+							
+					}
+					else{
+						printf("\n ERROR, the Path %s is not a directory valid\n. ",dname);
+						exit(1);
+					}
+					time(&current_time);
+					//printf("\n Hemos esperado 1 segundos, chequeamos de nuevo. Valor filenew %d. Valor curtime %ld Valor startime %ld",fileNew,current_time,start_time);
+					if(difftime(current_time,start_time)>=TIMEOUT_FILE)
+						exitProgram = 1;
+					else
+						sleep(5);
+				}while(!fileNew && !exitProgram);
+
+			}
+			MPI_Barrier(MPI_COMM_WORLD);
+			MPI_Bcast(&fileNew, 1, MPI_INT, root , MPI_COMM_WORLD);
+			MPI_Bcast(&exitProgram, 1, MPI_INT, root , MPI_COMM_WORLD);
+			MPI_Barrier(MPI_COMM_WORLD);
+			FitsImage * fitsImageLoop;
+			int numPixelImageLoop;
+			Init_Model * resultsInitModelLoop;
+			Init_Model * resultsInitModelTotalLoop;
+			float * chisqrfTotalLoop;
+			float * vChisqrfLoop;
+			int * vNumIterLoop;
+			int * vNumIterTotalLoop;
+			int sendcountsPixelsLoop [numProcs] ; // array describing how many elements to send to each process
+			int sendcountsSpectroLoop [numProcs];
+			int sendcountsLambdaLoop [numProcs];
+			int displsPixelsLoop[numProcs]; 
+			int displsSpectroLoop [numProcs];			
+			float * vSpectraSplitLoop;
+			float * vSpectraAdjustedSplitLoop;
+			float * vSpectraAjustedTotalLoop;
+			
+			if(fileNew){
+				
+				if(idProc==root){
+
+					if((access(newestFileName,F_OK)!=-1)){
+						clock_t t = clock();
+						
+						if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
+							fitsImageLoop = readFitsSpectroImageRectangular(newestFileName,&configCrontrolFile,1,nlambda);
+						}
+						else{
+							fitsImageLoop = readFitsSpectroImage(newestFileName,1,nlambda);
+						}
+
+						// CHECK SIZE MASK FILE 
+						if(vMask!=NULL && (numRowsMask!=fitsImageLoop->rows || numColsMask!=fitsImageLoop->cols) ){
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND MASK FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",vInputFileSpectraParalell[indexInputFits].name, fitsImages[indexInputFits]->rows, fitsImages[indexInputFits]->cols,configCrontrolFile.MaskFile,numRowsMask,numColsMask);
+							printf("\n--------------------------------------------------------------------------------\n");
+							exit(EXIT_FAILURE);
+						}
+
+						// CHECK SIZE STRAY LIGHT 
+
+						if(slight!=NULL){
+
+							if(nl_straylight!=nlambda){
+								printf("\n--------------------------------------------------------------------------------");
+								printf("\n Number of wavelenghts in Straylight file %d is different to Malla Grid file %d",nl_straylight,nlambda);
+								printf("\n--------------------------------------------------------------------------------\n");
+								exit(EXIT_FAILURE);
+							}
+							if(nx_straylight!=0 && ny_straylight!=0){
+								if(nx_straylight!= fitsImageLoop->rows || ny_straylight !=fitsImageLoop->cols ){
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n DIMENSIONS OF IMAGE %s [rows: %d , cols: %d ] AND STRAYLIGHT FILE %s  [rows: %d , cols: %d ] ARE DIFFERENT. ",newestFileName, fitsImageLoop->rows, fitsImageLoop->cols,configCrontrolFile.StrayLightFile,nx_straylight,ny_straylight);
+									printf("\n--------------------------------------------------------------------------------\n");
+									exit(EXIT_FAILURE);
+								}
+							}
+						}
+						
+						t = clock() - t;
+						PRECISION timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
+						printf("\n--------------------------------------------------------------------------------");
+						printf("\n TIME TO READ FITS IMAGE %s:  %f seconds to execute . NUMBER OF PIXELS READ: %d ",newestFileName, timeReadImage,fitsImageLoop->numPixels); 
+						printf("\n--------------------------------------------------------------------------------\n");
+						numPixelImageLoop = fitsImageLoop->numPixels;
+					}
+					
+				}
+				MPI_Barrier(MPI_COMM_WORLD); // Wait UNTIL THE IMAGE HAS BEEN READED COMPLETELY
+				//  BROADCAST THE NUMBER OF PIXELS
+				MPI_Bcast(&numPixelImageLoop, 1, MPI_INT, root , MPI_COMM_WORLD);
+				MPI_Barrier(MPI_COMM_WORLD); // WAIT UNTIL numPixelImageLoop HAS BEEN READ
+
+				// IF THE NUMBER OF PIXELS IS NOT GREATER THAN 0 WE DON'T CONITUNUE 
+				if(numPixelImageLoop > 0){
+					
+					if(idProc == root){
+						printf("\n--------------------------------------------------------------------------------");
+						printf("\nDOING INVERSION: %s",newestFileName );
+						printf("\n--------------------------------------------------------------------------------\n");
+						
+						resultsInitModelTotalLoop = calloc (numPixelImageLoop , sizeof(Init_Model));
+						chisqrfTotalLoop = calloc (numPixelImageLoop , sizeof(float));
+						vNumIterTotalLoop = calloc (numPixelImageLoop, sizeof(int));
+						if(configCrontrolFile.SaveSynthesisAdjusted)
+							vSpectraAjustedTotalLoop = calloc (numPixelImageLoop*nlambda*NPARMS,sizeof(float));
+					}
+					// allocate memory in all processes 
+
+					int numPixelsProceso = numPixelImageLoop/(numProcs);
+					int resto = numPixelImageLoop % (numProcs);
+					int sum = 0;                // Sum of counts. Used to calculate displacements
+					int sumSpectro = 0;
+					int sumLambda = 0;
+					sendcountsPixelsLoop[0] = 0;
+					sendcountsSpectroLoop[0] = 0;
+					sendcountsLambdaLoop[0] = 0;
+					displsPixelsLoop[0] = 0;
+					displsSpectroLoop[0] = 0;
+					for ( i = 0; i < numProcs; i++) {
+						sendcountsPixelsLoop[i] = numPixelsProceso;
+						if (resto > 0) {
+								sendcountsPixelsLoop[i]++;
+								resto--;
+						}
+						sendcountsSpectroLoop[i] = (sendcountsPixelsLoop[i])*nlambda*NPARMS;
+						sendcountsLambdaLoop[i] = (sendcountsPixelsLoop[i])*nlambda;
+						displsPixelsLoop[i] = sum;
+						displsSpectroLoop[i] = sumSpectro;
+						//displsLambda[i] = sumLambda;
+						sum += sendcountsPixelsLoop[i];
+						sumSpectro += sendcountsSpectroLoop[i];
+						sumLambda += sendcountsLambdaLoop[i];
+					}
+
+					MPI_Barrier(MPI_COMM_WORLD); // Wait until all processes have their vlambda
+					// SCATTER VPIXELS 
+					vSpectraSplitLoop = calloc(sendcountsSpectroLoop[idProc],sizeof(float));
+					if(configCrontrolFile.SaveSynthesisAdjusted)
+						vSpectraAdjustedSplitLoop = calloc(sendcountsSpectroLoop[idProc],sizeof(float));
+					
+					
+					MPI_Barrier(MPI_COMM_WORLD); // Wait until all processes have their vlambda				
+					if( root == idProc){
+						MPI_Scatterv(fitsImageLoop->spectroImagen, sendcountsSpectroLoop, displsSpectroLoop, MPI_FLOAT, vSpectraSplitLoop, sendcountsSpectroLoop[idProc], MPI_FLOAT, root, MPI_COMM_WORLD);
+						//MPI_Iscatterv(fitsImageLoop->spectroImagen, sendcountsSpectroLoop, displsSpectroLoop, MPI_FLOAT, vSpectraSplitLoop, sendcountsSpectroLoop[idProc], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestScatter[indexInputFits]);
+					}
+					else{
+						MPI_Scatterv(NULL, NULL,NULL, MPI_FLOAT, vSpectraSplitLoop, sendcountsSpectroLoop[idProc], MPI_FLOAT, root, MPI_COMM_WORLD);
+						//MPI_Iscatterv(NULL, NULL,NULL, MPI_FLOAT, vSpectraSplit_L[indexInputFits], sendcountsSpectro_L[indexInputFits][idProc], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestScatter[indexInputFits]);
+					}		
+					
+
+					resultsInitModelLoop = calloc(sendcountsPixelsLoop[idProc], sizeof(Init_Model));
+					vChisqrfLoop = calloc(sendcountsPixelsLoop[idProc], sizeof(float));
+					vNumIterLoop = calloc(sendcountsPixelsLoop[idProc], sizeof(int));
+				}
+				else if (idProc==root){
+					printf("\n--------------------------------------------------------------------------------");
+					printf("\n---------------------- FITS FILE CAN NOT BE READ IT %s ",vInputFileSpectraParalell[indexInputFits].name);
+					printf("\n--------------------------------------------------------------------------------\n");
+				}
+				
+				//MPI_Waitall(numFilesPerProcessParallel,vMpiRequestScatter,MPI_STATUSES_IGNORE);
+				/*if(idProc==root){
+					//t = clock() - t;
+					//PRECISION timeTotalExecution = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
+					printf("\n--------------------------------------------------------------------------------");
+					printf("\n SCATTER IMAGE DONE ");
+					printf("\n--------------------------------------------------------------------------------\n");
+				}*/
+
+				// DO INVERSION 
+
+				
+				if(numPixelImageLoop > 0){
+					local_start_execution = MPI_Wtime();
+					for(indexPixel = 0; indexPixel < sendcountsPixelsLoop[idProc]; indexPixel++){
+						int invertir = 1;
+						if(vMask!=NULL && !vMask[ displsPixelsLoop[idProc] + indexPixel]){
+							invertir=0;
+						}
+						if(invertir){
+							float * vAuxSpectraSplit = vSpectraSplitLoop;
+							//Initial Model
+							Init_Model initModel;
+							initModel.eta0 = INITIAL_MODEL.eta0;
+							initModel.B = INITIAL_MODEL.B; 
+							initModel.gm = INITIAL_MODEL.gm;
+							initModel.az = INITIAL_MODEL.az;
+							initModel.vlos = INITIAL_MODEL.vlos; //km/s 0
+							initModel.mac = INITIAL_MODEL.mac;
+							initModel.dopp = INITIAL_MODEL.dopp;
+							initModel.aa = INITIAL_MODEL.aa;
+							initModel.alfa = INITIAL_MODEL.alfa; 
+							initModel.S0 = INITIAL_MODEL.S0;
+							initModel.S1 = INITIAL_MODEL.S1;
+
+							// CLASSICAL ESTIMATES TO GET B, GAMMA, vlos, azimuth
+							estimacionesClasicas(wlines[1], vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), &initModel,1);
+							if (isnan(initModel.B))
+								initModel.B = 1;
+							if (isnan(initModel.vlos))
+								initModel.vlos = 1e-3;
+							if (isnan(initModel.gm))
+								initModel.gm = 1;						
+							if (isnan(initModel.az))
+								initModel.az = 1;
+							// INVERSION RTE
+							
+							float * slightPixel;
+							if(slight==NULL) 
+								slightPixel = NULL;
+							else{
+								if(nx_straylight && ny_straylight){
+									slightPixel = slight+ (nlambda*NPARMS*indexPixel)+displsSpectroLoop[idProc];
+								}
+								else {
+									slightPixel = slight;
+									
+								}
+							}
+							vNumIterLoop[indexPixel] = -1;
+							lm_mils(cuantic, wlines, vGlobalLambda, nlambda, vAuxSpectraSplit+(indexPixel*(nlambda*NPARMS)), nlambda, &initModel, spectra, &(vChisqrfLoop[indexPixel]), slightPixel, configCrontrolFile.toplim, configCrontrolFile.NumberOfCycles,
+								configCrontrolFile.WeightForStokes, configCrontrolFile.fix, vSigma, configCrontrolFile.noise, configCrontrolFile.InitialDiagonalElement,&configCrontrolFile.ConvolveWithPSF,&(vNumIterLoop[indexPixel]),configCrontrolFile.mu,configCrontrolFile.logclambda);																		
+							
+							resultsInitModelLoop[indexPixel] = initModel;
+							if(configCrontrolFile.SaveSynthesisAdjusted){
+								int kk;
+								for (kk = 0; kk < (nlambda * NPARMS); kk++)
+								{
+									vSpectraAdjustedSplitLoop[ (indexPixel*(nlambda * NPARMS))+kk] = spectra[kk] ;
+								}						
+							}
+						}
+						else{
+							Init_Model initModel;
+							initModel.eta0 = 0;
+							initModel.B = 0; 
+							initModel.gm = 0;
+							initModel.az = 0;
+							initModel.vlos = 0; //km/s 0
+							initModel.mac = 0;
+							initModel.dopp = 0;
+							initModel.aa = 0;
+							initModel.alfa = 0; 
+							initModel.S0 = 0;
+							initModel.S1 = 0;
+							resultsInitModelLoop[indexPixel] = initModel;
+							if(configCrontrolFile.SaveSynthesisAdjusted){
+								int kk;
+								for (kk = 0; kk < (nlambda * NPARMS); kk++)
+								{
+									vSpectraAdjustedSplitLoop[ (indexPixel*(nlambda * NPARMS))+kk] = 0 ;
+								}						
+							}
+						}
+					}
+
+					//printf("\n ESTOY EN EL PROCESO %d Y HE TERMINADO MIS PIXELS. \n",idProc);
+					MPI_Gatherv(resultsInitModelLoop, sendcountsPixelsLoop[idProc], mpiInitModel, resultsInitModelTotalLoop, sendcountsPixelsLoop, displsPixelsLoop, mpiInitModel, root, MPI_COMM_WORLD);
+					MPI_Gatherv(vChisqrfLoop, sendcountsPixelsLoop[idProc], MPI_FLOAT, chisqrfTotalLoop, sendcountsPixelsLoop, displsPixelsLoop, MPI_FLOAT, root, MPI_COMM_WORLD);		
+					MPI_Gatherv(vNumIterLoop, sendcountsPixelsLoop[idProc], MPI_INT, vNumIterTotalLoop, sendcountsPixelsLoop, displsPixelsLoop, MPI_INT, root, MPI_COMM_WORLD);		
+					
+					//printf("\n ESTOY EN EL PROCESO %d GATHER REALIZADO . \n",idProc);
+					if(configCrontrolFile.SaveSynthesisAdjusted)
+						MPI_Gatherv(vSpectraAdjustedSplitLoop, sendcountsSpectroLoop[idProc], MPI_FLOAT, vSpectraAjustedTotalLoop, sendcountsSpectroLoop, displsSpectroLoop, MPI_FLOAT, root, MPI_COMM_WORLD);		
+					local_elapsed_execution = MPI_Wtime() - local_start_execution;
+					MPI_Reduce(&local_elapsed_execution, &elapsed_execution, 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD);
+
+					if(idProc==root){
+						
+						char outputNameModelsLoop[256];
+						char outputNameSynthesisAdjustedLoop[256];
+
+						strcpy(outputNameModelsLoop,get_basefilename(newestFileName));
+						strcat(outputNameModelsLoop, "_mod");
+						if(configCrontrolFile.outputPrefix[0]!='\0'){
+							strcat(outputNameModelsLoop, "_");
+							strcat(outputNameModelsLoop, configCrontrolFile.outputPrefix);
+						}
+						strcat(outputNameModelsLoop,FITS_FILE);						
+
+						strcpy(outputNameSynthesisAdjustedLoop,get_basefilename(newestFileName));
+						strcat(outputNameSynthesisAdjustedLoop, "_stokes");
+						if(configCrontrolFile.outputPrefix[0]!='\0'){
+							strcat(outputNameSynthesisAdjustedLoop, "_");
+							strcat(outputNameSynthesisAdjustedLoop, configCrontrolFile.outputPrefix);
+						}
+						strcat(outputNameSynthesisAdjustedLoop,FITS_FILE);
+
+						double timeWriteImage;
+						clock_t t;
+						t = clock();
+
+						if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
+							if(!writeFitsImageModelsSubSet(outputNameModelsLoop,fitsImageLoop->rows_original,fitsImageLoop->cols_original,configCrontrolFile,resultsInitModelTotalLoop,chisqrfTotalLoop,vNumIterTotalLoop,configCrontrolFile.saveChisqr)){
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n ERROR WRITING FILE OF MODELS: %s",outputNameModelsLoop);
+									printf("\n--------------------------------------------------------------------------------\n");
+							}
+						}
+						else{
+							if(!writeFitsImageModels(outputNameModelsLoop,fitsImageLoop->rows,fitsImageLoop->cols,resultsInitModelTotalLoop,chisqrfTotalLoop,vNumIterTotalLoop,configCrontrolFile.saveChisqr)){
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n ERROR WRITING FILE OF MODELS: %s",outputNameModelsLoop);
+									printf("\n--------------------------------------------------------------------------------\n");
+							}
+						}
+						t = clock() - t;
+						timeWriteImage = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+						
+						// PROCESS FILE OF SYNTETIC PROFILES
+						if(configCrontrolFile.SaveSynthesisAdjusted){
+							free(fitsImageLoop->pixels);
+							fitsImageLoop->pixels = calloc(fitsImageLoop->numPixels, sizeof(vpixels));
+							for( i=0;i<fitsImageLoop->numPixels;i++){
+								fitsImageLoop->pixels[i].spectro = calloc ((fitsImageLoop->numStokes*fitsImageLoop->nLambdas),sizeof(float));
+								//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+							}		
+							for(indexPixel=0;indexPixel<fitsImageLoop->numPixels;indexPixel++)
+							{	
+								int kk;
+								for (kk = 0; kk < (nlambda * NPARMS); kk++)
+								{
+									fitsImageLoop->pixels[indexPixel].spectro[kk] = vSpectraAjustedTotalLoop[kk+(indexPixel*(nlambda * NPARMS))] ;
+								}
+							}					
+							// WRITE SINTHETIC PROFILES TO FITS FILE
+							if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){							
+								if(!writeFitsImageProfilesSubSet(outputNameSynthesisAdjustedLoop,newestFileName,fitsImageLoop,configCrontrolFile)){
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",outputNameSynthesisAdjustedLoop);
+									printf("\n--------------------------------------------------------------------------------\n");
+								}
+							}
+							else{
+								if(!writeFitsImageProfiles(outputNameSynthesisAdjustedLoop,newestFileName,fitsImageLoop)){
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",outputNameSynthesisAdjustedLoop);
+									printf("\n--------------------------------------------------------------------------------\n");
+								}
+							}
+							
+							for( i=0;i<fitsImageLoop->numPixels;i++){
+								free(fitsImageLoop->pixels[i].spectro);
+								fitsImageLoop->pixels[i].spectro = NULL;
+								//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
+							}							
+							free(fitsImageLoop->pixels);
+							fitsImageLoop->pixels = NULL;
+						}
+
+						free(resultsInitModelTotalLoop);		
+						free(chisqrfTotalLoop);
+						free(vNumIterTotalLoop);
+						if(configCrontrolFile.SaveSynthesisAdjusted){
+							free(vSpectraAjustedTotalLoop);
+						}
+						
+						printf("\n-------------------------------------------------------------------------------------------------------------------------");
+						printf("\nINVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f ", newestFileName,elapsed_execution);
+						//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
+						printf("\nTIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
+						printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
+						freeFitsImage(fitsImageLoop);
+					}
+				}
+				MPI_Barrier(MPI_COMM_WORLD);
+				free(resultsInitModelLoop);
+				free(vChisqrfLoop);
+				free(vNumIterLoop);
+				free(vSpectraSplitLoop);
+				if(configCrontrolFile.SaveSynthesisAdjusted)
+					free(vSpectraAdjustedSplitLoop);
+				fileNew = 0;
+			}
+		}while(!exitProgram);
+
+		//printf("\n SALIENDO DEL PROGRAMA ID PROC %d\n",idProc);
+	}
 
 	FreeMemoryDerivedSynthesis();
 

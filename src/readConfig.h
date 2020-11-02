@@ -25,3 +25,5 @@ char* file_ext(const char *string);
 
 char * get_basefilename (const char * fname);
 int checkInitialModel (Init_Model * INIT_MODEL);
+int checkSubString(char * source, char * searched);
+char * mySubString (char* input, int offset, int len, char* dest);
