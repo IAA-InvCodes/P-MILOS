@@ -74,3 +74,8 @@ void myMemCpy(PRECISION *dest, PRECISION *src, size_t n) ;
 
 void strip_ext(char *fname);
 
+
+
+void insert_in_linked_list (tpuntero *cabeza, char * fileName);
+int checkNameInLista (tpuntero cabeza,char * fileName);
+void deleteList (tpuntero *cabeza);

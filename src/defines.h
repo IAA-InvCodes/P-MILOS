@@ -395,6 +395,13 @@ typedef struct NAME_FILE nameFile;
 #define STOKES_PER_EXT "_stokes.per"
 
 
+// linked list to store name of files 
+typedef struct snodo {
+    char d_name [256];
+    struct snodo * next;
+} tnodo;
+
+typedef tnodo *tpuntero;
 
 #endif /*DEFINES_H_*/
 

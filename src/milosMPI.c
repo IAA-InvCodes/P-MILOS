@@ -170,7 +170,7 @@ int main(int argc, char **argv)
 	nameFile * vInputFileSpectraLocal = NULL;
 	nameFile * vOutputNameModelsLocal = NULL;
 	nameFile * vOutputNameSynthesisAdjustedLocal = NULL;
-
+	tpuntero listFileNamesReaded = NULL; 
 	
 	const char	* nameInputFilePSF ;
 
@@ -536,8 +536,12 @@ int main(int argc, char **argv)
 
 				struct dirent **namelist;
 				char observedProAux[256];
+				char observedProAux2[256];
 				strcpy(observedProAux,configCrontrolFile.ObservedProfiles);
+				strcpy(observedProAux2,configCrontrolFile.ObservedProfiles);
 				char * dname = dirname(observedProAux);
+				char * bname = basename(observedProAux2);
+				
 				int numFileDirectory = scandir(dname, &namelist, 0, alphasort);
     			if (numFileDirectory < 0)
         			perror("scandir");
@@ -548,8 +552,67 @@ int main(int argc, char **argv)
 						vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
-						int first =1;
+						int maxNumber = -1;
+						int minNumber = 1000000;
 						for(i=2;i<numFileDirectory;i++){
+							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
+								char pathAux [256];
+								strcpy(pathAux,dname);
+								strcat(pathAux,"/");
+								strcat(pathAux,namelist[i]->d_name);
+								char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
+								if(subString!=NULL){
+									char numChar [80];
+									//printf("\n%s len %d \t %s len %d",get_basefilename(namelist[i]->d_name),strlen(get_basefilename(namelist[i]->d_name)),bname,strlen(bname));
+									mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
+									//printf("\n NUM CHAR %s ",numChar);
+									int numAux = atoi(numChar);
+									//printf("\n NUMERO DE FICHERO ACTUAL ES : %d",numAux);
+									if(numAux>maxNumber)
+										maxNumber  = numAux;
+									if(numAux<minNumber)
+										minNumber = numAux;
+								}
+							}
+						}	
+						printf("\n El numero minimo es %d ",minNumber);
+						printf("\n El numero máximo es %d ", maxNumber);
+
+						int indexName =0;
+						for(i=minNumber;i<=maxNumber;i++){
+							char strIndex[5];
+							if(i>=0 && i<10)
+								sprintf(strIndex, "0%d", i);
+							else
+								sprintf(strIndex, "%d", i);
+							strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
+							strcat(vInputFileSpectra[indexName].name, strIndex);
+							strcat(vInputFileSpectra[indexName].name, FITS_FILE);
+							//printf("\n vInputFileSpectra %s\n", vInputFileSpectra[indexName].name);
+							// FILE NAME FOR OUTPUT MODELS 
+							strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+							strcat(vOutputNameModels[indexName].name, strIndex);
+							strcat(vOutputNameModels[indexName].name, "_mod");
+							if(configCrontrolFile.outputPrefix[0]!='\0'){
+								strcat(vOutputNameModels[indexName].name, "_");
+								strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
+							}
+							strcat(vOutputNameModels[indexName].name,FITS_FILE);
+							//printf("\n vOutputNameModels %s\n", vOutputNameModels[indexName].name);
+							// FILE NAME FOR ADJUSTED SYNTHESIS 
+							strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+							strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
+							strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
+							if(configCrontrolFile.outputPrefix[0]!='\0'){
+								strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
+								strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
+							}
+							strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
+							//printf("\n vOutputNameSynthesisAdjusted %s\n", vOutputNameSynthesisAdjusted[indexName].name);
+							indexName++;	
+						}
+
+						/*for(i=2;i<numFileDirectory;i++){
 							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
 								struct stat filestat;
 								char pathAux[256];
@@ -557,15 +620,6 @@ int main(int argc, char **argv)
 								strcat(pathAux,"/");
 								strcat(pathAux,namelist[i]->d_name);
 								stat(pathAux,&filestat);
-								if(first){
-									newestFileTimeInitial = filestat.st_mtime;
-									first = 0;
-								}
-								else{
-									if(difftime(filestat.st_mtime,newestFileTimeInitial)>0){
-										newestFileTimeInitial = filestat.st_mtime;
-									}
-								}
 								strcpy(vInputFileSpectra[i-2].name, dname);
 								strcat(vInputFileSpectra[i-2].name,"/");
 								strcat(vInputFileSpectra[i-2].name, namelist[i]->d_name);
@@ -597,7 +651,7 @@ int main(int argc, char **argv)
 								//printf("\n%s",vOutputNameSynthesisAdjusted[i-2].name);							
 							}
 							
-						}
+						}*/
 					}
 				}
 			}
@@ -611,7 +665,6 @@ int main(int argc, char **argv)
 				char * dname = dirname(observedProAux);
 				char * bname = basename(observedProAux2);
 
-				
 				int numFileDirectory = scandir(dname, &namelist, 0, alphasort);
     			if (numFileDirectory < 0){
         			perror("scandir");
@@ -637,33 +690,7 @@ int main(int argc, char **argv)
 						}
 					}
 				}
-				//printf("\n MAX NUMBER IN DIRECTORY ES %d\n",maxNumber);				
-				
-				//printf("\n El directorio es: %s",dname);
-				/*DIR *d;
-				struct dirent *dir;
-				d = opendir(dname);
-				if (d)
-				{
-					while ((dir = readdir(d)) != NULL)
-					{
-						char pathAux [256];
-						strcpy(pathAux,dname);
-						strcat(pathAux,"/");
-						strcat(pathAux,dir->d_name);
-						char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
-						//int check = checkSubString(path)
-						//printf("\n path aux %s %s  %s ",pathAux,configCrontrolFile.ObservedProfiles,subString);
-						if(subString!=NULL)
-							numFileDirectory++;
-						//printf("%s\n", dir->d_name);
-					}
-					closedir(d);
-				}*/
-				/*numFileDirectory = scandir(dname, &namelist, 0, alphasort);
-    			if (numFileDirectory < 0)
-        			perror("scandir");*/
-				
+
 				//printf("\n el numero de ficheros en el directorio es %d",numFileDirectory);
 
 				if((maxNumber-configCrontrolFile.t1)+1>0){
@@ -709,6 +736,10 @@ int main(int argc, char **argv)
 						indexName++;	
 					}
 				}
+			}
+			//newestFileTimeInitial = time(0);
+			for(i=0;i<numberOfFileSpectra;i++){
+				insert_in_linked_list(&listFileNamesReaded,vInputFileSpectra[i].name);
 			}
 		}
 		else{
@@ -1974,15 +2005,12 @@ int main(int argc, char **argv)
 
 	if(configCrontrolFile.loopInversion){
 		MPI_Barrier(MPI_COMM_WORLD);
-		newestFileTimeInitial = time(0);
+		//newestFileTimeInitial = time(0);
 		int fileNew = 0;
 		int exitProgram = 0;
 		char newestFileName [256];
 		do{
 			if(idProc==root){
-				/*int addSlax = 0;
-				if(configCrontrolFile.ObservedProfiles[strlen(configCrontrolFile.ObservedProfiles)-1]!='/')
-					addSlax = 1;*/
 				time_t start_time,current_time;
 				
 				fileNew = 0;
@@ -1998,23 +2026,37 @@ int main(int argc, char **argv)
 					char observedProfilesAux[256];
 					strcpy(observedProfilesAux,configCrontrolFile.ObservedProfiles);
 					char * dname = dirname(observedProfilesAux);
-					d = opendir(dname);
-					if(d){
-						time_t newestFileTime;
-						ino_t newestFileInode;
+					//d = opendir(dname);
+					struct dirent **namelist;
+					int numFiles = scandir(dname, &namelist, 0, alphasort);
+					//printf("\nEl numero de ficheros es %d \n",numFiles);
+					if(numFiles>0){
+						//time_t newestFileTime;						
+						//int first = 1;
+						//while ((dir = readdir(d)) != NULL){
 						
-						int first = 1;
-						while ((dir = readdir(d)) != NULL){
-							
-							if(strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 && strstr(dir->d_name,"_mod_")==NULL && strstr(dir->d_name,"_stokes_")==NULL){
-								struct stat filestat;
+						for(i=2;i<numFiles && !fileNew;i++){	
+							//if(strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 && strstr(dir->d_name,"_mod_")==NULL && strstr(dir->d_name,"_stokes_")==NULL){
+							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0 && strstr(namelist[i]->d_name,"_mod_")==NULL && strstr(namelist[i]->d_name,"_stokes_")==NULL){
+								//struct stat filestat;
 								char pathAux[256];
 								//strcpy(pathAux,configCrontrolFile.ObservedProfiles);
 								strcpy(pathAux,dname);
 								strcat(pathAux,"/");
-								strcat(pathAux,dir->d_name);
-								stat(pathAux,&filestat);
-								if(first){
+								//strcat(pathAux,dir->d_name);
+								strcat(pathAux,namelist[i]->d_name);
+								//stat(pathAux,&filestat);
+								if(!checkNameInLista(listFileNamesReaded,pathAux)){
+									insert_in_linked_list(&listFileNamesReaded,pathAux);
+									fileNew = 1;
+									strcpy(newestFileName,pathAux);
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n THERE IS A NEW FILE IN DIRECTORY  %s",newestFileName);
+									printf("\n--------------------------------------------------------------------------------");
+									printf("\n");									
+								}
+								//printf("\n fichero a comprar %s \n",pathAux);
+								/*if(first){
 									newestFileInode = filestat.st_ino;
 									newestFileTime = filestat.st_mtime;
 									strcpy(newestFileName,pathAux);
@@ -2026,20 +2068,21 @@ int main(int argc, char **argv)
 										newestFileTime = filestat.st_mtime;
 										strcpy(newestFileName,pathAux);
 									}
-								}
+								}*/
 							}
 						}
 
-						closedir(d);
+						//closedir(d);
 						//printf("\n newestFileTimeInitial %ld  newestFileTime %ld newestFileName %s\n",newestFileTimeInitial,newestFileTime,newestFileName);
-						if(difftime(newestFileTimeInitial,newestFileTime)<0){
+						/*if(difftime(newestFileTimeInitial,newestFileTime)<0){
 							fileNew = 1;
 							newestFileTimeInitial = newestFileTime;
+							//newestFileTimeInitial = time(0);
 							printf("\n--------------------------------------------------------------------------------");
 							printf("\n THERE IS A NEW FILE IN DIRECTORY  %s",newestFileName);
 							printf("\n--------------------------------------------------------------------------------");
 							printf("\n");
-						}
+						}*/
 							
 					}
 					else{
@@ -2420,6 +2463,8 @@ int main(int argc, char **argv)
 
 		//printf("\n SALIENDO DEL PROGRAMA ID PROC %d\n",idProc);
 	}
+
+	deleteList(&listFileNamesReaded);
 
 	FreeMemoryDerivedSynthesis();
 

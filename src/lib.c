@@ -453,3 +453,31 @@ void strip_ext(char *fname)
 
 
 
+void insert_in_linked_list (tpuntero *cabeza, char * fileName){
+    tpuntero nuevo; 
+    nuevo = malloc(sizeof(tnodo)); 
+    strcpy(nuevo->d_name,fileName); 
+    nuevo->next = *cabeza; 
+    *cabeza = nuevo; 
+}
+ 
+int checkNameInLista(tpuntero cabeza,char * fileName){
+	int found = 0;
+    while(cabeza != NULL && !found){ //Mientras cabeza no sea NULL
+		if(strcmp(cabeza->d_name,fileName)==0)
+			found = 1;
+		else
+        	cabeza = cabeza->next; //Pasamos al siguiente nodo
+    }
+	return found;
+}
+ 
+void deleteList(tpuntero *cabeza){ 
+    tpuntero actual; //Puntero auxiliar para eliminar correctamente la lista
+  
+    while(*cabeza != NULL){ //Mientras cabeza no sea NULL
+        actual = *cabeza; //Actual toma el valor de cabeza
+        *cabeza = (*cabeza)->next; //Cabeza avanza 1 posicion en la lista
+        free(actual); //Se libera la memoria de la posicion de Actual (el primer nodo), y cabeza queda apuntando al que ahora es el primero
+    }
+}
