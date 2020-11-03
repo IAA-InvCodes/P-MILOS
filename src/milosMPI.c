@@ -552,8 +552,10 @@ int main(int argc, char **argv)
 						vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
-						int maxNumber = -1;
-						int minNumber = 1000000;
+						int numberFiles[numberOfFileSpectra];
+						/*int maxNumber = -1;
+						int minNumber = 1000000;*/
+						int indexNumberFiles = 0;
 						for(i=2;i<numFileDirectory;i++){
 							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
 								char pathAux [256];
@@ -567,49 +569,52 @@ int main(int argc, char **argv)
 									mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
 									//printf("\n NUM CHAR %s ",numChar);
 									int numAux = atoi(numChar);
+									numberFiles[indexNumberFiles++] = numAux;
 									//printf("\n NUMERO DE FICHERO ACTUAL ES : %d",numAux);
-									if(numAux>maxNumber)
+									/*if(numAux>maxNumber)
 										maxNumber  = numAux;
 									if(numAux<minNumber)
-										minNumber = numAux;
+										minNumber = numAux;*/
 								}
 							}
 						}	
-						printf("\n El numero minimo es %d ",minNumber);
-						printf("\n El numero máximo es %d ", maxNumber);
 
-						int indexName =0;
-						for(i=minNumber;i<=maxNumber;i++){
+						//for(i=minNumber;i<=maxNumber;i++){
+						for(i=0;i<numberOfFileSpectra;i++){
 							char strIndex[5];
-							if(i>=0 && i<10)
+							/*if(i>=0 && i<10)
 								sprintf(strIndex, "0%d", i);
 							else
-								sprintf(strIndex, "%d", i);
-							strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
-							strcat(vInputFileSpectra[indexName].name, strIndex);
-							strcat(vInputFileSpectra[indexName].name, FITS_FILE);
-							//printf("\n vInputFileSpectra %s\n", vInputFileSpectra[indexName].name);
+								sprintf(strIndex, "%d", i);*/
+							if(numberFiles[i]>=0 && numberFiles[i]<10)
+								sprintf(strIndex, "0%d", numberFiles[i]);
+							else
+								sprintf(strIndex, "%d", numberFiles[i]);								
+							
+							strcpy(vInputFileSpectra[i].name, configCrontrolFile.ObservedProfiles);
+							strcat(vInputFileSpectra[i].name, strIndex);
+							strcat(vInputFileSpectra[i].name, FITS_FILE);
+							//printf("\n vInputFileSpectra %s\n", vInputFileSpectra[i].name);
 							// FILE NAME FOR OUTPUT MODELS 
-							strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
-							strcat(vOutputNameModels[indexName].name, strIndex);
-							strcat(vOutputNameModels[indexName].name, "_mod");
+							strcpy(vOutputNameModels[i].name, configCrontrolFile.ObservedProfiles);
+							strcat(vOutputNameModels[i].name, strIndex);
+							strcat(vOutputNameModels[i].name, "_mod");
 							if(configCrontrolFile.outputPrefix[0]!='\0'){
-								strcat(vOutputNameModels[indexName].name, "_");
-								strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
+								strcat(vOutputNameModels[i].name, "_");
+								strcat(vOutputNameModels[i].name, configCrontrolFile.outputPrefix);
 							}
-							strcat(vOutputNameModels[indexName].name,FITS_FILE);
-							//printf("\n vOutputNameModels %s\n", vOutputNameModels[indexName].name);
+							strcat(vOutputNameModels[i].name,FITS_FILE);
+							//printf("\n vOutputNameModels %s\n", vOutputNameModels[i].name);
 							// FILE NAME FOR ADJUSTED SYNTHESIS 
-							strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
-							strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
-							strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
+							strcpy(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.ObservedProfiles);
+							strcat(vOutputNameSynthesisAdjusted[i].name, strIndex);
+							strcat(vOutputNameSynthesisAdjusted[i].name, "_stokes");
 							if(configCrontrolFile.outputPrefix[0]!='\0'){
-								strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
-								strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
+								strcat(vOutputNameSynthesisAdjusted[i].name, "_");
+								strcat(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.outputPrefix);
 							}
-							strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
-							//printf("\n vOutputNameSynthesisAdjusted %s\n", vOutputNameSynthesisAdjusted[indexName].name);
-							indexName++;	
+							strcat(vOutputNameSynthesisAdjusted[i].name,FITS_FILE);
+							//printf("\n vOutputNameSynthesisAdjusted %s\n", vOutputNameSynthesisAdjusted[i].name);
 						}
 
 						/*for(i=2;i<numFileDirectory;i++){
