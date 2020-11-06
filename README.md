@@ -160,11 +160,11 @@ The other options are to choose which version of the code to compile (sequential
 ```
 make milos
 ```
-* Compile and create executable **milosMPI**
+* Compile and create executable **pmilos**
 ```
-make milosMPI
+make pmilos
 ```
-* Compile and create both: **milos** and **milosMPI**
+* Compile and create both: **milos** and **pmilos**
 ```
 make 
 ```
@@ -186,12 +186,12 @@ The program must be executed by passing the configuration file as a parameter:
 ./milos run/pmilos.mtrol
 ```
 
-### milosMPI
+### pmilos
 
 For the parallel program the execution is a bit different. In this case the file that we must pass as a parameter to the executable will be of type **.init** . As for the **.trol** file, we leave you an example inside the run folder [pmilos.minit](run/pmilos.minit)
 
 The program must be executed using the command of **mpirun** or **mpiexec**. a simple use of parallelization on the local machine, would be to specify the number of processes with the *-np* option:
 
 ```
-mpiexec -np 12 ./milosMPI run/pmilos.minit
+mpiexec -np 12 ./pmilos run/pmilos.minit
 ```
