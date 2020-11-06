@@ -34,15 +34,15 @@ DEPENCOMMON=$(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.
 DEPEN_SEQ=$(SRCDIR)/milos.o 
 DEPEN_PAR=$(SRCDIR)/milosMPI.o 
 LDLIBS= -lm -lcfitsio -lnsl -lgsl -lgslcblas -lfftw3 -ldl -lpthread 
-BIN= pmilos pmilosMPI 
+BIN= milos pmilos 
 
 
 all: $(BIN)
 
-pmilos: $(DEPENCOMMON) $(DEPEN_SEQ)
+milos: $(DEPENCOMMON) $(DEPEN_SEQ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
-pmilosMPI: $(DEPENCOMMON) $(DEPEN_PAR)
+pmilos: $(DEPENCOMMON) $(DEPEN_PAR)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
 clean:
