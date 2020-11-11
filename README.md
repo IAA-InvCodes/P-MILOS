@@ -120,7 +120,7 @@ Look this example:
 Line indices            :   Initial lambda     Step     Final lambda
 (in this order)                    (mA)          (mA)         (mA) 
 -----------------------------------------------------------------------
-1                       :        -350            35           665
+1                       :        -350,            35,           665
 ```
 In the file [malla.grid](run/malla.grid) you can find an extended example. 
 
