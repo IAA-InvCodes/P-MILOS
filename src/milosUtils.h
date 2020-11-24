@@ -3,15 +3,7 @@
 #include <fftw3.h> //siempre a continuacion de complex.h
 #include <math.h>
 
-/**
- * 
- */
-void spectral_synthesis_convolution(int * nlambda);
 
-/**
- * 
- */
-void response_functions_convolution(int * nlambda);
 
 /**
  * 
@@ -31,11 +23,7 @@ void FijaACeroDerivadasNoNecesarias(REAL *d_spectra, int *fixed, int nlambda);
  */
 int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta);
 
-/**
- * 
- */
-//void weights_init(PRECISION *sigma, PRECISION **wOut, PRECISION **sigOut, PRECISION noise);
-void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise);
+
 
 /*
 *
@@ -49,19 +37,10 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise);
 * spectro :   vector [I,Q,U,V]
 * initModel:  Modelo de atmosfera a ser modificado
 *
-*
-*
-* @Author: Juan Pedro Cobos Carrascosa (IAA-CSIC)
-*		   jpedro@iaa.es
-* @Date:  Nov. 2011
-*
 */
 void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel, int forInitialUse);
 
-/**
- * 
- * */
-void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, REAL * slight);
+
 
 /*
  *

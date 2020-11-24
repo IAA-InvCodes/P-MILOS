@@ -192,11 +192,11 @@ int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel){
  * 
  * Check if the initial model is inside a range.
  * 
- *  Si alguno está mal, abortar con un mensaje de error diciendo cuál es el parámetro problemático:
-	Todos los parámetros deben ser positivos (mayores o iguales que cero), excepto la velocidad LOS, que puede ser positiva o negativa
-	El filling factor debe ir entre 0 y 1
-	Gamma y azimuth van entre 0 y 360 grados. Aquí me había confundido: los valores de gamma y azimuth iniciales tienen que estar entre 0 y 180 grados.
-	Si el filling factor es menor que uno, debe haber un fichero de perfiles de luz difusa. Si no, el programa aborta con un mensaje de error.
+ *  If any of them are wrong, abort with an error message saying what the problematic parameter is:
+	All parameters must be positive (greater than or equal to zero), except the speed LOS, which can be positive or negative
+	The filling factor must be between 0 and 1
+	Gamma and azimuth range from 0 to 360 degrees. Here I was confused: the initial gamma and azimuth values have to be between 0 and 180 degrees.
+	If the filling factor is less than one, there must be a scattered light profile file. If not, the program aborts with an error message.
 
  * */
 int checkInitialModel (Init_Model * INIT_MODEL){
@@ -308,10 +308,8 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 	char name[100];
 
 	while ((read = getline(&line, &len, fp)) != -1 && !dataRead){
-		//printf("\n linea leida %s",line);
 		if(found){ //1                       :        -624.37,        21.53,     1765.46
 			sscanf(line,"%i%99[^:]:%lf,%lf,%lf",&indexLine,name,initialLambda,step,finalLambda);
-			//sscanf(line,"%i%99[^:]:%lf%lf%lf",&indexLine,name,initialLambda,step,finalLambda);
 			dataRead = 1;
 		}
 		else{
@@ -339,10 +337,7 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
  * */
 int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInputPSF, PRECISION centralWaveLenght){
 
-	// first of all read the number of lines to give size for arrays deltaLambda and PSF
 	FILE *fp;
-
-	// alloc memory 
 
 	char * line = NULL;
 	size_t len = 0;
@@ -357,7 +352,6 @@ int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInput
 	while ((read = getline(&line, &len, fp)) != -1) {
 		double delta, psf;
 		sscanf(line,"%le  %le", &delta, &psf);
-		//deltaLambda[index] = (delta/1000)+centralWaveLenght;
 		deltaLambda[index] = delta;
 		PSF[index] = psf;
 		index++;
@@ -368,6 +362,9 @@ int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, const char * nameInput
 }
 
 
+/**
+ * 
+ * */
 void loadInitialValues(ConfigControl * configControlFile){
 
 	// array of weight 
@@ -376,14 +373,11 @@ void loadInitialValues(ConfigControl * configControlFile){
 	configControlFile->WeightForStokes[2]=1.;
 	configControlFile->WeightForStokes[3]=1.;
 
-	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
 	int i;
 	for(i=0;i<11;i++){
 		configControlFile->fix[i]= 0;
 		configControlFile->fix2[i]= 0;
 	}
-	/*configControlFile->fix[10] = 0;
-	configControlFile->fix2[10]= 0;*/
 
 	configControlFile->noise = NOISE_SIGMA * NOISE_SIGMA;
 	configControlFile->sigma[0] = configControlFile->noise;
@@ -409,671 +403,6 @@ void loadInitialValues(ConfigControl * configControlFile){
 	configControlFile->loopInversion = 0;
 	configControlFile->invertDirectory = 0;
 }
-
-int readParametersFileInput(char * fileParameters,  ConfigControl * trolConfig, int printLog){
-
-	// try open the file with the 
-	FILE * fReadParameters;
-	float aux;
-	char LINE [4096], * returnLine;
-	char comment[200], name[100];
-	fReadParameters = fopen(fileParameters, "r");
-	if (fReadParameters == NULL)
-	{
-		printf("Error opening the file of parameters, it's possible that the file doesn't exist. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;
-	}
-	int rfscanf; 
-	
-	/***************************  NUMBER OF CYCLES  ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->NumberOfCycles,comment);
-	
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NumberOfCycles. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	/*if( trolConfig->NumberOfCycles < 0){
-		printf("milos: Error in NumberOfCycles parameter. review it. Not accepted: %d\n", trolConfig->NumberOfCycles);
-		return 0;
-	}*/
-	if(printLog) printf("NumberOfCycles to apply: %i\n", trolConfig->NumberOfCycles);
-
-	/***************************  OBSERVED PROFILES  ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->ObservedProfiles,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Observed Profiles. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Observed profiles to apply: %s\n", trolConfig->ObservedProfiles);
-
-	/***************************  STRAY LIGHT FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->StrayLightFile,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Stray light file. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Stray light file to apply: %s\n", trolConfig->StrayLightFile);
-
-
-	/***************************  PSF FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->PSFFile,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param PSF file. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("PSF file to apply: %s\n", trolConfig->PSFFile);
-
-	/*************************** WAVELENGHT FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->WavelengthFile,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param wavelength file. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("wavelength file to apply: %s\n", trolConfig->WavelengthFile);
-
-	/*************************** WAVELENGHT  GRID FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->MallaGrid,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param wavelength GRID file. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("wavelength file grid to apply: %s\n", trolConfig->MallaGrid);
-
-
-	/*************************** ATOMIC PARAMETER  FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->AtomicParametersFile,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Atomic parameters file. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Atomic parameters file to apply: %s\n", trolConfig->AtomicParametersFile);
-
-	/*************************** INITIAL GUESS MODEL   FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->InitialGuessModel,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Initial guess model 1. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Initial guess model 1 to apply: %s\n", trolConfig->InitialGuessModel);
-
-	/*************************** INITIAL GUESS MODEL  2  FILE ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->InitialGuessModel_2,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Initial guess model 2. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Initial guess model 2 to apply: %s\n", trolConfig->InitialGuessModel_2);
-
-	/*************************** WEIGHT FOT STOKES I ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
-	trolConfig->WeightForStokes[0] = aux;
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Weight for Stokes I. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Weight for Stokes I to apply: %lf\n", trolConfig->WeightForStokes[0]);
-
-	/*************************** WEIGHT FOT STOKES Q ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
-	trolConfig->WeightForStokes[1] = aux;
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Weight for Stokes Q. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Weight for Stokes Q to apply: %lf\n", trolConfig->WeightForStokes[1]);
-
-	/*************************** WEIGHT FOT STOKES U ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
-	trolConfig->WeightForStokes[2] = aux;
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Weight for Stokes U. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Weight for Stokes U to apply: %lf\n", trolConfig->WeightForStokes[2]);
-
-	/*************************** WEIGHT FOT STOKES V ********************************************/
-
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;
-	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
-	trolConfig->WeightForStokes[3] = aux;
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Weight for Stokes V. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Weight for Stokes V to apply: %lf\n", trolConfig->WeightForStokes[3]);
-
-
-	/*************************** MU ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->mu,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param mu=cos (theta). Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("mu=cos (theta) to apply: %f\n", trolConfig->mu);
-
-	/*************************** EstimatedSNForI ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->EstimatedSNForI,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Estimated S/N for I. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog){
-		printf("Estimated S/N for I  to apply: %i\n", trolConfig->EstimatedSNForI);
-		printf("Estimated noise for I  to apply: %lf\n", 1.0/trolConfig->EstimatedSNForI);
-	} 
-	trolConfig->noise = 1.0/trolConfig->EstimatedSNForI;
-	trolConfig->sigma[0] = trolConfig->noise*trolConfig->noise;
-	trolConfig->sigma[1] = trolConfig->sigma[0];
-	trolConfig->sigma[2] = trolConfig->sigma[0];
-	trolConfig->sigma[3] = trolConfig->sigma[0];
-	// PUT VALUES IN ARRAY OF SIGMA 
-
-
- 	/*************************** CONTINIUM CONTRAST ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->ContinuumContrast,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Continuum contrast. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Continuum contrast to apply: %i\n", trolConfig->ContinuumContrast);
-
-	/*************************** INITIAL_DIAGONAL_ELEMENT ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux ,comment);
-	trolConfig->InitialDiagonalElement = aux;
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Initial diagonal element. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
-
-	/*************************** USE_INTERPOLAR_SPLINES_OR_LINEAR ********************************************/
-	
-	/*returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->useInterpolarSplinesOrLinear,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Splines/Linear Interpolation. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Splines/Linear Interpolation to apply: %d\n", trolConfig->useInterpolarSplinesOrLinear);*/
-
-	/*************************** USE PSF FILTER GAUSSIAN ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->ConvolveWithPSF,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Use Gaussian PSF . Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Use Gaussian PSF  to apply: %d\n", trolConfig->ConvolveWithPSF);
-
-	/*************************** FWHM ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->FWHM,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param FWHM. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("FWHM to apply: %f\n", trolConfig->FWHM);
-
-	/*************************** NTL ********************************************/
-	
-	/*returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->ntl,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NTL. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("NTL to apply: %d\n", trolConfig->ntl);*/
-
-	/*************************** NLIOBS ********************************************/
-	
-	/*returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->nliobs,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NLIOBS. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("NLIOBS to apply: %d\n", trolConfig->nliobs);*/
-
-
-	/*************************** OUTFILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->outputPrefix,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param OUTFILE. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("OUTFILE PREFIX to apply: %s\n", trolConfig->outputPrefix);
-
-
-	/*************************** CENTRAL_WAVE_LENGHT ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->CentralWaveLenght,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Central Wave Lenght. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Central Wave Lenght  to apply: %f\n", trolConfig->CentralWaveLenght);
-
-	/*************************** ETA0_LINE_TO_CONTINUUM_ABSORPTION ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[0],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Line To Continiuum Absorption. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Line To Continiuum Absorption to apply: %d\n", trolConfig->fix[0]);
-
-	/*************************** B_MAGNETIC_FIELD_STRENGTH ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[1],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Magnetic Field Strength. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Magnetic Field Strength to apply: %d\n", trolConfig->fix[1]);
-
-	/*************************** VLOS_LINE_OF_SIGHT_VELOCITY ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[2],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Line Of Sight Velocity. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Line Of Sight Velocity to apply: %d\n", trolConfig->fix[2]);
-
-	/*************************** DOPP_DOOPLER_WIDTH ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[3],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Doopler Width. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Doopler Width to apply: %d\n", trolConfig->fix[3]);
-
-	/*************************** AA_DAMPING_PARAMETER ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[4],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Damping Parameter. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Damping Parameter to apply: %d\n", trolConfig->fix[4]);
-
-	/*************************** GM_MAGNETIC_FIELD_INCLINATION ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[5],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Magnetic FieldInclination. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Magnetic FieldInclination to apply: %d\n", trolConfig->fix[5]);
-
-	/*************************** AZ_MAGNETIC_FIELD_AZIMUTH ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[6],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Magnetic Field Azimuth. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Magnetic Field Azimuth to apply: %d\n", trolConfig->fix[6]);
-
-	/*************************** S0_SOURCE_FUNCTION_CONSTANT ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[7],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Source Function Constant. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Source Function Constant to apply: %d\n", trolConfig->fix[7]);
-
-	/*************************** S1_SOURCE_FUNCTION_GRADIENT ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[8],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Source Function Gradient . Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Source Function Gradient  to apply: %d\n", trolConfig->fix[8]);
-
-	/*************************** MAC_MACROTURBULENT_VELOCITY ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[9],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Macroturbulent Velocity. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Macroturbulent Velocity to apply: %d\n", trolConfig->fix[9]);
-
-	/*************************** ALPHA_FILLING_FACTOR ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->fix[10],comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Filling Factor. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Filling Factor  to apply: %d\n", trolConfig->fix[10]);
-
-	/*************************** SAVE_CHISQR ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->saveChisqr,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Save Chisqr. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Save Chisqr  to apply: %d\n", trolConfig->saveChisqr);
-
-	/*************************** USE_CLASSICAL_ESTIMATES ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->UseClassicalEstimates,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Use Classical Estimates. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Use Classical Estimates to apply: %d\n", trolConfig->UseClassicalEstimates);
-
-	/*************************** USE_RTE_INVERSION ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->UseRTEInversion,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Use RTE Inversion. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Use RTE Inversion to apply: %d\n", trolConfig->UseRTEInversion);
-
-
-	/*************************** SAVE SYNTHESIS PROFILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->SaveSynthesisAdjusted,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Save Synthesis Profile Adjusted. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
-
-	/*************************** OUTPUT_MODEL_FILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->OutputModelFile,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Output Model File. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Output Model File  to apply: %s\n", trolConfig->OutputModelFile);
-
-	/*************************** Type Output File Model  ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->typeFileOutputModel,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param type of output file model. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Output File Model to apply: %d\n", trolConfig->typeFileOutputModel);
-
-
-	/*************************** OUTPUT_SYNTHESIS_FILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->OutputSynthesisFile,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param Output Synthesis File. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("Output Synthesis File to apply: %s\n", trolConfig->OutputSynthesisFile);
-
-	/*************************** SIGMA_FILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%f%99[^!]!",name, &aux,comment);
-	trolConfig->noise = aux;
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NOISE. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("NOISE to apply: %le\n", trolConfig->noise);
-
-
-	/*************************** TOPLIM_FILE ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%lf%99[^!]!",name, &trolConfig->toplim,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param TOPLIM. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("TOPLIM to apply: %le\n", trolConfig->toplim);
-
-	/*************************** NX ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->nx,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NX. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("NX to apply: %d\n", trolConfig->nx);
-
-	/*************************** NY ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->ny,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NY. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("NY to apply: %d\n", trolConfig->ny);
-
-	/*************************** subx1 ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->subx1,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param subx1. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("subX1 to apply: %d\n", trolConfig->subx1);	
-
-
-	/*************************** subx2 ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->subx2,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param subx1. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("subX2 to apply: %d\n", trolConfig->subx2);
-
-	/*************************** suby1 ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->suby1,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param suby1. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("suby1 to apply: %d\n", trolConfig->suby1);
-
-	/*************************** suby2 ********************************************/
-	
-	returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->suby2,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param suby2. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	if(printLog) printf("suby2 to apply: %d\n", trolConfig->suby2);
-
-
-	// CHECK SIZE IMAGE PARAMS
-
-	if(trolConfig->subx2 > trolConfig->nx || trolConfig->subx1>trolConfig->subx2 || trolConfig->suby2 > trolConfig->ny || trolConfig->suby1 > trolConfig->suby2){
-		printf("\n ERROR IN THE DIMENSIONS, PLEASE CHECK GIVEN VALUES \n ");
-		exit(1);
-	}
-	if(trolConfig->subx1 == 0 && trolConfig->subx2==0 && trolConfig->suby1==0 && trolConfig->suby2==0){ // invert entire image 
-		trolConfig->subx1 = 1;
-		trolConfig->suby1 = 1;
-		trolConfig->subx2 = trolConfig->nx;
-		trolConfig->suby2 = trolConfig->ny;
-	}
-
-	return 1;
-
-}
-
 
 
 /**
@@ -1112,11 +441,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	/*if( trolConfig->NumberOfCycles < 0){
-		printf("milos: Error in NumberOfCycles parameter. review it. Not accepted: %d\n", trolConfig->NumberOfCycles);
-		return 0;
-	}*/
-	//if(printLog) printf("Number Of Cycles  read from control file: %i\n", trolConfig->NumberOfCycles);
 	if(printLog) printf("%s", LINE);
 
 	/***************************  OBSERVED PROFILES  ********************************************/
@@ -1131,7 +455,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Observed profiles file read from control file: %s\n", trolConfig->ObservedProfiles);
 	if(printLog) printf("%s", LINE);
 
 	/***************************  STRAY LIGHT FILE ********************************************/
@@ -1144,7 +467,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Stray light file read from control file: %s\n", trolConfig->StrayLightFile);
 	if(printLog) printf("%s", LINE);
 
 	/***************************  PSF FILE ********************************************/
@@ -1182,7 +504,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		}
 
 	}
-	//if(printLog) printf("PSF file read from control file: %s. Convolve with PSF? %d \n", trolConfig->PSFFile,trolConfig->ConvolveWithPSF);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** WAVELENGHT FILE ********************************************/
@@ -1211,7 +532,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 			exit(EXIT_FAILURE);
 		}
 	}
-	//if(printLog) printf("Wavelength grid file read from control file: %s\n", trolConfig->WavelengthFile);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** ATOMIC PARAMETER  FILE ********************************************/
@@ -1224,7 +544,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Atomic parameters file to apply: %s\n", trolConfig->AtomicParametersFile);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** ABUNDANCES FILE ********************************************/
@@ -1237,7 +556,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Abundances file to apply: %s\n", trolConfig->AbundancesFile);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** INITIAL GUESS MODEL   FILE ********************************************/
@@ -1252,7 +570,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Initial guess model 1 to apply: %s\n", trolConfig->InitialGuessModel);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** INITIAL GUESS MODEL  2  FILE ********************************************/
@@ -1265,7 +582,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Initial guess model 2 to apply: %s\n", trolConfig->InitialGuessModel_2);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES I ********************************************/
@@ -1279,7 +595,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[0] = aux;
-	//if(printLog) printf("Weight for Stokes I to apply: %lf\n", trolConfig->WeightForStokes[0]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES Q ********************************************/
@@ -1293,7 +608,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[1] = aux;
-	//if(printLog) printf("Weight for Stokes Q to apply: %lf\n", trolConfig->WeightForStokes[1]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES U ********************************************/
@@ -1307,7 +621,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[2] = aux;
-	//if(printLog) printf("Weight for Stokes U to apply: %lf\n", trolConfig->WeightForStokes[2]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** WEIGHT FOT STOKES V ********************************************/
@@ -1321,7 +634,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->WeightForStokes[3] = aux;
-	//if(printLog) printf("Weight for Stokes V to apply: %lf\n", trolConfig->WeightForStokes[3]);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1335,7 +647,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Automatic Selected of Nodes to apply: %i\n", trolConfig->automaticSelectOfNodes);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1353,7 +664,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for S_0 1 to apply: %d\n", trolConfig->fix[7]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** S1_SOURCE_FUNCTION_GRADIENT ********************************************/
@@ -1366,7 +676,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for S_1 1  to apply: %d\n", trolConfig->fix[8]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** ETA0_LINE_TO_CONTINUUM_ABSORPTION ********************************************/
@@ -1379,7 +688,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for eta0 1 to apply: %d\n", trolConfig->fix[0]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** B_MAGNETIC_FIELD_STRENGTH ********************************************/
@@ -1392,7 +700,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for magnetic field 1 to apply: %d\n", trolConfig->fix[1]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** VLOS_LINE_OF_SIGHT_VELOCITY ********************************************/
@@ -1405,7 +712,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Line Of Sight Velocity to apply: %d\n", trolConfig->fix[2]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** GM_MAGNETIC_FIELD_INCLINATION ********************************************/
@@ -1418,7 +724,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for gamma 1 to apply: %d\n", trolConfig->fix[5]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** AZ_MAGNETIC_FIELD_AZIMUTH ********************************************/
@@ -1431,7 +736,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for phi 1 to apply: %d\n", trolConfig->fix[6]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** DOPP_DOOPLER_WIDTH ********************************************/
@@ -1444,7 +748,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for lambda_doppler 1 to apply: %d\n", trolConfig->fix[3]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** AA_DAMPING_PARAMETER ********************************************/
@@ -1457,7 +760,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for damping 1 to apply: %d\n", trolConfig->fix[4]);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1471,7 +773,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Invert macroturbulence 1 to apply: %d\n", trolConfig->fix[9]);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1489,7 +790,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for S_0 2 to apply: %d\n", trolConfig->fix2[7]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** S1_SOURCE_FUNCTION_GRADIENT ********************************************/
@@ -1502,7 +802,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for S_1 2  to apply: %d\n", trolConfig->fix2[8]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** ETA0_LINE_TO_CONTINUUM_ABSORPTION ********************************************/
@@ -1515,7 +814,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for eta0 2 to apply: %d\n", trolConfig->fix2[0]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** B_MAGNETIC_FIELD_STRENGTH ********************************************/
@@ -1528,7 +826,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for magnetic field 2 to apply: %d\n", trolConfig->fix2[1]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** VLOS_LINE_OF_SIGHT_VELOCITY ********************************************/
@@ -1541,7 +838,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for LOS velocity 2 to apply: %d\n", trolConfig->fix2[2]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** GM_MAGNETIC_FIELD_INCLINATION ********************************************/
@@ -1554,7 +850,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for gamma 2 to apply: %d\n", trolConfig->fix2[5]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** AZ_MAGNETIC_FIELD_AZIMUTH ********************************************/
@@ -1567,7 +862,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for phi 2 to apply: %d\n", trolConfig->fix2[6]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** DOPP_DOOPLER_WIDTH ********************************************/
@@ -1580,7 +874,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for lambda_doppler 2 to apply: %d\n", trolConfig->fix2[3]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** AA_DAMPING_PARAMETER ********************************************/
@@ -1593,7 +886,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Nodes for damping 2 to apply: %d\n", trolConfig->fix2[4]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** MAC_MACROTURBULENT_VELOCITY ********************************************/
@@ -1606,7 +898,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Invert macroturbulence 2 to apply: %d\n", trolConfig->fix2[9]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** INVERT FILLING FACTOR ********************************************/
@@ -1619,7 +910,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Filling Factor  to apply: %d\n", trolConfig->InvertFillingFactor);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1634,7 +924,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->fix2[10] = trolConfig->fix[10];
-	//if(printLog) printf("Stray light Factor  to apply: %d\n", trolConfig->fix[10]);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** MU ********************************************/
@@ -1647,7 +936,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("mu=cos (theta) to apply: %f\n", trolConfig->mu);
 	if(printLog) printf("%s", LINE);
 
 	/*************************** EstimatedSNForI ********************************************/
@@ -1662,8 +950,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	}
 	if(printLog){
 		printf("%s", LINE);
-		/*printf("Estimated S/N for I  to apply: %i\n", trolConfig->EstimatedSNForI);
-		printf("Estimated noise for I  to apply: %lf\n", 1.0/trolConfig->EstimatedSNForI);*/
 	}
 	if(trolConfig->EstimatedSNForI!=0){ // IF it's empty then take value from default.
 		trolConfig->noise = 1.0/trolConfig->EstimatedSNForI;
@@ -1686,8 +972,7 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//trolConfig->toplim = trolConfig->ContinuumContrast;
-	//if(printLog) printf("Continuum contrast to apply: %i\n", trolConfig->ContinuumContrast);
+
 	if(printLog) printf("%s", LINE);
 
 
@@ -1702,7 +987,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		return 0;		
 	}
 	trolConfig->InitialDiagonalElement = aux;
-	//if(printLog) printf("Initial diagonal element  to apply: %le\n", trolConfig->InitialDiagonalElement);
 	if(printLog) printf("%s", LINE);
 	
 	/*************************** USE FFT ********************************************/
@@ -1715,7 +999,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1729,7 +1012,6 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
 	if(printLog) printf("%s", LINE);
 
 
@@ -1783,7 +1065,7 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Type Input Stokes to apply: %s\n", trolConfig->typeInputStokes);
+
 	if(printLog) printf("%s", LINE);
 
 	/***************************  type input stray light file  ********************************************/
@@ -1796,33 +1078,8 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Type input stray light to apply: %s\n", trolConfig->typeInputStrayLight);
 	if(printLog) printf("%s", LINE);
-	/*************************** NX ********************************************/
-	
-	/*returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->nx,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NX. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	//if(printLog) printf("NX to apply: %d\n", trolConfig->nx);
-	if(printLog) printf("%s", LINE);*/
 
-	/*************************** NY ********************************************/
-	
-	/*returnLine = fgets(LINE,4096,fReadParameters);
-	if(returnLine == NULL) return 0;						
-	rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->ny,comment);
-	if(rfscanf ==0 || rfscanf == EOF){
-		printf("Error reading the file of parameters, param NY. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
-		return 0;		
-	}
-	//if(printLog) printf("NY to apply: %d\n", trolConfig->ny);
-	if(printLog) printf("%s", LINE);*/
 
 	/*************************** subx1 ********************************************/
 	
@@ -1834,7 +1091,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("subX1 to apply: %d\n", trolConfig->subx1);	
 	if(printLog) printf("%s", LINE);
 
 	/*************************** subx2 ********************************************/
@@ -1847,7 +1103,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("subX2 to apply: %d\n", trolConfig->subx2);
 	if(printLog) printf("%s", LINE);
 	/*************************** suby1 ********************************************/
 	
@@ -1859,7 +1114,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("suby1 to apply: %d\n", trolConfig->suby1);
 	if(printLog) printf("%s", LINE);
 	/*************************** suby2 ********************************************/
 	
@@ -1871,7 +1125,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("suby2 to apply: %d\n", trolConfig->suby2);
 	if(printLog) printf("%s", LINE);
 	// CHECK SIZE IMAGE PARAMS
 	
@@ -1905,7 +1158,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Output prefix to apply: %s\n", trolConfig->outputPrefix);
 	if(printLog) printf("%s", LINE);
 
 	/***************************  mask file prefix  ********************************************/
@@ -1918,14 +1170,12 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Maskfile to apply: %s\n", trolConfig->MaskFile);
 	if(printLog) printf("%s", LINE);
 	/*************************** t1 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;
 	char stringt1 [256];							
-	//rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->t1,comment);
 	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, stringt1,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param t1. Please verify it. \n");
@@ -1938,14 +1188,12 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	else{
 		trolConfig->t1=atoi(stringt1);
 	}	
-	//if(printLog) printf("t1 to apply: %d\n", trolConfig->t1);
 	if(printLog) printf("%s", LINE);
 	/*************************** t2 ********************************************/
 	
 	returnLine = fgets(LINE,4096,fReadParameters);
 	if(returnLine == NULL) return 0;						
 	char stringt2 [256];	
-	//rfscanf = sscanf(LINE,"%99[^:]:%i%99[^!]!",name, &trolConfig->t2,comment);
 	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, stringt2,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param t2. Please verify it. \n");
@@ -1958,7 +1206,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	else{
 		trolConfig->t2=atoi(stringt2);
 	}
-	//if(printLog) printf("t2 to apply: %d\n", trolConfig->t2);
 	if(printLog) printf("%s", LINE);
 	/*************************** SAVE SYNTHESIS PROFILE ********************************************/
 	
@@ -1970,7 +1217,6 @@ int readInitFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
 		return 0;		
 	}
-	//if(printLog) printf("Save Synthesis Profile to apply: %d\n", trolConfig->SaveSynthesisAdjusted);
 	if(printLog) printf("%s", LINE);
 
 
@@ -2023,19 +1269,7 @@ char * get_basefilename (const char * fname) // returns the filename minus the e
 	return ext;
 }
 
-int checkSubString(char * source, char * searched){
 
-	int find = 0;
-	int nCharfind =0;
-	int i;
-	for(i=0;i<strlen(searched);i++){
-		if(source[i]==searched[i])
-			nCharfind++;
-	}
-	if(nCharfind==strlen(searched))
-		find = 1;
-	return find;
-}
 
 
 char* mySubString (char* input, int offset, int len, char* dest)

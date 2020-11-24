@@ -147,7 +147,6 @@ int main(int argc, char **argv)
 	
 	time_t newestFileTimeInitial; // time for newest file in case invert all directory
 	// CONFIGURACION DE PARAMETROS A INVERTIR
-	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
 	//----------------------------------------------
 
 	float * slight = NULL;
@@ -158,7 +157,7 @@ int main(int argc, char **argv)
 
 	int numberOfFileSpectra;
 
-   	nameFile * vInputFileSpectra = NULL;
+   nameFile * vInputFileSpectra = NULL;
 	nameFile * vInputFileSpectraParalell = NULL;
 	nameFile * vInputFileSpectraDiv2Parallel = NULL;
 	nameFile * vOutputNameModels = NULL;
@@ -194,13 +193,11 @@ int main(int argc, char **argv)
 	int sendcountsNameInputFiles [numProcs];  // how many files per process
 	int displsPixels [numProcs];  // array describing the displacements where each segment begins
 	int displsSpectro [numProcs];
-	//int displsLambda [numProcs];
 	int displsNameInputFiles [numProcs]; // how many 
 
 	/********************* Read data input from file ******************************/
 
 	loadInitialValues(&configCrontrolFile);
-	//readParametersFileInput(argv[1],&configCrontrolFile,(idProc==root));
 	if(!readInitFile(argv[1],&configCrontrolFile,(idProc==root))){
 		if(idProc==root)
 			printf("\n\n ¡¡¡ ERROR READING INIT FILE !!! \n\n");
@@ -460,20 +457,16 @@ int main(int argc, char **argv)
 				double offset =0;
 				int posWL = 0;
 				for(i=0;i<nlambda && !posWL;i++){
-					//if( (trunc(vGlobalLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
 					if( fabs(trunc(vOffsetsLambda[i]))==0)
 						posWL = i;
 				}
 				if(posWL!= (nlambda/2)){ // move center to the middle of samples
-					//printf("\nPOS CENTRAL WL %i",posWL);
 					offset = (((nlambda/2)-posWL)*step)*1000;
-					//printf ("\n OFFSET IS %f\n",offset);
 				}					
 				interpolationLinearPSF(deltaLambda,  PSF, vOffsetsLambda , N_SAMPLES_PSF, G, nlambda,offset);		
 				sizeG=nlambda;	
 			}
 			else{
-				//G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
 				if(idProc==root)
 					printf("\n****************** ERROR THE PSF FILE is empty or damaged.******************\n");
 				exit(EXIT_FAILURE);
@@ -548,13 +541,10 @@ int main(int argc, char **argv)
 				else{
 					if(numFileDirectory>2){
 						numberOfFileSpectra=numFileDirectory-2;
-						//printf("\n NUMERO DE FICHEROS EN EL DIRECTORIO LEIDO %d",numberOfFileSpectra);
 						vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						int numberFiles[numberOfFileSpectra];
-						/*int maxNumber = -1;
-						int minNumber = 1000000;*/
 						int indexNumberFiles = 0;
 						for(i=2;i<numFileDirectory;i++){
 							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
@@ -565,27 +555,15 @@ int main(int argc, char **argv)
 								char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
 								if(subString!=NULL){
 									char numChar [80];
-									//printf("\n%s len %d \t %s len %d",get_basefilename(namelist[i]->d_name),strlen(get_basefilename(namelist[i]->d_name)),bname,strlen(bname));
 									mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
-									//printf("\n NUM CHAR %s ",numChar);
 									int numAux = atoi(numChar);
 									numberFiles[indexNumberFiles++] = numAux;
-									//printf("\n NUMERO DE FICHERO ACTUAL ES : %d",numAux);
-									/*if(numAux>maxNumber)
-										maxNumber  = numAux;
-									if(numAux<minNumber)
-										minNumber = numAux;*/
 								}
 							}
 						}	
 
-						//for(i=minNumber;i<=maxNumber;i++){
 						for(i=0;i<numberOfFileSpectra;i++){
 							char strIndex[5];
-							/*if(i>=0 && i<10)
-								sprintf(strIndex, "0%d", i);
-							else
-								sprintf(strIndex, "%d", i);*/
 							if(numberFiles[i]>=0 && numberFiles[i]<10)
 								sprintf(strIndex, "0%d", numberFiles[i]);
 							else
@@ -594,7 +572,6 @@ int main(int argc, char **argv)
 							strcpy(vInputFileSpectra[i].name, configCrontrolFile.ObservedProfiles);
 							strcat(vInputFileSpectra[i].name, strIndex);
 							strcat(vInputFileSpectra[i].name, FITS_FILE);
-							//printf("\n vInputFileSpectra %s\n", vInputFileSpectra[i].name);
 							// FILE NAME FOR OUTPUT MODELS 
 							strcpy(vOutputNameModels[i].name, configCrontrolFile.ObservedProfiles);
 							strcat(vOutputNameModels[i].name, strIndex);
@@ -604,7 +581,6 @@ int main(int argc, char **argv)
 								strcat(vOutputNameModels[i].name, configCrontrolFile.outputPrefix);
 							}
 							strcat(vOutputNameModels[i].name,FITS_FILE);
-							//printf("\n vOutputNameModels %s\n", vOutputNameModels[i].name);
 							// FILE NAME FOR ADJUSTED SYNTHESIS 
 							strcpy(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.ObservedProfiles);
 							strcat(vOutputNameSynthesisAdjusted[i].name, strIndex);
@@ -614,49 +590,7 @@ int main(int argc, char **argv)
 								strcat(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.outputPrefix);
 							}
 							strcat(vOutputNameSynthesisAdjusted[i].name,FITS_FILE);
-							//printf("\n vOutputNameSynthesisAdjusted %s\n", vOutputNameSynthesisAdjusted[i].name);
 						}
-
-						/*for(i=2;i<numFileDirectory;i++){
-							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
-								struct stat filestat;
-								char pathAux[256];
-								strcpy(pathAux,dname);
-								strcat(pathAux,"/");
-								strcat(pathAux,namelist[i]->d_name);
-								stat(pathAux,&filestat);
-								strcpy(vInputFileSpectra[i-2].name, dname);
-								strcat(vInputFileSpectra[i-2].name,"/");
-								strcat(vInputFileSpectra[i-2].name, namelist[i]->d_name);
-								
-								//printf("\n%s",vInputFileSpectra[i-2].name);
-								// FILE NAME FOR OUTPUT MODELS 
-								strcpy(vOutputNameModels[i-2].name, dname);
-								strcat(vOutputNameModels[i-2].name,"/");
-
-								strcat(vOutputNameModels[i-2].name,get_basefilename(namelist[i]->d_name));
-								strcat(vOutputNameModels[i-2].name, "_mod");
-								if(configCrontrolFile.outputPrefix[0]!='\0'){
-									strcat(vOutputNameModels[i-2].name, "_");
-									strcat(vOutputNameModels[i-2].name, configCrontrolFile.outputPrefix);
-								}
-								strcat(vOutputNameModels[i-2].name,FITS_FILE);
-								//printf("\n%s",vOutputNameModels[i-2].name);
-								// FILE NAME FOR ADJUSTED SYNTHESIS 
-								strcpy(vOutputNameSynthesisAdjusted[i-2].name, dname);
-								strcat(vOutputNameSynthesisAdjusted[i-2].name,"/");
-
-								strcat(vOutputNameSynthesisAdjusted[i-2].name,get_basefilename(namelist[i]->d_name));
-								strcat(vOutputNameSynthesisAdjusted[i-2].name, "_stokes");
-								if(configCrontrolFile.outputPrefix[0]!='\0'){
-									strcat(vOutputNameSynthesisAdjusted[i-2].name, "_");
-									strcat(vOutputNameSynthesisAdjusted[i-2].name, configCrontrolFile.outputPrefix);
-								}
-								strcat(vOutputNameSynthesisAdjusted[i-2].name,FITS_FILE);	
-								//printf("\n%s",vOutputNameSynthesisAdjusted[i-2].name);							
-							}
-							
-						}*/
 					}
 				}
 			}
@@ -685,23 +619,17 @@ int main(int argc, char **argv)
 						char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
 						if(subString!=NULL){
 							char numChar [80];
-							//printf("\n%s len %d \t %s len %d",get_basefilename(namelist[i]->d_name),strlen(get_basefilename(namelist[i]->d_name)),bname,strlen(bname));
 							mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
-							//printf("\n NUM CHAR %s ",numChar);
 							int numAux = atoi(numChar);
-							//printf("\n NUMERO DE FICHERO ACTUAL ES : %d",numAux);
 							if(numAux>maxNumber)
 								maxNumber  = numAux;
 						}
 					}
 				}
 
-				//printf("\n el numero de ficheros en el directorio es %d",numFileDirectory);
 
 				if((maxNumber-configCrontrolFile.t1)+1>0){
-					//numberOfFileSpectra = numFileDirectory-2;
 					numberOfFileSpectra = (maxNumber - configCrontrolFile.t1)+1;
-					//printf("\n NUMERO DE FICHEROS EN EL DIRECTORIO LEIDO %d",numberOfFileSpectra);
 					vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 					vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 					vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
@@ -717,7 +645,6 @@ int main(int argc, char **argv)
 						strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
 						strcat(vInputFileSpectra[indexName].name, strIndex);
 						strcat(vInputFileSpectra[indexName].name, FITS_FILE);
-						//printf("\n vInputFileSpectra %s\n", vInputFileSpectra[indexName].name);
 						// FILE NAME FOR OUTPUT MODELS 
 						strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
 						strcat(vOutputNameModels[indexName].name, strIndex);
@@ -727,7 +654,6 @@ int main(int argc, char **argv)
 							strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
 						}
 						strcat(vOutputNameModels[indexName].name,FITS_FILE);
-						//printf("\n vOutputNameModels %s\n", vOutputNameModels[indexName].name);
 						// FILE NAME FOR ADJUSTED SYNTHESIS 
 						strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
 						strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
@@ -737,12 +663,10 @@ int main(int argc, char **argv)
 							strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
 						}
 						strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
-						//printf("\n vOutputNameSynthesisAdjusted %s\n", vOutputNameSynthesisAdjusted[indexName].name);
 						indexName++;	
 					}
 				}
 			}
-			//newestFileTimeInitial = time(0);
 			for(i=0;i<numberOfFileSpectra;i++){
 				insert_in_linked_list(&listFileNamesReaded,vInputFileSpectra[i].name);
 			}
@@ -756,7 +680,6 @@ int main(int argc, char **argv)
 
 				vOutputNameModels = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
 				strcpy(vOutputNameModels[0].name,get_basefilename(configCrontrolFile.InitialGuessModel));	
-				//strcat(vOutputNameModels[0].name,"_mod");
 				strcat(vOutputNameModels[0].name,MOD_FITS);
 
 				vOutputNameSynthesisAdjusted = (nameFile *)malloc(numberOfFileSpectra*sizeof(nameFile));
@@ -1317,90 +1240,78 @@ int main(int argc, char **argv)
 				if(configCrontrolFile.SaveSynthesisAdjusted)
 					MPI_Wait(&vMpiRequestSpectraAd[indexInputFits],MPI_STATUS_IGNORE);
 
-					double timeWriteImage;
-					clock_t t;
-					t = clock();
+				double timeWriteImage;
+				clock_t t;
+				t = clock();
 
-					if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
-						if(!writeFitsImageModelsSubSet(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows_original,fitsImages[indexInputFits]->cols_original,configCrontrolFile,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
-								printf("\n--------------------------------------------------------------------------------");
-								printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
-								printf("\n--------------------------------------------------------------------------------\n");
+				if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){
+					if(!writeFitsImageModelsSubSet(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows_original,fitsImages[indexInputFits]->cols_original,configCrontrolFile,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
+					}
+				}
+				else{
+					if(!writeFitsImageModels(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows,fitsImages[indexInputFits]->cols,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
+					}
+				}
+				t = clock() - t;
+				timeWriteImage = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+				
+				// PROCESS FILE OF SYNTETIC PROFILES
+				if(configCrontrolFile.SaveSynthesisAdjusted){
+					fitsImages[indexInputFits]->pixels = calloc(fitsImages[indexInputFits]->numPixels, sizeof(vpixels));
+					for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
+						fitsImages[indexInputFits]->pixels[i].spectro = calloc ((fitsImages[indexInputFits]->numStokes*fitsImages[indexInputFits]->nLambdas),sizeof(float));
+					}		
+					for(indexPixel=0;indexPixel<fitsImages[indexInputFits]->numPixels;indexPixel++)
+					{	
+						int kk;
+						for (kk = 0; kk < (nlambda * NPARMS); kk++)
+						{
+							fitsImages[indexInputFits]->pixels[indexPixel].spectro[kk] = vSpectraAjustedTotal_L[indexInputFits][kk+(indexPixel*(nlambda * NPARMS))] ;
+						}
+					}					
+					// WRITE SINTHETIC PROFILES TO FITS FILE
+					if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){							
+						if(!writeFitsImageProfilesSubSet(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits],configCrontrolFile)){
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
 						}
 					}
 					else{
-						if(!writeFitsImageModels(vOutputNameModelsParalell[indexInputFits].name,fitsImages[indexInputFits]->rows,fitsImages[indexInputFits]->cols,resultsInitModelTotal_L[indexInputFits],chisqrfTotal_L[indexInputFits],vNumIterTotal_L[indexInputFits],configCrontrolFile.saveChisqr)){
-								printf("\n--------------------------------------------------------------------------------");
-								printf("\n ERROR WRITING FILE OF MODELS: %s",vOutputNameModelsParalell[indexInputFits].name);
-								printf("\n--------------------------------------------------------------------------------\n");
+						if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits])){
+							printf("\n--------------------------------------------------------------------------------");
+							printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
+							printf("\n--------------------------------------------------------------------------------\n");
 						}
 					}
-					t = clock() - t;
-					timeWriteImage = ((double)t)/CLOCKS_PER_SEC; // in seconds 
 					
-					// PROCESS FILE OF SYNTETIC PROFILES
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						fitsImages[indexInputFits]->pixels = calloc(fitsImages[indexInputFits]->numPixels, sizeof(vpixels));
-						for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
-							fitsImages[indexInputFits]->pixels[i].spectro = calloc ((fitsImages[indexInputFits]->numStokes*fitsImages[indexInputFits]->nLambdas),sizeof(float));
-							//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
-						}		
-						for(indexPixel=0;indexPixel<fitsImages[indexInputFits]->numPixels;indexPixel++)
-						{	
-							int kk;
-							for (kk = 0; kk < (nlambda * NPARMS); kk++)
-							{
-								fitsImages[indexInputFits]->pixels[indexPixel].spectro[kk] = vSpectraAjustedTotal_L[indexInputFits][kk+(indexPixel*(nlambda * NPARMS))] ;
-							}
-						}					
-						// WRITE SINTHETIC PROFILES TO FITS FILE
-						if(configCrontrolFile.subx1 > 0 && configCrontrolFile.subx2 >0 && configCrontrolFile.suby1 > 0 && configCrontrolFile.suby2>0){							
-							if(!writeFitsImageProfilesSubSet(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits],configCrontrolFile)){
-								printf("\n--------------------------------------------------------------------------------");
-								printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
-								printf("\n--------------------------------------------------------------------------------\n");
-							}
-						}
-						else{
-							if(!writeFitsImageProfiles(vOutputNameSynthesisAdjustedParallel[indexInputFits].name,vInputFileSpectraParalell[indexInputFits].name,fitsImages[indexInputFits])){
-								printf("\n--------------------------------------------------------------------------------");
-								printf("\n ERROR WRITING FILE OF SINTHETIC PROFILES: %s",vOutputNameSynthesisAdjustedParallel[indexInputFits].name);
-								printf("\n--------------------------------------------------------------------------------\n");
-							}
-						}
-						
-						for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
-							free(fitsImages[indexInputFits]->pixels[i].spectro);
-							fitsImages[indexInputFits]->pixels[i].spectro = NULL;
-							//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
-						}							
-						free(fitsImages[indexInputFits]->pixels);
-						fitsImages[indexInputFits]->pixels = NULL;
-					}
+					for( i=0;i<fitsImages[indexInputFits]->numPixels;i++){
+						free(fitsImages[indexInputFits]->pixels[i].spectro);
+						fitsImages[indexInputFits]->pixels[i].spectro = NULL;
+					}							
+					free(fitsImages[indexInputFits]->pixels);
+					fitsImages[indexInputFits]->pixels = NULL;
+				}
 
-					free(resultsInitModelTotal_L[indexInputFits]);		
-					free(chisqrfTotal_L[indexInputFits]);
-					free(vNumIterTotal_L[indexInputFits]);
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						free(vSpectraAjustedTotal_L[indexInputFits]);
-					}
-					
-					printf("\n-------------------------------------------------------------------------------------------------------------------------");
-					printf("\nINVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f ", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
-					//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
-					printf("\nTIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
-					printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
-					freeFitsImage(fitsImages[indexInputFits]);
-				/*}
-				else{
-					if(configCrontrolFile.SaveSynthesisAdjusted){
-						free(vSpectraAdjustedSplit_L[indexInputFits]);
-					}
-					free(vSpectraSplit_L[indexInputFits]);
-					free(resultsInitModel_L[indexInputFits]);				
-					free(vChisqrf_L[indexInputFits]);
-					free(vNumIter_L[indexInputFits]);
-				}*/
+				free(resultsInitModelTotal_L[indexInputFits]);		
+				free(chisqrfTotal_L[indexInputFits]);
+				free(vNumIterTotal_L[indexInputFits]);
+				if(configCrontrolFile.SaveSynthesisAdjusted){
+					free(vSpectraAjustedTotal_L[indexInputFits]);
+				}
+				
+				printf("\n-------------------------------------------------------------------------------------------------------------------------");
+				printf("\nINVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f ", vInputFileSpectraParalell[indexInputFits].name,vElapsed_execution[indexInputFits]);
+				//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
+				printf("\nTIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
+				printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
+				freeFitsImage(fitsImages[indexInputFits]);
 				indexInputFits++;			
 			}while(indexInputFits<numFilesPerProcessParallel);
 		}
@@ -1533,7 +1444,6 @@ int main(int argc, char **argv)
 				printf("\n-------------------------------------------------------------------------------------------------------------------------");
 				printf("\nIDPROC: %d -->  DOING INVERSION: %s  ",idProc,vInputFileSpectraLocal[indexInputFits].name);
 				printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
-				//slog_info(0,"\n***********************  DOING INVERSION *******************************\n\n");
 
 				for(indexPixel = 0; indexPixel < fitsImage->numPixels; indexPixel++){
 					
@@ -1762,7 +1672,7 @@ int main(int argc, char **argv)
 				if(configCrontrolFile.SaveSynthesisAdjusted)
 					vSpectraAjustedTotal = calloc (numPixels*nlambda*NPARMS,sizeof(float));
 			}				
-			//AllocateMemoryDerivedSynthesis(nlambda);
+
 			int numPixelsProceso = numPixels/myGroupSize;
 			int resto = numPixels % myGroupSize;
 			int sum = 0;                // Sum of counts. Used to calculate displacements
@@ -1783,7 +1693,6 @@ int main(int argc, char **argv)
 				sendcountsDiv2Lambda[i] = sendcountsDiv2Pixels[i]*nlambda;
 				displsDiv2Pixels[i] = sum;
 				displsDiv2Spectro[i] = sumSpectro;
-				//displsLambda[i] = sumLambda;
 				sum += sendcountsDiv2Pixels[i];
 				sumSpectro += sendcountsDiv2Spectro[i];
 				sumLambda += sendcountsDiv2Lambda[i];
@@ -1949,7 +1858,6 @@ int main(int argc, char **argv)
 					fitsImage->pixels = calloc(fitsImage->numPixels, sizeof(vpixels));
 					for( i=0;i<fitsImage->numPixels;i++){
 						fitsImage->pixels[i].spectro = calloc ((fitsImage->numStokes*fitsImage->nLambdas),sizeof(float));
-						//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
 					}		
 					for(indexPixel=0;indexPixel<numPixels;indexPixel++)
 					{	
@@ -1969,7 +1877,6 @@ int main(int argc, char **argv)
 					for( i=0;i<fitsImage->numPixels;i++){
 						free(fitsImage->pixels[i].spectro);
 						fitsImage->pixels[i].spectro = NULL;
-						//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
 					}							
 					free(fitsImage->pixels);
 					fitsImage->pixels = NULL;
@@ -2010,7 +1917,6 @@ int main(int argc, char **argv)
 
 	if(configCrontrolFile.loopInversion){
 		MPI_Barrier(MPI_COMM_WORLD);
-		//newestFileTimeInitial = time(0);
 		int fileNew = 0;
 		int exitProgram = 0;
 		char newestFileName [256];
@@ -2034,18 +1940,11 @@ int main(int argc, char **argv)
 					//d = opendir(dname);
 					struct dirent **namelist;
 					int numFiles = scandir(dname, &namelist, 0, alphasort);
-					//printf("\nEl numero de ficheros es %d \n",numFiles);
 					if(numFiles>0){
-						//time_t newestFileTime;						
-						//int first = 1;
-						//while ((dir = readdir(d)) != NULL){
 						
 						for(i=2;i<numFiles && !fileNew;i++){	
-							//if(strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 && strstr(dir->d_name,"_mod_")==NULL && strstr(dir->d_name,"_stokes_")==NULL){
 							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0 && strstr(namelist[i]->d_name,"_mod_")==NULL && strstr(namelist[i]->d_name,"_stokes_")==NULL){
-								//struct stat filestat;
 								char pathAux[256];
-								//strcpy(pathAux,configCrontrolFile.ObservedProfiles);
 								strcpy(pathAux,dname);
 								strcat(pathAux,"/");
 								//strcat(pathAux,dir->d_name);
@@ -2060,42 +1959,14 @@ int main(int argc, char **argv)
 									printf("\n--------------------------------------------------------------------------------");
 									printf("\n");									
 								}
-								//printf("\n fichero a comprar %s \n",pathAux);
-								/*if(first){
-									newestFileInode = filestat.st_ino;
-									newestFileTime = filestat.st_mtime;
-									strcpy(newestFileName,pathAux);
-									first = 0;
-								}
-								else{
-									if(difftime(filestat.st_mtime,newestFileTime)>0){
-										newestFileInode = filestat.st_ino;
-										newestFileTime = filestat.st_mtime;
-										strcpy(newestFileName,pathAux);
-									}
-								}*/
 							}
-						}
-
-						//closedir(d);
-						//printf("\n newestFileTimeInitial %ld  newestFileTime %ld newestFileName %s\n",newestFileTimeInitial,newestFileTime,newestFileName);
-						/*if(difftime(newestFileTimeInitial,newestFileTime)<0){
-							fileNew = 1;
-							newestFileTimeInitial = newestFileTime;
-							//newestFileTimeInitial = time(0);
-							printf("\n--------------------------------------------------------------------------------");
-							printf("\n THERE IS A NEW FILE IN DIRECTORY  %s",newestFileName);
-							printf("\n--------------------------------------------------------------------------------");
-							printf("\n");
-						}*/
-							
+						}	
 					}
 					else{
 						printf("\n ERROR, the Path %s is not a directory valid\n. ",dname);
 						exit(1);
 					}
 					time(&current_time);
-					//printf("\n Hemos esperado 1 segundos, chequeamos de nuevo. Valor filenew %d. Valor curtime %ld Valor startime %ld",fileNew,current_time,start_time);
 					if(difftime(current_time,start_time)>=TIMEOUT_FILE)
 						exitProgram = 1;
 					else
@@ -2216,7 +2087,6 @@ int main(int argc, char **argv)
 						sendcountsLambdaLoop[i] = (sendcountsPixelsLoop[i])*nlambda;
 						displsPixelsLoop[i] = sum;
 						displsSpectroLoop[i] = sumSpectro;
-						//displsLambda[i] = sumLambda;
 						sum += sendcountsPixelsLoop[i];
 						sumSpectro += sendcountsSpectroLoop[i];
 						sumLambda += sendcountsLambdaLoop[i];
@@ -2250,18 +2120,7 @@ int main(int argc, char **argv)
 					printf("\n--------------------------------------------------------------------------------\n");
 				}
 				
-				//MPI_Waitall(numFilesPerProcessParallel,vMpiRequestScatter,MPI_STATUSES_IGNORE);
-				/*if(idProc==root){
-					//t = clock() - t;
-					//PRECISION timeTotalExecution = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
-					printf("\n--------------------------------------------------------------------------------");
-					printf("\n SCATTER IMAGE DONE ");
-					printf("\n--------------------------------------------------------------------------------\n");
-				}*/
-
-				// DO INVERSION 
-
-				
+				// DO INVERSION 				
 				if(numPixelImageLoop > 0){
 					local_start_execution = MPI_Wtime();
 					for(indexPixel = 0; indexPixel < sendcountsPixelsLoop[idProc]; indexPixel++){
@@ -2405,7 +2264,6 @@ int main(int argc, char **argv)
 							fitsImageLoop->pixels = calloc(fitsImageLoop->numPixels, sizeof(vpixels));
 							for( i=0;i<fitsImageLoop->numPixels;i++){
 								fitsImageLoop->pixels[i].spectro = calloc ((fitsImageLoop->numStokes*fitsImageLoop->nLambdas),sizeof(float));
-								//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
 							}		
 							for(indexPixel=0;indexPixel<fitsImageLoop->numPixels;indexPixel++)
 							{	
@@ -2434,7 +2292,6 @@ int main(int argc, char **argv)
 							for( i=0;i<fitsImageLoop->numPixels;i++){
 								free(fitsImageLoop->pixels[i].spectro);
 								fitsImageLoop->pixels[i].spectro = NULL;
-								//image->pixels[i].vLambda = calloc (image->nLambdas, sizeof(float));
 							}							
 							free(fitsImageLoop->pixels);
 							fitsImageLoop->pixels = NULL;
@@ -2449,7 +2306,6 @@ int main(int argc, char **argv)
 						
 						printf("\n-------------------------------------------------------------------------------------------------------------------------");
 						printf("\nINVERSION OF IMAGE %s ¡¡¡DONE!!!. TIME MAX EXECUTION: %f ", newestFileName,elapsed_execution);
-						//printf("\n MAX EXECUTION time = %lf seconds\n", vElapsed_execution[indexInputFits]);
 						printf("\nTIME TO WRITE FITS IMAGE:  %f seconds to execute ", timeWriteImage);
 						printf("\n-------------------------------------------------------------------------------------------------------------------------\n");
 						freeFitsImage(fitsImageLoop);
@@ -2465,8 +2321,6 @@ int main(int argc, char **argv)
 				fileNew = 0;
 			}
 		}while(!exitProgram);
-
-		//printf("\n SALIENDO DEL PROGRAMA ID PROC %d\n",idProc);
 	}
 
 	deleteList(&listFileNamesReaded);

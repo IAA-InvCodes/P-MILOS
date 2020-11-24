@@ -7,26 +7,10 @@
 #include <complex.h>
 #include <fftw3.h> //siempre a continuacion de complex.h
 
-
+/**
+ * Calculate central components
+ * */
 int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,REAL *wex,REAL *nuxB,REAL *dfi,REAL *dshi,PRECISION LD,PRECISION A,int desp);
-
-void Resetear_Valores_Intermedios(int nlambda);
-
-
-
-/*
-	E00	int eta0; // 0
-	MF	int B;    
-	VL	double vlos;
-	LD	double dopp;
-	A	double aa;
-	GM	int gm; //5
-	AZI	int az;
-	B0	double S0;
-	B1	double S1;
-	MC	double mac; //9
-		double alfa;		
-*/
 
 
 extern REAL *dtaux, *etai_gp3, *ext1, *ext2, *ext3, *ext4;
@@ -45,17 +29,12 @@ REAL **uuGlobalInicial;
 REAL **HGlobalInicial;
 REAL **FGlobalInicial;
 extern int FGlobal,HGlobal,uuGlobal;
-//extern PRECISION *G, *GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
 extern PRECISION *GMAC,*GMAC_DERIV; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
-//extern REAL *G;
 extern PRECISION *G;
-//extern VSLConvTaskPtr taskConv;
-
 extern fftw_complex * inSpectraFwMAC, *inSpectraBwMAC, *outSpectraFwMAC, *outSpectraBwMAC;
 extern fftw_complex * inFilterMAC, * inFilterMAC_DERIV, * outFilterMAC, * outFilterMAC_DERIV;
 extern fftw_plan planForwardMAC, planBackwardMAC;
 extern fftw_plan planFilterMAC, planFilterMAC_DERIV;
-
 extern fftw_complex * fftw_G_PSF, * fftw_G_MAC_PSF, * fftw_G_MAC_DERIV_PSF;
 extern fftw_complex * inPSF_MAC, * inMulMacPSF, * inPSF_MAC_DERIV, *inMulMacPSFDeriv, *outConvFilters, * outConvFiltersDeriv;
 extern fftw_plan planForwardPSF_MAC, planForwardPSF_MAC_DERIV,planBackwardPSF_MAC, planBackwardPSF_MAC_DERIV;
@@ -71,20 +50,12 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 
 	int nterms,numl;
 	int lineas;
-
-
-
 	PRECISION E00,LD,A,B1,MC,ALF;
 	int il,i,j,k;
 	PRECISION E0;	
-
-
-
-    int odd,ishift,par;
+   int odd,ishift,par;
     
-	
 	E00=initModel->eta0; 
-	//MF=initModel->B;
 	LD=initModel->dopp;
 	A=initModel->aa;
 	B1=-((initModel->S1)*ah);
@@ -95,15 +66,13 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	numl=nlambda;
 	lineas=wlines[0];
 
-	//DEFINO UN VECTOR DE DERIVADAS
-	//POR ORDEN SERAN param=[eta0,magnet,vlos,landadopp,aa,gamma,azi]	
 	
-	//Resetear_Valores_Intermedios(nlambda);
+
 
     
     for(il=0;il<lineas;il++) {
 		//Line strength
-	    E0=E00*cuantic[il].FO; //y sino se definio Fo que debe de pasar 0 o 1 ...??
+	    E0=E00*cuantic[il].FO; 
 
 		fi_p=fi_p+nlambda*il*sizeof(REAL);
 		fi_b=fi_b+nlambda*il*sizeof(REAL);
@@ -122,31 +91,24 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		funcionComponentFor(cuantic[il].N_SIG,wlines[il+1],numl,cuantic[il].WER,nurB,dfi,dshi,LD,A,2);
 
 		for(i=0;i<numl;i++){
-			//d_ei[i]=d_ei[i]+etain[i]/E0;
 			d_ei[i]=etain[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			//d_eq[i]=d_eq[i]+etaqn[i]/E0;
 			d_eq[i]=etaqn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			//d_eu[i]=d_eu[i]+etaun[i]/E0;
 			d_eu[i]=etaun[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			//d_ev[i]=d_ev[i]+etavn[i]/E0;
 			d_ev[i]=etavn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			//d_rq[i]=d_rq[i]+rhoqn[i]/E0;
 			d_rq[i]=rhoqn[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			//d_ru[i]=d_ru[i]+rhoun[i]/E0;
 			d_ru[i]=rhoun[i]/E0;
 		}
 		for(i=0;i<numl;i++){
-			//d_rv[i]=d_rv[i]+rhovn[i]/E0;
 			d_rv[i]=rhovn[i]/E0;
 		}
 
@@ -166,71 +128,54 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	
 		
 		for(j=1;j<5;j++){
-			//derivadas de los perfiles de dispersion respecto de B,VL,LDOPP,A 
+			//derived from the dispersion profiles with respect to de B,VL,LDOPP,A 
 			for(i=0;i<numl;i++){
 				REAL dfisum,aux;
 				dfisum=	dfi[i + (j-1)*numl+ (numl*4)]+dfi[i + (j-1)*numl + (numl*4*2)];
-				
-				//d_ei[j*numl+i] = d_ei[j*numl+i] + (dfi[i+ (j-1)*numl] * sinis_E0_2 + dfisum * cosis_2_E0_2);
 				d_ei[j*numl+i] = (dfi[i+ (j-1)*numl] * sinis_E0_2 + dfisum * cosis_2_E0_2);
 				
 				aux=dfi[(j-1)*numl+i]-dfisum/2;
-				//d_eq[j*numl+i]=d_eq[j*numl+i]+(aux)*sinis_cosa;
 				d_eq[j*numl+i]=(aux)*sinis_cosa;
-				//d_eu[j*numl+i]=d_eu[j*numl+i]+(aux)*sinis_sina;
 				d_eu[j*numl+i]=(aux)*sinis_sina;
 			}
 			for(i=0;i<numl;i++){
-				//d_ev[j*numl+i]= d_ev[j*numl+i] +(dfi[(j-1)*numl+i+(numl*4*2)]-dfi[(j-1)*numl+i+(numl*4)])*cosi_2_E0;
 				d_ev[j*numl+i]= (dfi[(j-1)*numl+i+(numl*4*2)]-dfi[(j-1)*numl+i+(numl*4)])*cosi_2_E0;
 			}
 		}
 		for(j=1;j<5;j++){
 			for(i=0;i<numl;i++){
 				REAL aux=dshi[(j-1)*numl+i]-(dshi[(j-1)*numl+i+(numl*4)]+dshi[(j-1)*numl+i+(numl*4*2)])/2.0;
-				//d_rq[j*numl+i]=d_rq[j*numl+i]+(aux)*sinis_cosa;
 				d_rq[j*numl+i]=(aux)*sinis_cosa;
-				//d_ru[j*numl+i]=d_ru[j*numl+i]+(aux)*sinis_sina;
 				d_ru[j*numl+i]=(aux)*sinis_sina;
 			}
 			for(i=0;i<numl;i++){
-				//d_rv[j*numl+i]=d_rv[j*numl+i]+((dshi[(j-1)*numl+i+(numl*4*2)]-dshi[(j-1)*numl+i+(numl*4)]))*cosi_2_E0;
 				d_rv[j*numl+i]=((dshi[(j-1)*numl+i+(numl*4*2)]-dshi[(j-1)*numl+i+(numl*4)]))*cosi_2_E0;
 			}	
 		}
 		
-		//derivadas de los perfiles de dispersion respecto de GAMMA
+		//derived from the dispersion profiles with respect to de GAMMA
 		REAL cosi_cosdi,sindi_E0_2;
 		cosi_cosdi=cosi*cosdi*E0_2;
 		sindi_E0_2=sindi*E0_2;
 		for(i=0;i<numl;i++){
-			//d_ei[5*numl+i]=d_ei[5*numl+i]+fi_p[i]*sindi_E0_2+(parcial1[i])*cosi_cosdi;
 			d_ei[5*numl+i]=fi_p[i]*sindi_E0_2+(parcial1[i])*cosi_cosdi;
 		}
 		for(i=0;i<numl;i++){
-			//d_eq[5*numl+i]=d_eq[5*numl+i]+parcial2[i]*sindi_cosa;
 			d_eq[5*numl+i]=parcial2[i]*sindi_cosa;
 		}
 		for(i=0;i<numl;i++){
-			//d_eu[5*numl+i]=d_eu[5*numl+i]+parcial2[i]*sindi_sina;
 			d_eu[5*numl+i]=parcial2[i]*sindi_sina;
 		}
 		for(i=0;i<numl;i++){
-			//d_ev[5*numl+i]=d_ev[5*numl+i]+(fi_r[i]-fi_b[i])*cosdi_E0_2;
 			d_ev[5*numl+i]=(fi_r[i]-fi_b[i])*cosdi_E0_2;
 		}
-		
-
 		for(i=0;i<numl;i++){
-			//d_rq[5*numl+i]=d_rq[5*numl+i]+parcial3[i]*sindi_cosa;
 			d_rq[5*numl+i]=parcial3[i]*sindi_cosa;
 		}
 		for(i=0;i<numl;i++){
-			//d_ru[5*numl+i]=d_ru[5*numl+i]+parcial3[i]*sindi_sina;
 			d_ru[5*numl+i]=parcial3[i]*sindi_sina;
 		}
 		for(i=0;i<numl;i++){
-			//d_rv[5*numl+i]=d_rv[5*numl+i]+(shi_r[i]-shi_b[i])*cosdi_E0_2;
 			d_rv[5*numl+i]=(shi_r[i]-shi_b[i])*cosdi_E0_2;
 		}
 		
@@ -240,32 +185,24 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		sinis_cosda=sinis*cosda;
 		sinis_sinda=sinis*sinda;		
 		for(i=0;i<numl;i++){				
-			//d_eq[6*numl+i]=d_eq[6*numl+i]+parcial2[i]*sinis_cosda;
 			d_eq[6*numl+i]=parcial2[i]*sinis_cosda;
 		}
 
 		for(i=0;i<numl;i++){
-			//d_eu[6*numl+i]=d_eu[6*numl+i]+parcial2[i]*sinis_sinda;
 			d_eu[6*numl+i]=parcial2[i]*sinis_sinda;
 		}
 		for(i=0;i<numl;i++){
-			//d_rq[6*numl+i]=d_rq[6*numl+i]+parcial3[i]*sinis_cosda;
 			d_rq[6*numl+i]=parcial3[i]*sinis_cosda;
 		}
 		for(i=0;i<numl;i++){
-			//d_ru[6*numl+i]=d_ru[6*numl+i]+parcial3[i]*sinis_sinda;
 			d_ru[6*numl+i]=parcial3[i]*sinis_sinda;
 		}
 
 	} //end for
 
-            	
-//	Leer_Puntero_Calculos_Compartidos(7,&etai,&etaq,&etau,&etav,&rhoq,&rhou,&rhov);
 
-    //Los parametros de Stokes estan normalizados a la intensidad en el continuo (no)
 
-    //bucle para derivadas de I,Q,U,V 
-    //derivada de spectra respecto  E0,MF,VL,LD,A,gamma,azi
+    //derivative of spectra with respect to  E0,MF,VL,LD,A,gamma,azi
 
    for(i=0;i<numl;i++)
 		dtaux[i]=(B1)/(dt[i]*dt[i]);
@@ -283,10 +220,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 	}
 	
 	
-	//printf("-------------------> dpgx :  %d\n",il);
     for(il=0;il<7;il++){
-
-
     	for(i=0;i<numl;i++){
     		dgp1[i]=2.0*(etai[i]*d_ei[i+numl*il]-etaq[i]*d_eq[i+numl*il]-etau[i]*d_eu[i+numl*il]-etav[i]*d_ev[i+numl*il]  
 				 +rhoq[i]*d_rq[i+numl*il]+rhou[i]*d_ru[i+numl*il]+rhov[i]*d_rv[i+numl*il]);
@@ -387,10 +321,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		int startShift = numl/2;
 		if(odd) startShift+=1;		
 		
-
-//		printf("dentro MC \n");
-    	//la 9 respecto MC
-    	//convolucion del espectro original
+    	//convolution original spectro
     	
 		fgauss(MC,lambda,numl,wlines[1],0);  // Gauss Function stored in global variable GMAC 
 		// VARIABLES USED TO CALCULATE DERIVATE OF G1
@@ -449,8 +380,8 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 			}
 			
 			for(par=0;par<4;par++){
-				//Va hasta 8 porque la macro no la convoluciono
-				//seria directamente dmacro=I*dg    		
+				//Go until the eigth because macros is not convolve 
+
 				for(il=0;il<9;il++){
 					if(il!=7){
 						for(i=0;i<numl;i++){
@@ -477,54 +408,18 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		else{ // USE DIRECT CONVOLUTION 
 			for(i=0;i<numl;i++){
 				GMAC_DERIV[i] = (GMAC[i] / MC * ((((lambda[i] - centro) / ild) * ((lambda[i] - centro) / ild)) - 1.0));
-				//inFilterMAC_DERIV[i] = GMAC_DERIV[i];
 			}
 			if(filter){
 				// convolve both gaussians and use this to convolve this with spectra 
 				direct_convolution_double(GMAC_DERIV, nlambda, G, nlambda); 
 				direct_convolution_double(GMAC, nlambda, G, nlambda); 
 			}
-			// DIS-COMMENT FOR CONVOLVE ONLY I WITH CIRCULAR CONVOLUTION AND Q,U,V WITH LINEAR CONVOLUTION 
-			/*convCircular(spectra, GMAC_DERIV, nlambda,d_spectra+(9*numl));
-
-			for(il=1;il<4;il++){
-				direct_convolution2(spectra+nlambda*il, nlambda, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il),1);
-			}*/
 
 			for(il=0;il<4;il++){
 				convCircular(spectra+nlambda*il, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il)); 
 			}
 
-			/*int h;
-			REAL Ic;
-			for (i = 0; i < 9; i++)
-			{
-				// invert continuous
-				if (i != 7){		
-					if(d_spectra[(nlambda * i)]>d_spectra[(nlambda * i) + (nlambda - 1)])
-						Ic = d_spectra[(nlambda * i)];	
-					else
-						Ic = d_spectra[(nlambda * i) + (nlambda - 1)];
-					for(h=0;h<nlambda;h++){
-						d_spectra[(nlambda * i) + h] = Ic - d_spectra[(nlambda * i) +h];
-					}																													
-					direct_convolution(d_spectra + (nlambda * i), nlambda, GMAC, nlambda); 
-					for(h=0;h<nlambda;h++){
-						d_spectra[(nlambda * i) +h] = Ic - d_spectra[(nlambda * i) + h];
-					}
-				}	
-			}
-
-			for (j = 1; j < NPARMS; j++)
-			{
-				for (i = 0; i < 9; i++)
-				{
-					if (i != 7)																															 //no convolucionamos S0
-						direct_convolution(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), nlambda, GMAC, nlambda); 
-				}
-			}	
-			*/
-			// DISCOMMENT FOR USE CIRCULAR CONVOLUTION ONLY 
+			
 			for(il=0;il<4;il++){
 				convCircular(spectra+nlambda*il, GMAC_DERIV, nlambda,d_spectra+(9*numl)+(numl*nterms*il)); 
 			}
@@ -575,11 +470,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 		}
 		else{ // DIRECT CONVOLUTION 
 			REAL Ic;
-						
-			/*if(spectra[0]>spectra[nlambda - 1])
-				Ic = spectra[0];
-			else				
-				Ic = spectra[nlambda - 1];*/
+			
 			for (i = 0; i < NTERMS; i++)
 			{
 				// invert continuous
@@ -588,13 +479,6 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 						Ic = d_spectra[(nlambda * i)];	
 					else
 						Ic = d_spectra[(nlambda * i) + (nlambda - 1)];
-					/*for(h=0;h<nlambda;h++){
-						d_spectra[(nlambda * i) + h] = Ic - d_spectra[(nlambda * i) +h];
-					}																													
-					direct_convolution(d_spectra + (nlambda * i), nlambda, G, nlambda); 
-					for(h=0;h<nlambda;h++){
-						d_spectra[(nlambda * i) +h] = Ic - d_spectra[(nlambda * i) + h];
-					}*/
 
 					direct_convolution_ic(d_spectra + (nlambda * i), nlambda, G, nlambda,Ic);
 				}	
@@ -609,17 +493,7 @@ int me_der(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *
 				}
 			}
 
-			// FOR USE CIRCULAR CONVOLUTION 
-			/*for (j = 0; j < NPARMS; j++)
-			{
-				for (i = 0; i < NTERMS; i++)
-				{
-					if (i != 7)																															 //no convolucionamos S0
-						convCircular(d_spectra + (nlambda * i) + (nlambda * NTERMS * j), nlambda, G, nlambda,d_spectra + (nlambda * i) + (nlambda * NTERMS * j)); 
-				}
-			}*/
 		}
-		//response_functions_convolution(&nlambda);
 	}
 	// stray light factor 
 	if(slight!=NULL){
@@ -691,57 +565,37 @@ int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,REAL *wex,REAL *nuxB
 			uu[j]=-uu[j]/LD;
 		}
 
-		//numl*4*3
-		// a   b c
-		//col a,fil b,desplazamiento c
-		//b*a+numl+(numl*4*c)
-		//dfi
+
 		for(j=0;j<numl;j++){
-			//(*,0,desp)=>0*numl+j+(numl*4*0)
-			//dfi[j+(numl*4*desp)]=dfi[j+(numl*4*desp)]+dH_u[j]*(-nuxB[i]);
 			dfi[j+(numl*4*desp)]=dH_u[j]*(-nuxB[i]);
 		}
 		
 		for(j=0;j<numl;j++){
-			//(*,1,desp)=>1*numl+j+(numl*4*0)
-			//dfi[numl+j+(numl*4*desp)]=dfi[numl+j+(numl*4*desp)]+dH_u[j]*auxCte[j];
 			dfi[numl+j+(numl*4*desp)]=dH_u[j]*auxCte[j];
 		}
 
 		for(j=0;j<numl;j++){
-			//(*,2,desp)=>1*numl+j+(numl*4*0)
-			//dfi[2*numl+j+(numl*4*desp)]=dfi[2*numl+j+(numl*4*desp)]+(dH_u[j]*uu[j]);
 			dfi[2*numl+j+(numl*4*desp)]=(dH_u[j]*uu[j]); 											
 		}								
 
 		for(j=0;j<numl;j++){
-			//(*,3,desp)=>1*numl+j+(numl*4*0)
-			//dfi[3*numl+j+(numl*4*desp)]=dfi[3*numl+j+(numl*4*desp)]+(-2*dF_u[j]);//dH_a[j];
-			dfi[3*numl+j+(numl*4*desp)]=(-2*dF_u[j]);//dH_a[j];						
+			dfi[3*numl+j+(numl*4*desp)]=(-2*dF_u[j]);						
 		}
 		
 		//dshi
 		for(j=0;j<numl;j++){
-			//(*,0,desp)=>0*numl+j+(numl*4*0)
-			//dshi[j+(numl*4*desp)]=dshi[j+(numl*4*desp)]+(dF_u[j])*(-nuxB[i]);
 			dshi[j+(numl*4*desp)]=(dF_u[j])*(-nuxB[i]);
 		}
 						
 		for(j=0;j<numl;j++){
-			//(*,1,desp)=>1*numl+j+(numl*4*0)
-			//dshi[numl+j+(numl*4*desp)]=dshi[numl+j+(numl*4*desp)]+dF_u[j]*auxCte[j];
 			dshi[numl+j+(numl*4*desp)]=dF_u[j]*auxCte[j];
 		}
 
 		for(j=0;j<numl;j++){
-			//(*,2,desp)=>1*numl+j+(numl*4*0)
-			//dshi[2*numl+j+(numl*4*desp)]=dshi[2*numl+j+(numl*4*desp)]+(dF_u[j]*uu[j]);
 			dshi[2*numl+j+(numl*4*desp)]=(dF_u[j]*uu[j]); 											
 		}								
 		
 		for(j=0;j<numl;j++){
-			//(*,3,desp)=>1*numl+j+(numl*4*0)
-			//dshi[3*numl+j+(numl*4*desp)]=dshi[3*numl+j+(numl*4*desp)]+(dH_u[j]/2);
 			dshi[3*numl+j+(numl*4*desp)]=(dH_u[j]/2);						
 		}									
 
@@ -752,19 +606,4 @@ int funcionComponentFor(int n_pi,PRECISION iwlines,int numl,REAL *wex,REAL *nuxB
 	FGlobal=FGlobal+n_pi;
 
 	return 1;	
-}
-
-
-void Resetear_Valores_Intermedios(int nlambda){
-		
-	//memset(d_ei , 0, (nlambda*7)*sizeof(REAL));
-	//memset(d_eq , 0, (nlambda*7)*sizeof(REAL));
-	//memset(d_ev , 0, (nlambda*7)*sizeof(REAL));
-	//memset(d_eu , 0, (nlambda*7)*sizeof(REAL));
-	//memset(d_rq , 0, (nlambda*7)*sizeof(REAL));
-	//memset(d_ru , 0, (nlambda*7)*sizeof(REAL));
-	//memset(d_rv , 0, (nlambda*7)*sizeof(REAL));
-	//memset(dfi , 0, (nlambda*4*3)*sizeof(REAL));
-	//memset(dshi , 0, (nlambda*4*3)*sizeof(REAL));
-
 }

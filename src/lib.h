@@ -48,33 +48,10 @@ int multmatrix_transpose_sigma(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,
 int CalculaNfree(int nspectro);
 
 
-/**
- * 
- * */
-PRECISION mean(PRECISION *dat, int numl);
-
-/**
- * PRINT 
- * */
-void printProgress (PRECISION percentage);
-
 /*
 * Check if path is a directory or not. 
 */
 int isDirectory(const char *path);
-
-
-/**
- * Own implementation of memcpy
- * */
-
-void myMemCpy(PRECISION *dest, PRECISION *src, size_t n) ;
-
-
-
-void strip_ext(char *fname);
-
-
 
 void insert_in_linked_list (tpuntero *cabeza, char * fileName);
 int checkNameInLista (tpuntero cabeza,char * fileName);

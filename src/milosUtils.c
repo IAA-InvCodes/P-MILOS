@@ -18,139 +18,40 @@
 extern PRECISION **PUNTEROS_CALCULOS_COMPARTIDOS;
 extern int POSW_PUNTERO_CALCULOS_COMPARTIDOS;
 extern int POSR_PUNTERO_CALCULOS_COMPARTIDOS;
-
 extern REAL *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
-
 extern REAL *gp1, *gp2, *dt, *dti, *gp3, *gp4, *gp5, *gp6, *etai_2;
 extern REAL *dgp1, *dgp2, *dgp3, *dgp4, *dgp5, *dgp6, *d_dt;
 extern REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
 extern REAL *dfi, *dshi;
 extern REAL *fi_p, *fi_b, *fi_r, *shi_p, *shi_b, *shi_r;
-
-
 extern REAL *spectra, *d_spectra, *spectra_mac, *spectra_slight;
 extern REAL *etain, *etaqn, *etaun, *etavn, *rhoqn, *rhoun, *rhovn;
 extern REAL *etai, *etaq, *etau, *etav, *rhoq, *rhou, *rhov;
 extern REAL *parcial1, *parcial2, *parcial3;
 extern REAL *nubB, *nupB, *nurB;
 extern PRECISION *G,*GMAC;
-//extern REAL *G;
 extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
 extern fftw_plan planForwardPSF, planBackwardPSF;
-
 extern fftw_complex * fftw_G_PSF;
-
-
-
 extern Cuantic *cuantic; // Variable global, está hecho así, de momento,para parecerse al original
-
-
 extern gsl_vector *eval;
 extern gsl_matrix *evec;
 extern gsl_eigen_symmv_workspace * workspace;
 extern int NTERMS;
-void spectral_synthesis_convolution(int * nlambda)
-{
 
-	int i,j,ishift;
-	//int nlambda = NLAMBDA;
-	//convolucionamos los perfiles IQUV (spectra)			
-	int odd=(*nlambda%2);
-	
-	int startShift = *nlambda/2;
-	if(odd) startShift+=1;
 
-	for (i = 0; i < NPARMS; i++){
-		for(j=0;j<* nlambda;j++){
-			inSpectraFwPSF[j] = spectra[(*nlambda*i)+j] + 0 * _Complex_I;
-		}
-		fftw_execute(planForwardPSF);
-		// multiplication fft results 
-		for(j=0;j<* nlambda;j++){
-			inSpectraBwPSF[j] = (outSpectraFwPSF[j]/(*nlambda)) * fftw_G_PSF[j];						
-		}
-		fftw_execute(planBackwardPSF);
-		//shift: -numln/2
-		for(j=0,ishift=startShift;j<(*nlambda)/2;j++,ishift++){
-			spectra[ishift+i*(*nlambda)]=creal(outSpectraBwPSF[j])*(*nlambda);
-		}
-		for(j=(*nlambda)/2,ishift=0;j<(*nlambda);j++,ishift++){
-			spectra[ishift+i*(*nlambda)]=creal(outSpectraBwPSF[j])*(*nlambda);
-		}
-	}
 
-}
 
-void response_functions_convolution(int * nlambda)
-{
 
-	int i, j, h,k,ishift;
-	//int nlambda = NLAMBDA;
-
-	//convolucionamos las funciones respuesta ( d_spectra )
-
-	//PRECISION _Complex *fftaux,*fftaux2, *fftd;
-	int odd=(*nlambda%2);
-	int startShift = (*nlambda)/2;
-	if(odd) startShift+=1;
-
-	for (j = 0; j < NPARMS; j++)
-	{
-		for (i = 0; i < NTERMS; i++)
-		{
-			if (i != 7)	{																														 //no convolucionamos S0
-				// copy to inSpectra
-				for(k=0;k<(*nlambda);k++){
-					inSpectraFwPSF[k] = d_spectra[(*nlambda * i + *nlambda * NTERMS * j) + k] + 0 * _Complex_I;
-				}
-				fftw_execute(planForwardPSF);
-				for(h=0;h<(*nlambda);h++){
-					inSpectraBwPSF[h] = (outSpectraFwPSF[h]/(*nlambda)) * fftw_G_PSF[h];
-				}
-				fftw_execute(planBackwardPSF);   			
-				//shift 
-				for(h=0,ishift=startShift;h<(*nlambda)/2;h++,ishift++){
-					d_spectra[ishift+ (*nlambda) * i + (*nlambda) * NTERMS * j]=creal(outSpectraBwPSF[h])*(*nlambda);
-				}
-				for(h=((*nlambda)/2),ishift=0;h<(*nlambda);h++,ishift++){
-					d_spectra[ishift+(*nlambda) * i + (*nlambda) * NTERMS * j]=creal(outSpectraBwPSF[h])*(*nlambda);
-				}
-			}
-		}
-	}
-
-}
-
-void AplicaSlight(REAL * d_spectra, int numl, PRECISION ALFA, REAL * slight){
-	int par, il, i;
-	// Response Functions 
-	for(par=0;par<NPARMS;par++){
-		for(il=0;il<NTERMS;il++){
-			for(i=0;i<numl;i++){
-				d_spectra[numl*il+numl*NTERMS*par+i]=d_spectra[numl*il+numl*NTERMS*par+i]*ALFA;
-				if(il==10){ //Magnetic filling factor Response function
-					d_spectra[numl*il+numl*NTERMS*par+i]=spectra[numl*par+i]-slight[numl*par+i];
-				}
-			}
-		}
-
-		spectra[i] = spectra[i]*ALFA+slight[i]*(1.0-ALFA);
-	}
-
-	for(i=0;i<numl*NPARMS;i++){
-		spectra[i] = spectra[i]*ALFA+slight[i]*(1.0-ALFA);
-	}
-}
 
 void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *modelout)
 {
 
-	//INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
+	
 	int index =0;
 	if (fixed[0])  // ETHA 0 
 	{
 		modelout->eta0 = model->eta0 - delta[0]; // 0
-		//modelout->eta0 = model->eta0 - delta[index++]; // 0
 	}
 	if (fixed[1]) // B
 	{
@@ -159,33 +60,19 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 		else if (delta[1] > 300)
 			delta[1] = 300;
 		modelout->B = model->B - delta[1]; //magnetic field
-		//modelout->B = model->B - delta[index++]; //magnetic field
 	}
 	if (fixed[2]) // VLOS
 	{
-		/*if (delta[2] > 2)
-			delta[2] = 2;
-
-		if (delta[2] < -2)
-			delta[2] = -2;		*/
 		modelout->vlos = model->vlos - delta[2];
-		//modelout->vlos = model->vlos - delta[index++];
 	}
 
 	if (fixed[3]) // DOPPLER WIDTH
 	{
-
-		/*if (delta[3] > 1e-2)
-			delta[3] = 1e-2;
-		else if (delta[3] < -1e-2)
-			delta[3] = -1e-2;*/
 		modelout->dopp = model->dopp - delta[3];
-		//modelout->dopp = model->dopp - delta[index++];
 	}
 
 	if (fixed[4]) // DAMPING 
 		modelout->aa = model->aa - delta[4];
-		//modelout->aa = model->aa - delta[index++];
 
 	if (fixed[5])  // GAMMA 
 	{
@@ -195,14 +82,10 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 			delta[5] = 30;
 
 		modelout->gm = model->gm - delta[5]; //5
-		//modelout->gm = model->gm - delta[index++]; //5
 	}
 	if (fixed[6]) // AZIMUTH
 	{
-		/*if (delta[6] < -15)
-			delta[6] = -15;
-		else if (delta[6] > 15)
-			delta[6] = 15;*/
+
 
 		if (delta[6] < -30)
 			delta[6] = -30;
@@ -210,17 +93,16 @@ void AplicaDelta(Init_Model *model, PRECISION *delta, int *fixed, Init_Model *mo
 			delta[6] = 30;
 
 		modelout->az = model->az - delta[6];
-		//modelout->az = model->az - delta[index++];
 	}
 	if (fixed[7])
 		modelout->S0 = model->S0 - delta[7];
-		//modelout->S0 = model->S0 - delta[index++];
+
 	if (fixed[8])
 		modelout->S1 = model->S1 - delta[8];
-		//modelout->S1 = model->S1 - delta[index++];
+
 	if (fixed[9]){
 		modelout->mac = model->mac - delta[9]; //9
-		//modelout->mac = model->mac - delta[index++]; //9
+
 	}
 	if (fixed[10]){
 		if(NTERMS==11)
@@ -260,7 +142,6 @@ int check(Init_Model *model)
 		model->az = model->az - 180.0;
 	}
 
-	//RANGOS
 	//Eta0
 	if (model->eta0 < 1)
 		model->eta0 = 1;
@@ -319,11 +200,6 @@ void FijaACeroDerivadasNoNecesarias(REAL *d_spectra, int *fixed, int nlambda)
 {
 
 	int In, j, i;
-	/*for (In = 0; In < NTERMS; In++)
-		if (fixed[In] == 0)
-			for (j = 0; j < NPARMS; j++)
-				for (i = 0; i < nlambda; i++)
-					d_spectra[i + nlambda * In + j * nlambda * NTERMS] = 0;*/
 
 	if(NTERMS==9 || NTERMS==11){
 		for (In = 0; In < NTERMS; In++)
@@ -362,27 +238,17 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 {
 
 	const PRECISION epsilon = 1e-12;
-	//PRECISION h1[NTERMS * NTERMS];
-	//PRECISION v[NTERMS * NTERMS], w[NTERMS];
+
 	PRECISION *v, *w;
 	int i, j;
 	PRECISION aux2[NTERMS];
-	//int aux_nf, aux_nc;
-	
 
-
-	/*for (j = 0; j < NTERMS * NTERMS; j++)
-	{
-		h1[j] = h[j];
-	}*/
 
 	gsl_matrix_view gsl_h1 = gsl_matrix_view_array (h, NTERMS, NTERMS);
 	gsl_eigen_symmv(&gsl_h1.matrix, eval, evec, workspace);
 	w = gsl_vector_ptr(eval,0);
 	v = gsl_matrix_ptr(evec,0,0);
 
-	//svdcmp(h,NTERMS,NTERMS,w,v);
-	//multmatrix(beta, 1, NTERMS, v, NTERMS, NTERMS, aux2, &aux_nf, &aux_nc);
 	PRECISION sum;
 		
 	for ( j = 0; j < NTERMS; j++){
@@ -390,16 +256,10 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		for ( i = 0;  i < NTERMS; i++){
 			sum += beta[i] * v[i*NTERMS+j];
 		}
-		//aux2[j] = sum;
 		aux2[j] = sum * ((fabs(w[j]) > epsilon) ? (1/w[j]): 0.0);
 	}
 
-	/*for (i = 0; i < NTERMS; i++)
-	{
-		aux2[i]= aux2[i]*((fabs(w[i]) > epsilon) ? (1/w[i]): 0.0);
-	}*/
 
-	//multmatrix(v, NTERMS, NTERMS, aux2, NTERMS, 1, delta, &aux_nf, &aux_nc);
 	for ( i = 0; i < NTERMS; i++){		
 		sum=0;
 		for ( j = 0;  j < NTERMS; j++){
@@ -408,31 +268,6 @@ int mil_svd(PRECISION *h, REAL *beta, PRECISION *delta)
 		delta[i] = sum;
 	}
 	return 1;
-}
-
-
-
-void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise)
-{
-	int i;
-	//PRECISION *w, *sig;
-	PRECISION *sig;
-
-	sig = calloc(4, sizeof(PRECISION));
-	if (sigma == NULL)
-	{
-		for (i = 0; i < 4; i++)
-			sig[i] = noise * noise;
-	}
-	else
-	{
-
-		for (i = 0; i < 4; i++)
-			sig[i] = (*sigma); // * (*sigma);
-	}
-
-	//*wOut = w;
-	*sigOut = sig;
 }
 
 
@@ -447,12 +282,6 @@ void weights_init(PRECISION *sigma, PRECISION **sigOut, PRECISION noise)
 * nlambda :   numero de muesras
 * spectro :   vector [I,Q,U,V]
 * initModel:  Modelo de atmosfera a ser modificado
-*
-*
-*
-* @Author: Juan Pedro Cobos Carrascosa (IAA-CSIC)
-*		   jpedro@iaa.es
-* @Date:  Nov. 2011
 *
 */
 void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, float *spectro, Init_Model *initModel, int forInitialUse)
@@ -498,18 +327,6 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	Ic = spectro[endLambda - 1]; // Continuo ultimo valor de I
 
-	/*double Icmax = spectro[0];
-	int index =0;
-	for (i = 0; i < nlambda; i++)
-	{
-		if(spectroI[i]>Ic){
-			Icmax = spectroI[i];
-			index = i;
-		}
-	}
-
-	Ic = Icmax;*/
-
 	x = 0;
 	y = 0;
 	x_vlos = 0;
@@ -552,19 +369,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	
 
 	Blos = (1 / C) * ((LM_lambda_plus - LM_lambda_minus) / 2);
-	//Vlos = (VLIGHT / (lambda_0)) * ((LM_lambda_plus + LM_lambda_minus) / 2);
 	Vlos = (VLIGHT / (lambda_0)) * ((x_vlos/y_vlos) / 2); // for now use the center without spectroV only spectroI 
-
-
-	//------------------------------------------------------------------------------------------------------------
-	// //Para probar fórmulación propuesta por D. Orozco (Junio 2017)
-	//La formula es la 2.7 que proviene del paper:
-	// Diagnostics for spectropolarimetry and magnetography by Jose Carlos del Toro Iniesta and Valent´ýn Mart´ýnez Pillet
-	//el 0.08 Es la anchura de la línea en lugar de la resuloción del etalón.
-
-	//Vlos = ( 2*(VLIGHT)*0.08 / (PI*lambda_0)) * atan((spectroI[0]+spectroI[1]-spectroI[3]-spectroI[4])/(spectroI[0]-spectroI[1]-spectroI[3]+spectroI[4]));
-
-	//------------------------------------------------------------------------------------------------------------
 
 	//inclinacion
 	x = 0;
@@ -573,7 +378,7 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 	{
 		if(spectroQ[i]>-1 && spectroU[i]>-1 && spectroV[i]>-1){
 			L = FABS(SQRT(spectroQ[i] * spectroQ[i] + spectroU[i] * spectroU[i]));
-			m = fabs((4 * (lambda[i] - lambda_0) * L)); // / (3*C*Blos) ); //2*3*C*Blos mod abril 2016 (en test!)
+			m = fabs((4 * (lambda[i] - lambda_0) * L)); 
 
 			x = x + FABS(spectroV[i]) * m;
 			y = y + FABS(spectroV[i]) * FABS(spectroV[i]);
@@ -643,8 +448,6 @@ void estimacionesClasicas(PRECISION lambda_0, PRECISION *lambda, int nlambda, fl
 
 	if(!forInitialUse) // store Blos in SO if we are in non-initialization use
 		initModel->S0 = Blos;
-
-	//Liberar memoria del vector de lambda auxiliar
 	
 }
 
@@ -728,16 +531,12 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 	*iter = 0;
 
 	PRECISION covar[NTERMS * NTERMS];
-	//PRECISION betad[NTERMS];
 
 
 	mil_sinrf(cuantic, initModel, wlines, lambda, nlambda, spectra, ah,slight,spectra_mac, spectra_slight, *INSTRUMENTAL_CONVOLUTION);
 	me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac, spectra_slight,ah, slight, *INSTRUMENTAL_CONVOLUTION,fixed);	
 	FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);
 	covarm2(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
-
-	/*for (i = 0; i < NTERMS; i++)
-		betad[i] = beta[i];*/
 
 	for (i = 0; i < NTERMS * NTERMS; i++){
 		covar[i] = alpha[i];
@@ -788,9 +587,6 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 			me_der(cuantic, initModel, wlines, lambda, nlambda, d_spectra, spectra_mac,spectra, ah, slight,*INSTRUMENTAL_CONVOLUTION,fixed);
 			FijaACeroDerivadasNoNecesarias(d_spectra,fixed,nlambda);	
 			covarm2(weight, vSigma, spectro, nlambda, spectra, d_spectra, beta, alpha);
-			
-			/*for (i = 0; i < NTERMS; i++)
-				betad[i] = beta[i];*/
 
 			for (i = 0; i < NTERMS * NTERMS; i++)
 				covar[i] = alpha[i];
@@ -812,7 +608,7 @@ int lm_mils(Cuantic *cuantic, PRECISION *wlines, PRECISION *lambda, int nlambda,
 		{
 			for (i = 0; i < NTERMS * NTERMS; i++)
 				covar[i] = alpha[i];
-			//flambda = flambda * 10; //10;
+
 			flambda=flambda*PARBETA_worst*PARBETA_FACTOR;
 			if(log)
 				printf("\n%d\t%f\t increases\t______________________________",*iter,flambda);
@@ -892,10 +688,7 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 	gsl_interp_init(interpolation, deltaLambda, PSF, N_PSF);
 	gsl_interp_accel * accelerator =  gsl_interp_accel_alloc();
 
-	//printf("\n[");
 	for (i = 0; i < NSamples; ++i){
-		//printf("\n VALOR A INERPOLAR EN X %f, iteration %li",lambdasSamples[i]-offset,i);
-		//printf("\t%f,",lambdasSamples[i]-offset);
 		double aux;
 		if(offset>=0){
 			if(lambdasSamples[i]-offset>= deltaLambda[0]){
@@ -912,7 +705,6 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 			}
 		}
 		else{
-			//printf("lamba+offset %f  deltalambda %f ",lambdasSamples[i]+offset,deltaLambda[NSamples-1] );
 			if(lambdasSamples[i]-offset>= deltaLambda[NSamples-1]){
 				aux = gsl_interp_eval(interpolation, deltaLambda, PSF, lambdasSamples[i]-offset, accelerator);
 						// if lambdasSamples[i] is out of range from deltaLambda then aux is GSL_NAN, we put nan values to 0. 
@@ -927,7 +719,6 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
 			}			
 		}
 	}
-	//printf("]\n");
 
   	// normalizations 
 	double cte = 0;
@@ -940,10 +731,7 @@ int interpolationLinearPSF(PRECISION *deltaLambda, PRECISION * PSF, PRECISION * 
   	gsl_interp_accel_free(accelerator);
 	gsl_interp_free(interpolation);
   	
-	/*for(i=0; i< NSamples; i++){
-		if(fInterpolated[i]<1e-3)
-			fInterpolated[i] =0;
-	}*/
+
 
 
 	return 1;

@@ -26,6 +26,11 @@ extern REAL *resultConv;
 extern _Complex double *z,* zden, * zdiv;
 extern int NTERMS;
 
+/**
+ * @param int numl indicates the number of wavelenghts and the size of array 
+ * 
+ * This method allocate the memory neccesary for inversion of one pixel
+ * */
 void AllocateMemoryDerivedSynthesis(int numl)
 {
 
@@ -148,10 +153,12 @@ void AllocateMemoryDerivedSynthesis(int numl)
 	FGlobal = 0;
 }
 
+
+/**
+ * This method free memory used to calculate the inversion of one pixel. 
+ * */
 void FreeMemoryDerivedSynthesis()
 {
-	
-	/************* SVD VARIABLES *************************************/
 	
 	/**************************************************/
 	free(dtaux);

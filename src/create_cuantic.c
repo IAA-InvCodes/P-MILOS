@@ -1,10 +1,26 @@
 
 #include "defines.h"
 
+/**
+ * @param Cuantic * cuantic --> structure that stores cuantic numbers
+ * @param double sl 
+ * @param double ll
+ * @param double jl
+ * @param double su
+ * @param double lu
+ * @param double ju
+ * @param double fos
+ * @param int log
+ * 
+ * */
 int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISION su, PRECISION lu, PRECISION ju, PRECISION fos,int log);
 
-//data -> [lines, sl,ll,jl,su,lu,ju, fos]  (fos only if lines>1)
 
+/**
+ * @param double * dat
+ * @param int log
+ * 
+ * */
 Cuantic *create_cuantic(PRECISION *dat,int log)
 {
 	Cuantic *cuantic;
@@ -28,12 +44,21 @@ Cuantic *create_cuantic(PRECISION *dat,int log)
 	return cuantic;
 }
 
+
+/**
+ * @param Cuantic * cuantic --> structure that stores cuantic numbers
+ * @param double sl 
+ * @param double ll
+ * @param double jl
+ * @param double su
+ * @param double lu
+ * @param double ju
+ * @param double fos
+ * @param int log
+ * 
+ * */
 int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISION su, PRECISION lu, PRECISION ju, PRECISION fos, int log)
 {
-	//SL(I),     SU(I),     LL(I),    LU(I),    JL(I),   JU(I)
-	//,NUB,NUP,NUR,WEB,WEP,WER,GLO,GUP,GEF
-	//	;1-> LOW
-	//	;2-> UP
 
 	int *m1, *m2, im, i, j;
 	int jj, n_pi, n_sig;
@@ -55,28 +80,22 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 
 	geff = (g1 + g2) / 2 + (g1 - g2) * (jl * (jl + 1.) - ju * (ju + 1.)) / 4;
 
-	//	printf("g1 : %f\n",g1);
-	//	printf("g2 : %f\n",g2);
 
 	//magnetic quanten number Mlo Mup
 	m1 = calloc(2 * jl + 1, sizeof(int));
 	for (i = 0; i < 2 * jl + 1; i++)
 	{
 		m1[i] = i - (int)jl;
-		//		printf("m1 (%d) : %d \n",i,m1[i]);
 	}
 	m2 = calloc(2 * ju + 1, sizeof(int));
 	for (i = 0; i < 2 * ju + 1; i++)
 	{
 		m2[i] = i - (int)ju;
-		//		printf("m2 (%d) :%d\n",i,m2[i]);
 	}
 
 	n_pi = (2 * (jl < ju ? jl : ju)) + 1; //Number of pi components
 	n_sig = jl + ju;							  //Number of sigma components
 
-	//	printf("n_pi :%d\n",n_pi);
-	//	printf("n_sig :%d\n",n_sig);
 
 	//BLUE COMPONENT => Mlo-Mup = +1
 	//RED COMPONENT => Mlo-Mup = -1

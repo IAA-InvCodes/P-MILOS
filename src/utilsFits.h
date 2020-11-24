@@ -28,21 +28,6 @@ FitsImage *  readFitsSpectroImage (const char * fitsFileSpectra, int forParallel
  */
 FitsImage * readFitsSpectroImageRectangular (const char * fitsFileSpectra, ConfigControl * configCrontrolFile, int forParallel, int nLambdaGrid);
 
-/**
- * This function read the spectro image from the file "fitsFileSpectra" and store it into a struct of FitsImage
- * @param fitsFileSpectra --> name of the fits file to read 
- * Return the image read or NULL if something was wrong during the lecture. 
- */
-FitsImage * readFitsSpectroNPixels (const char * fitsFileSpectra, int rowInit, int colInit,int rowEnd, int colEnd, int numPixelsRead,  int forParallel);
-
-/**
- * This function read the lambda values for the image from the file "fitsFileLambda" and store it into a struct of FitsImage. The file of spectro must
- * be read it before call this method. 
- * @param fitsFileLambda --> name of the fits file to read with lambda values 
- * @param fitsImage --> struct of image 
- * Return 1 If the image has been read corectly if not return 0 
- */
-int readFitsLambdaFile (const char * fitsFileLambda, FitsImage * fitsImage);
 
 /**
  * 
@@ -151,32 +136,7 @@ int writeFitsImageProfiles(const char * fitsProfileFile, const char * fitsFileOr
  */
 int writeFitsImageProfilesSubSet(const char * fitsProfileFile, const char * fitsFileOrigin, FitsImage * image, ConfigControl configCrontrolFile);
 
-/**
- * 
- * This method is used to process the file with the parameters of the file to call the program MILOS. 
- * @param fileParameters 
- * @param maxIter 
- * @param clasicalEstimate
- * @param printSintesis
- * @param nameInputFileSpectra
- * @param nameOutputFileModels
- * @param nameOutputFilePerfiles
- * @param useConvolution
- * @param FWHM
- * @param DELTA
- * @param NMUESTRAS_G
- * 
- * @return 0 is there is something wrong reading the parameters, 1 is everything was fine. 
- */
-/*int readParametersFileInput(char * fileParameters, int * maxIter, int * clasicalEstimate, int * printSintesis, char * nameInputFileSpectra, char * nameInputFileLambda,char * nameInputFileLines, char * nameInputFileInitModel,  PRECISION *  centralLambda, char *nameOutputFileModels, char * nameOutputFileProfiles, int * useConvolution, char * nameInputFilePSF, PRECISION * FWHM, int * KIND_CONVOLUTION);
 
-
-
-int readFileCuanticLines(char * inputLineFile, PRECISION * cuanticDat, PRECISION centralLambda);
-
-int readInitialModel(Init_Model * INIT_MODEL, char * fileInitModel);
-
-int readPSFFile(PRECISION * deltaLambda, PRECISION * PSF, char * nameInputPSF);*/
 
 /**
  * 

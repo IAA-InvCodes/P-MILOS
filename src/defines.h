@@ -3,11 +3,6 @@
 #include <math.h>
 #include <complex.h>
 #include "fitsio.h"
-//#include <fftw3.h> //siempre detras de complex.h!
-//#include <math.h>
-//#include <stdio.h>
-
-
 
 
 #ifdef USE_DOUBLE_PRECISION
@@ -16,7 +11,6 @@
 #define SQRT(x)	sqrt(x)
 #define SIN(x)	sin(x)
 #define COS(x)	cos(x)
-//#define SINCOS(x,y,z) sincos(x,y,z)
 #define TAN(x)	tan(x)
 #define ATAN(x)	atan(x)
 #define ATAN2(x,y) atan2(x,y)
@@ -31,7 +25,6 @@
 #define SQRT(x) sqrtf(x)
 #define SIN(x) sinf(x)
 #define COS(x) cosf(x)
-//#define SINCOS(x,y,z) sincosf(x,y,z)
 #define TAN(x) tanf(x)
 #define ATAN(x) atanf(x)
 #define ATAN2(x,y) atan2f(x,y)
@@ -48,12 +41,6 @@
 #ifndef DEFINES_H_
 #define DEFINES_H_
 
-//---------------------------------------------------------
-//---------------------------------------------------------
-//---------------------------------------------------------
-//---------------------------------------------------------
-// USER CONFIGURATION
-
 
 //NumeroS cuanticos
 #define CUANTIC_NWL 1
@@ -66,8 +53,6 @@
 
 
 #define NOISE_SIGMA 0.001 
-
-#define CLASSICAL_ESTIMATES_SAMPLE_REF 4 //Muestra referencia para cambio de cuadrante de azimuth. Depende del numero de muestras y posicion Continuo
 
 //#define NTERMS 11 
 
@@ -90,16 +75,12 @@
 #define VLIGHT 2.99792458e+5 //;light speed (km/s); 
 
 #define CTE4_6_13 4.6686411e-13
-#define AH 1.0 //angulo heliocentrico
+#define AH 1.0 //heliocentric angle
 
 #define FFT_FORWARD -1 
 #define FFT_BACKWARD +1
 
 #define NPARMS 4 //(IQUV)
-
-
-
-#define INSTRUMENTAL_CONVOLUTION_INTERPOLACION 0  //realizar interpolacion en la convolucion ?? //No funciona !
 
 //INIT_MODEL=[eta0,magnet,vlos,landadopp,aa,gamma,azi,B1,B2,macro,alfa]
 struct INIT_MODEL{
@@ -296,55 +277,6 @@ struct CONFIG_CONTROL{
 };
 
 typedef struct CONFIG_CONTROL ConfigControl;
-
-// CONSTANTS TO COMPARE DATA FOR READ FROM CONFIGURATION FILE 
-#define NUMBER_OF_CYCLES "NumberOfCycles"
-#define OBSERVED_PROFILES "ObservedProfiles"
-#define STRAY_LIGHT_FILE "StrayLightFile"
-#define WAVE_LENGHT_FILE "WavelengthFile"
-#define ATOMIC_PARAMETERS_FILE "AtomicParametersFile"
-#define INITIAL_GUESS_MODEL "InitialGuessModel"
-#define WEIGHT_FOR_STOKESI  "WeightForStokesI"
-#define WEIGHT_FOR_STOKESQ  "WeightForStokesQ"
-#define WEIGHT_FOR_STOKESU  "WeightForStokesU"
-#define WEIGHT_FOR_STOKESV  "WeightForStokesV"
-#define INVERT_MACROTURBULENCE "InvertMacroturbulence"
-#define INVERT_FILLING_FACTOR "InvertFillingFactor"
-#define INVERT_STRAY_LIGHT_FACTOR "InvertStrayLightFactor"
-#define MU "mu"
-#define ESTIMATEDSNFORI "EstimatedSNForI"
-#define CONTINUUM_CONTRAST "ContinuumContrast"
-#define INITIAL_DIAGONAL_ELEMENT "InitialDiagonalElement"
-#define USE_INTERPOLAR_SPLINES_OR_LINEAR "UseInterpolarSplinesOrLinear"
-#define CONVOLVE_WITH_PSF "ConvolveWithPSF"
-#define FWHM_FILE "FWHM"
-#define TYPE_CONVOLUTION "TypeConvolution"
-#define GAS_PRESSURE_AT_SURFACE_1 "GasPressureAtSurface1" 
-#define GAS_PRESSURE_AT_SURFACE_2 "GasPressureAtSurface2" 
-#define MAGNETIC_PRESSURE_TERM "MagneticPressureTerm"
-#define NTL "ntl"
-#define NLIOBS "nliobs"
-#define CENTRAL_WAVE_LENGHT "CentralWaveLenght"
-#define ETA0_LINE_TO_CONTINUUM_ABSORPTION "ETA0_LineToContiniuumAbsorption"
-#define B_MAGNETIC_FIELD_STRENGTH "B_MagneticFieldStrength"
-#define VLOS_LINE_OF_SIGHT_VELOCITY "VLOS_LineOfSightVelocity"
-#define DOPP_DOOPLER_WIDTH "DOPP_DooplerWidth"
-#define AA_DAMPING_PARAMETER "AA_DampingParameter"
-#define GM_MAGNETIC_FIELD_INCLINATION "GM_MagneticFieldInclination"
-#define AZ_MAGNETIC_FIELD_AZIMUTH "AZ_MagneticFieldAzimuth"
-#define S0_SOURCE_FUNCTION_CONSTANT "S0_SourceFunctionConstant"
-#define S1_SOURCE_FUNCTION_GRADIENT "S1_SourceFunctionGradient"
-#define MAC_MACROTURBULENT_VELOCITY "MAC_MacroturbulentVelocity"
-#define ALPHA_FILLING_FACTOR "ALPHA_FillingFactor"
-#define SAVE_CHISQR "SaveChisqr"
-#define USE_CLASSICAL_ESTIMATES "UseClassicalEstimates"
-#define USE_RTE_INVERSION "UseRTEInversion"
-#define SAVE_SYNTHESIS_PROFILE "SaveSynthesisAdjusted"
-#define OUTPUT_MODEL_FILE "OutputModelFile"
-#define OUTPUT_SYNTHESIS_FILE "OutputSynthesisFile"
-#define SIGMA_FILE "sigma"
-#define NOISE_FILE "noise"
-#define TOPLIM_FILE "toplim" 
 
 // values for init guess model 
 

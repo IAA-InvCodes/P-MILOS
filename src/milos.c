@@ -56,7 +56,6 @@ int POSR_PUNTERO_CALCULOS_COMPARTIDOS;
 
 REAL *dtaux, *etai_gp3, *ext1, *ext2, *ext3, *ext4;
 REAL *gp1, *gp2, *dt, *dti, *gp3, *gp4, *gp5, *gp6, *etai_2;
-//PRECISION gp4_gp2_rhoq[NLAMBDA],gp5_gp2_rhou[NLAMBDA],gp6_gp2_rhov[NLAMBDA];
 REAL *gp4_gp2_rhoq, *gp5_gp2_rhou, *gp6_gp2_rhov;
 REAL *dgp1, *dgp2, *dgp3, *dgp4, *dgp5, *dgp6, *d_dt;
 REAL *d_ei, *d_eq, *d_eu, *d_ev, *d_rq, *d_ru, *d_rv;
@@ -76,8 +75,6 @@ PRECISION *GMAC,* GMAC_DERIV;
 PRECISION * dirConvPar;
 REAL *resultConv;
 PRECISION * G = NULL;
-//REAL * G;
-
 
 
 REAL * opa;
@@ -86,7 +83,6 @@ int FGlobal, HGlobal, uuGlobal;
 REAL *d_spectra, *spectra, *spectra_mac, *spectra_slight;
 
 // GLOBAL variables to use for FFT calculation 
-//VSLConvTaskPtr taskConv;
 fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
 fftw_complex * inSpectraFwMAC, *inSpectraBwMAC, *outSpectraFwMAC, *outSpectraBwMAC;
 fftw_plan planForwardPSF, planBackwardPSF;
@@ -314,7 +310,6 @@ int main(int argc, char **argv)
 			if(fp==NULL)
 			{
 				printf("File \"%s\" does not exist!!!\n",nameInputFilePSF);
-				//slog_error(0,"File \"%s\" does not exist!!!\n",nameInputFilePSF);
 				return 0;
 			}
 
@@ -340,14 +335,11 @@ int main(int argc, char **argv)
 				
 				double offset=0;
 				for(i=0;i<nlambda && !posWL;i++){
-					//if( (trunc(vLambda[i]*1000)/1000)== (trunc(configCrontrolFile.CentralWaveLenght*1000)/1000))
 					if( fabs(trunc(vOffsetsLambda[i]))==0) 
 						posWL = i;
 				}
 				if(posWL!= (nlambda/2) ){ // move center to the middle of samples
-					//printf("\nPOS CENTRAL WL %i, posicion central del array %i",posWL,(nlambda-1)/2);
 					offset = ((  ((nlambda)/2) - posWL)*step)*1000;
-					//printf ("\n OFFSET IS %f\n",offset);
 				}
 				
 				interpolationLinearPSF(deltaLambda,  PSF, vOffsetsLambda ,N_SAMPLES_PSF, G, nlambda,offset);
@@ -355,9 +347,6 @@ int main(int argc, char **argv)
 				sizeG = nlambda;
 			}
 			else{
-				//G = vgauss(FWHM, NMUESTRAS_G, DELTA);
-				//PRECISION * fgauss_WL(PRECISION FWHM, PRECISION step_between_lw, PRECISION lambda0, PRECISION lambdaCentral, int nLambda, int * sizeG)
-				//G = fgauss_WL(0.75,vLambda[1]-vLambda[0],vLambda[0],vLambda[nlambda/2],nlambda,&sizeG);
 				printf("\n****************** ERROR THE PSF FILE is empty or damaged.******************\n");
 				exit(EXIT_FAILURE);
 			}
@@ -434,7 +423,6 @@ int main(int argc, char **argv)
 			}
 			float aux1, aux2,aux3,aux4,aux5,aux6;
 			while ((read = getline(&line, &len, fReadSpectro)) != -1 && contLine<nlambda) {
-				//sscanf(line,"%e %e %e %e %e %e",&indexLine,&dummy,&spectroPER[contLine], &spectroPER[contLine + nlambda], &spectroPER[contLine + nlambda * 2], &spectroPER[contLine + nlambda * 3]);
 				sscanf(line,"%e %e %e %e %e %e",&aux1,&aux2,&aux3,&aux4,&aux5,&aux6);
 				spectroPER[contLine] = aux3;
 				spectroPER[contLine + nlambda] = aux4;
@@ -493,7 +481,6 @@ int main(int argc, char **argv)
 			printf("\n--------------------------------------------------------------------------------");
 			printf("\nOBSERVED PROFILES FILE READ: %s", configCrontrolFile.ObservedProfiles);
 			printf("\n--------------------------------------------------------------------------------\n");
-			//fitsImage = readFitsSpectroImageRectangular(configCrontrolFile.ObservedProfiles,&configCrontrolFile,0,nlambda);
 			// ALLOCATE MEMORY FOR STORE THE RESULTS 
 			int indexPixel = 0;
 			vModels = calloc (fitsImage->numPixels , sizeof(Init_Model));
@@ -527,7 +514,6 @@ int main(int argc, char **argv)
 			strcat(nameAuxOutputModel,FITS_FILE);			
 			if(!writeFitsImageModels(nameAuxOutputModel,fitsImage->rows,fitsImage->cols,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){
 					printf("\n ERROR WRITING FILE OF MODELS: %s",nameAuxOutputModel);
-					//slog_error(0,"\n ERROR WRITING FILE OF MODELS: %s",nameOutputFileModels);
 			}
 			free(vModels);
 			free(vChisqrf);
@@ -633,7 +619,6 @@ int main(int argc, char **argv)
 			int kk;
 			for (kk = 0; kk < nlambda; kk++)
 			{
-				//fprintf(fptr,"%d\t%f\t%e\t%e\t%e\t%e\n", indexLine, (vLambda[kk]-configCrontrolFile.CentralWaveLenght)*1000, spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
 				fprintf(fptr,"%d\t%f\t%e\t%e\t%e\t%e\n", indexLine, (vLambda[kk]-configCrontrolFile.CentralWaveLenght)*1000, spectra[kk], spectra[kk + nlambda], spectra[kk + nlambda * 2], spectra[kk + nlambda * 3]);
 			}
 			fclose(fptr);
@@ -795,8 +780,7 @@ int main(int argc, char **argv)
 
 			// SAVE OUTPUT MODEL 
 			char nameAuxOutputModel [4096];
-			/*strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
-			strcat(nameAuxOutputModel,OUTPUT_MOD_TXT_EXT);*/
+
 			if(configCrontrolFile.ObservedProfiles[0]!='\0')
 				strcpy(nameAuxOutputModel,get_basefilename(configCrontrolFile.ObservedProfiles));
 			else
@@ -820,9 +804,6 @@ int main(int argc, char **argv)
 				fprintf(fptr,"filling factor      :%lf\n",initModel.alfa);
 				fprintf(fptr,"# Iterations        :%d\n",numIter);
 				fprintf(fptr,"chisqr              :%le\n",chisqrf);
-
-
-
 				fprintf(fptr,"\n\n");
 				fclose(fptr);
 				printf("\n\n--------------------------------------------------------------------------------");
@@ -837,8 +818,6 @@ int main(int argc, char **argv)
 			// SAVE OUTPUT ADJUST SYNTHESIS PROFILES 
 			if(configCrontrolFile.SaveSynthesisAdjusted){
 				char nameAuxOutputStokes [4096];
-				//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
-				//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));
 				if(configCrontrolFile.ObservedProfiles[0]!='\0')
 					strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
 				else
@@ -1032,7 +1011,6 @@ int main(int argc, char **argv)
 							imageStokesAdjust->pixels[indexPixel].spectro[kk] = spectra[kk] ;
 						}						
 					}					
-					//printf ("\t\t %.2f seconds -- %.2f %%\r",  ((PRECISION)(clock() - t)/CLOCKS_PER_SEC) , ((indexPixel*100.)/fitsImage->numPixels));
 				}
 				t = clock() - t;
 				timeReadImage = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
@@ -1050,15 +1028,12 @@ int main(int argc, char **argv)
 				strcat(nameAuxOutputModel,MOD_FITS);
 				if(!writeFitsImageModels(nameAuxOutputModel,fitsImage->rows,fitsImage->cols,vModels,vChisqrf,vNumIter,configCrontrolFile.saveChisqr)){
 						printf("\n ERROR WRITING FILE OF MODELS: %s",nameAuxOutputModel);
-						//slog_error(0,"\n ERROR WRITING FILE OF MODELS: %s",nameOutputFileModels);
 				}
 				// PROCESS FILE OF SYNTETIC PROFILES
 
 				if(configCrontrolFile.SaveSynthesisAdjusted){
 					// WRITE SINTHETIC PROFILES TO FITS FILE
 					char nameAuxOutputStokes [4096];
-					//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
-					//strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.InitialGuessModel));
 					if(configCrontrolFile.ObservedProfiles[0]!='\0')
 						strcpy(nameAuxOutputStokes,get_basefilename(configCrontrolFile.ObservedProfiles));
 					else
@@ -1077,10 +1052,6 @@ int main(int argc, char **argv)
 			else{
 				printf("\n\n ***************************** FITS FILE WITH THE SPECTRO IMAGE CAN NOT BE READ IT ******************************\n");
 			}			
-
-			/*printf("\n--------------------------------------------------------------------------------");
-			printf("\n------------------------  IMAGE INVERSION DONE, CLEANING MEMORY ----------------");
-			printf("\n--------------------------------------------------------------------------------\n");*/
 
 			freeFitsImage(fitsImage);
 		}

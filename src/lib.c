@@ -17,16 +17,18 @@
 
 extern REAL * opa;
 extern int NTERMS;
-/*
 
- el tamaño de w es 	nlambda*NPARMS;
-
-return 
-	- beta de tam 1 x NTERMS
-	- alpha de tam NTERMS x NTERMS
-
-*/
-
+/**
+ * @param float * w 
+ * @param float * sig
+ * @param float * spectro 
+ * @param int nspectro 
+ * @param float * spectra
+ * @param float * d_spectra 
+ * @param float * beta 
+ * @param float * alpha 
+ * 
+ * */
 int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_spectra,REAL *beta,REAL *alpha){	
 	
 	int j,i,bt_nf,bt_nc,aux_nf,aux_nc;
@@ -44,11 +46,7 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 
 		BTaux=BT+(j*NTERMS);
 		APaux=AP+(j*NTERMS*NTERMS);
-		
-		//multmatrixIDLValue(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig[j]); //bt de tam NTERMS x 1
 		multmatrixIDLValueSigma(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig+(nspectro*j)); //bt de tam NTERMS x 1
-		
-		//multmatrix_transpose(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j]/sig[j]);//ap de tam NTERMS x NTERMS
 		multmatrix_transpose_sigma(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j], sig+(nspectro*j));//ap de tam NTERMS x NTERMS
 		
 	}
@@ -59,7 +57,17 @@ int covarm(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_
 	return 1;
 }
 
-
+/**
+ * @param REAL * W 
+ * @param REAL * sig
+ * @param float * spectro 
+ * @param int nspectro 
+ * @param REAL * spectra 
+ * @param REAL * d_spectra 
+ * @param REAL * beta 
+ * @param REAL * alpha 
+ * 
+ * */
 int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d_spectra,REAL *beta,REAL *alpha){	
 	
 	int j,i,h,k,aux_nf,aux_nc;
@@ -69,8 +77,6 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 	REAL *BTaux,*APaux;
 	REAL sum,sum2;
 
-	//printf("\nVALORES DEL SIGMA SQUARE\n");
-
 	for(j=0;j<NPARMS;j++){
 		for(i=0;i<nspectro;i++){
 			opa[i]= w[j]*(spectra[i+nspectro*j]-spectro[i+nspectro*j]);
@@ -79,20 +85,6 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 		BTaux=BT+(j*NTERMS);
 		APaux=AP+(j*NTERMS*NTERMS);
 		
-		//multmatrixIDLValue(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig[j]); //bt de tam NTERMS x 1
-		//multmatrixIDLValueSigma(opa,nspectro,1,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,BTaux,&bt_nf,&bt_nc,sig+(nspectro*j)); //bt de tam NTERMS x 1
-		/*for ( i = 0; i < NTERMS; i++){
-			sum=0;
-			for ( k = 0;  k < nspectro; k++){
-				sum += ((opa[k] * (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k))  ))/sig[nspectro*j+k];
-				//sum += (((w[j]*(spectra[k+nspectro*j]-spectro[k+nspectro*j])) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))  ))/sig[nspectro*j+k];
-			}
-			BTaux[i] = sum;
-		}*/
-
-
-		//multmatrix_transpose(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j]/sig[j]);//ap de tam NTERMS x NTERMS
-		//multmatrix_transpose_sigma(d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,d_spectra+j*nspectro*NTERMS,NTERMS,nspectro,APaux,&aux_nf,&aux_nc,w[j], sig+(nspectro*j));//ap de tam NTERMS x NTERMS
 		for ( i = 0; i < NTERMS; i++){
 		    for ( h = 0; h < NTERMS; h++){
 				sum=0;
@@ -101,8 +93,6 @@ int covarm2(REAL *w,REAL *sig,float *spectro,int nspectro,REAL *spectra,REAL  *d
 				}
 				for ( k = 0;  k < nspectro; k++){
 					REAL dAux = (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k));
-
-					//sum += (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k) * (*(d_spectra+j*nspectro*NTERMS+h*nspectro+k))) * (w[j]/sig[nspectro*j+k]);
 					sum += (*(d_spectra+j*nspectro*NTERMS+i*nspectro+k) * dAux ) * (w[j]/sig[nspectro*j+k]);
 					
 					if(i==0){
@@ -140,26 +130,6 @@ REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL n
 	int i,j;
 
 	TOT=0;
-	/*for(j=0;j<NPARMS;j++){
-		opa=0;
-		for(i=0;i<nspectro;i++){
-			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
-			opa+= (dif*dif);
-		}
-		TOT+=((w[j]*opa)/(sig[j]));
-	}*/
-
-	/*for(j=0;j<NPARMS;j++){
-		opa=0;
-		for(i=0;i<nspectro;i++){
-			dif=spectra[i+nspectro*j]-spectro[i+nspectro*j];
-			//printf("\n DIF SPECTRA: %f ; sigma %f ; value opa %f", dif,sig[i+nspectro*j] , (((dif*dif)*w[j])/(sig[i+nspectro*j])));
-			//if(sig[i+nspectro*j]!=-1)
-				opa+= (((dif*dif)*w[j])/(sig[i+nspectro*j]));
-		}
-		TOT+= opa;
-	}*/
-
 	opa1=0;
 	opa2=0;
 	opa3=0;
@@ -194,6 +164,19 @@ REAL fchisqr(REAL * spectra,int nspectro,float *spectro,REAL *w,REAL *sig,REAL n
 	El tamaño de columnas de b, nbc, debe de ser igual al de filas de a, naf.
 
 */
+
+/**
+ * @param REAL * a 
+ * @param int naf
+ * @param int nac 
+ * @param REAL * b
+ * @param int nbf
+ * @param int nbc 
+ * @param REAL * result 
+ * @param int * fil 
+ * @param int * col 
+ * @param REAL value 
+ * */
 int multmatrixIDLValue(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL *result,int *fil,int *col,REAL value){
     
    int i,j,k;
@@ -207,10 +190,8 @@ int multmatrixIDLValue(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL *res
 		    for ( j = 0; j < nac; j++){
 				sum=0;
 				for ( k = 0;  k < naf; k++){
-					//printf("i: %d,j:%d,k=%d .. a[%d][%d]:%f  .. b[%d][%d]:%f\n",i,j,k,k,j,a[k*nac+j],i,k,b[i*nbc+k]);
 					sum += a[k*nac+j] * b[i*nbc+k];
 				}
-				//printf("Sum, result[%d][%d] : %f \n",i,j,sum);
 				result[((nac)*i)+j] = sum/value;
       		} 
 		}
@@ -221,6 +202,9 @@ int multmatrixIDLValue(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL *res
 	return 0;
 }
 
+/**
+ * 
+ * */
 int multmatrixIDLValueSigma(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL *result,int *fil,int *col, REAL * sigma){
     
    int i,j,k;
@@ -231,17 +215,11 @@ int multmatrixIDLValueSigma(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL
 		(*col)=nac;
 
 		for ( i = 0; i < nbf; i++){
-		    //for ( j = 0; j < nac; j++){
 				sum=0;
 				for ( k = 0;  k < naf; k++){
-					//printf("i: %d,j:%d,k=%d .. a[%d][%d]:%f  .. b[%d][%d]:%f\n",i,j,k,k,j,a[k*nac+j],i,k,b[i*nbc+k]);
-					//if(sigma[k]!=-1)
-						//sum += (((a[k*nac+j] * b[i*nbc+k])))/sigma[k];
 						sum += (((a[k] * b[i*nbc+k])))/sigma[k];
 				}
-				//printf("Sum, result[%d][%d] : %f \n",i,j,sum);
-				result[i] = sum;
-      		//} 
+				result[i] = sum; 
 		}
 		return 1;
 	}
@@ -250,6 +228,12 @@ int multmatrixIDLValueSigma(REAL *a,int naf,int nac,REAL *b,int nbf,int nbc,REAL
 	return 0;
 }
 
+/**
+ * @param REAL * A
+ * @param int f 
+ * @param int c
+ * @param REAL * result
+ * */
 void totalParcialf(REAL * A, int f,int c,REAL * result){
 
 	int i,j;
@@ -263,7 +247,13 @@ void totalParcialf(REAL * A, int f,int c,REAL * result){
 	}
 }
 
-
+/**
+ * @param REAL * A
+ * @param int f
+ * @param int c
+ * @param int p
+ * @param REAL * result 
+ * */
 void totalParcialMatrixf(REAL * A, int f,int c,int p,REAL *result){
 
 	int i,j,k;
@@ -275,21 +265,24 @@ void totalParcialMatrixf(REAL * A, int f,int c,int p,REAL *result){
 				sum+=A[i*c+j+f*c*k];
 			result[i*c+j] = sum;
 		}
-
-//	return result;
 }
 
-/*
-	Multiplica la matriz a (tamaño naf,nac)
-	por la matriz b (de tamaño nbf,nbc)
-	al estilo multiplicación algebraica de matrices, es decir, columnas de a por filas de b,
-	el resultado se almacena en resultOut (de tamaño fil,col)
 
-	El tamaño de salida (fil,col) corresponde con (nbf,nac).
-
-	El tamaño de columnas de a, nac, debe de ser igual al de filas de b, nbf.
-*/
-
+/**
+ * @param PRECISION * a 
+ * @param int naf 
+ * @param int nac 
+ * @param PRECISION * b 
+ * @param int nbf 
+ * @param int nbc 
+ * @param PRECISION * result 
+ * @param int * fil 
+ * @param int * col 
+ * 
+ * Multiply matrix "a"(naf,nac) with matrix "b" (nbf,nbc). Algebraic matrix multiplication style, that is, 
+ * columns of "a" by rows of "b". The result is stored in "result"(fil,col). 
+ * The size of columns of "a", nac, must be the same of rows of "b", nbf. 
+ * */
 int multmatrix(PRECISION *a,int naf,int nac, PRECISION *b,int nbf,int nbc,PRECISION *result,int *fil,int *col){
     
     int i,j,k;
@@ -298,23 +291,15 @@ int multmatrix(PRECISION *a,int naf,int nac, PRECISION *b,int nbf,int nbc,PRECIS
 	if(nac==nbf){
 		(*fil)=naf;
 		(*col)=nbc;
-		
-//		free(*result);
-//		*result=calloc((*fil)*(*col),sizeof(PRECISION));
-//		printf("a ver ..\n");
 
 		for ( i = 0; i < naf; i++)
 		    for ( j = 0; j < nbc; j++){
 				sum=0;
 				for ( k = 0;  k < nbf; k++){
-//					printf("i: %d,j:%d,k=%d .. a[%d][%d]  .. b[%d][%d]\n",i,j,k,i,k,k,j);
 					sum += a[i*nac+k] * b[k*nbc+j];
 				}
-//				printf("Sum\n");
 				result[(*col)*i+j] = sum;
-
       		} 
-
 		return 1;
 	}
 	return 0;
@@ -323,7 +308,18 @@ int multmatrix(PRECISION *a,int naf,int nac, PRECISION *b,int nbf,int nbc,PRECIS
 
 
 
-
+/**
+ * @param REAL * a
+ * @param int naf 
+ * @param int nac 
+ * @param REAL *b
+ * @param int nbf
+ * @param int nbc 
+ * @param REAL * result 
+ * @param int * fil 
+ * @param int * col 
+ * @param REAL value
+ * */
 int multmatrix_transpose(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,REAL *result,int *fil,int *col,REAL value){
     
     int i,j,k;
@@ -351,6 +347,21 @@ int multmatrix_transpose(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,REAL *
 
 	return 0;
 }
+
+/**
+ * @param REAL * a
+ * @param int naf 
+ * @param int nac 
+ * @param REAL *b
+ * @param int nbf
+ * @param int nbc 
+ * @param REAL * result 
+ * @param int * fil 
+ * @param int * col 
+ * @param REAL weigth
+ * @param REAL * sigma 
+ * 
+ * */
 int multmatrix_transpose_sigma(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,REAL *result,int *fil,int *col,REAL weigth, REAL * sigma){
     
     int i,j,k;
@@ -364,7 +375,6 @@ int multmatrix_transpose_sigma(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,
 		    for ( j = 0; j < nbf; j++){
 				sum=0;
 				for ( k = 0;  k < nbc; k++){
-					//if(sigma[k]!=-1)
 						sum += (a[i*nac+k] * b[j*nbc+k]) * (weigth/sigma[k]);
 				}
 
@@ -380,21 +390,11 @@ int multmatrix_transpose_sigma(REAL *a,int naf,int nac, REAL *b,int nbf,int nbc,
 	return 0;
 }
 //Media de un vector de longitud numl
-PRECISION mean(PRECISION *dat, int numl){
-	
-	PRECISION auxsum;
-	int i;
 
-	auxsum=0;
-	for(i=0;i<numl;i++){
-		auxsum=auxsum+dat[i];		
-	}
 
-	return auxsum/numl;
-}
 
 /**
- * 
+ * @param int nspectro
  */
 int CalculaNfree(int nspectro)
 {
@@ -406,19 +406,9 @@ int CalculaNfree(int nspectro)
 	return nfree;
 }
 
-
-
-void printProgress (PRECISION percentage)
-{
-    //int val = (int) (percentage * 100);
-    //int lpad = (int) (percentage * PBWIDTH);
-    //int rpad = PBWIDTH - lpad;
-    //printf ("\r%3f%% [%.*s%*s]",  percentage, lpad, PBSTR, rpad, "");
-	 printf ("\r%3f %%",  percentage);
-    fflush (stdout);
-}
-
-
+/**
+ * @param const char * path
+ * */
 int isDirectory(const char *path) {
    struct stat statbuf;
    if (stat(path, &statbuf) != 0)
@@ -426,33 +416,10 @@ int isDirectory(const char *path) {
    return S_ISDIR(statbuf.st_mode);
 }
 
-
-void myMemCpy(PRECISION *dest, PRECISION *src, size_t n) 
-{ 
-   // Typecast src and dest addresses to (char *) 
-	size_t i;
-   // Copy contents of src[] to dest[] 
-   for (i=0; i<n; i++) 
-      dest[i] = src[i]; 
-} 
-
-
-
-void strip_ext(char *fname)
-{
-    char *end = fname + strlen(fname);
-
-    while (end > fname && *end != '.' && *end != '\\' && *end != '/') {
-        --end;
-    }
-    if ((end > fname && *end == '.') &&
-        (*(end - 1) != '\\' && *(end - 1) != '/')) {
-        *end = '\0';
-    }  
-}
-
-
-
+/**
+ * @param tpuntero * cabeza
+ * @param char * fileName
+ * */
 void insert_in_linked_list (tpuntero *cabeza, char * fileName){
     tpuntero nuevo; 
     nuevo = malloc(sizeof(tnodo)); 
@@ -461,6 +428,10 @@ void insert_in_linked_list (tpuntero *cabeza, char * fileName){
     *cabeza = nuevo; 
 }
  
+/**
+ * @param tpuntero  cabeza
+ * @param char * fileName
+ * */
 int checkNameInLista(tpuntero cabeza,char * fileName){
 	int found = 0;
     while(cabeza != NULL && !found){ //Mientras cabeza no sea NULL
@@ -472,6 +443,11 @@ int checkNameInLista(tpuntero cabeza,char * fileName){
 	return found;
 }
  
+
+/**
+ * @param tpuntero * cabeza
+ * */
+
 void deleteList(tpuntero *cabeza){ 
     tpuntero actual; //Puntero auxiliar para eliminar correctamente la lista
   

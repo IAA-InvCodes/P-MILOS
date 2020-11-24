@@ -13,19 +13,6 @@
 int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REAL *fi_x,
 												REAL *shi_x,PRECISION A,PRECISION MF);
 
-/*
-	E00	int eta0; // 0
-	MF	int B;    
-	VL	PRECISION vlos;
-	LD	PRECISION dopp;
-	A	PRECISION aa;
-	GM	int gm; //5
-	AZI	int az;
-	B0	PRECISION S0;
-	B1	PRECISION S1;
-	MC	PRECISION mac; //9
-		PRECISION alfa;		
-*/
 
 
 extern REAL * gp1,*gp2,*dt,*dti,*gp3,*gp4,*gp5,*gp6,*etai_2;
@@ -40,25 +27,22 @@ REAL **uuGlobalInicial;
 REAL **HGlobalInicial;
 REAL **FGlobalInicial;
 extern int FGlobal,HGlobal,uuGlobal;
-
-
 extern PRECISION *GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
-//extern REAL *G;
 extern PRECISION *G;
-
 extern fftw_complex * inSpectraFwMAC, *inSpectraBwMAC, *outSpectraFwMAC, *outSpectraBwMAC;
 extern fftw_complex * inFilterMAC, * inFilterMAC_DERIV, * outFilterMAC, * outFilterMAC_DERIV;
 extern fftw_plan planForwardMAC, planBackwardMAC;
 extern fftw_plan planFilterMAC, planFilterMAC_DERIV;
-
 extern fftw_complex * fftw_G_PSF, * fftw_G_MAC_PSF, * fftw_G_MAC_DERIV_PSF;
 extern fftw_complex * inPSF_MAC, * inMulMacPSF, * inPSF_MAC_DERIV, *inMulMacPSFDeriv, *outConvFilters, * outConvFiltersDeriv;
 extern fftw_plan planForwardPSF_MAC, planForwardPSF_MAC_DERIV,planBackwardPSF_MAC, planBackwardPSF_MAC_DERIV;
 extern fftw_complex * inSpectraFwPSF, *inSpectraBwPSF, *outSpectraFwPSF, *outSpectraBwPSF;
 extern fftw_plan planForwardPSF, planBackwardPSF;
-
 extern ConfigControl configCrontrolFile;
 
+
+/**
+ * */
 int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISION *lambda,int nlambda,REAL *spectra,
 			REAL ah,REAL * slight, REAL * spectra_mc, REAL * spectra_slight, int filter)
 {
@@ -68,16 +52,11 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 
 	PRECISION E00,MF,VL,LD,A,GM,AZI,B0,B1,MC,ALF;
-
 	int il,i,j;
 	PRECISION E0;	
 	REAL ulos;
-	
 	REAL u[nlambda];
-	   
    int odd,ishift;
-   
-	  
 	REAL  parcial;
 
 	offset= 0;//10.0;
@@ -99,16 +78,6 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 	lineas=(int)wlines[0];
 
-	/*for(j=0;j<numl;j++){
-		etai[j]=1.0;
-		etaq[j]=0;
-		etau[j]=0;
-		etav[j]=0;
-		rhoq[j]=0;
-		rhou[j]=0;
-		rhov[j]=0;
-	}*/
-
 	//Definicion de ctes.
 	//a radianes	
 
@@ -117,15 +86,12 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 	sin_gm=SIN(GM);
 	cosi=COS(GM);
-	//SINCOS(GM,&sin_gm,&cosi);
 	sinis=sin_gm*sin_gm;
 	cosis=cosi*cosi;
 	cosis_2=(1+cosis)/2;
 	azi_2=2*AZI;
 	sina=SIN(azi_2);
 	cosa=COS(azi_2);
-	//SINCOS(azi_2,&sina,&cosa);
-	
 
 	sinda=cosa*CC_2;
 	cosda=-sina*CC_2;
@@ -138,7 +104,6 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 
 
     for(il=0;il<lineas;il++) {
-		//reserva de memoria para vectores auxiliares
 
 		etain=etain+nlambda*il*sizeof(REAL);
 		etaqn=etaqn+nlambda*il*sizeof(REAL);
@@ -149,17 +114,15 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 		rhovn=rhovn+nlambda*il*sizeof(REAL);
 
 		//Line strength
-	    E0=E00*cuantic[il].FO; //y sino se definio Fo que debe de pasar 0 o 1 ...??
+		E0=E00*cuantic[il].FO; 
 
+		//frecuency shift for v line of sight
+		ulos=(VL*wlines[il+1])/(VLIGHT*LD);
 
-	    //frecuency shift for v line of sight
-	    ulos=(VL*wlines[il+1])/(VLIGHT*LD);
-
-
-	    //doppler velocity	    
-	    for(i=0;i<nlambda;i++){
-	    	u[i]=((lambda[i]-wlines[il+1])/LD)-ulos;
-	    }
+		//doppler velocity	    
+		for(i=0;i<nlambda;i++){
+			u[i]=((lambda[i]-wlines[il+1])/LD)-ulos;
+		}
 
 		fi_p=fi_p+nlambda*il*sizeof(REAL);
 		fi_b=fi_b+nlambda*il*sizeof(REAL);
@@ -246,27 +209,16 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 		}
 
 		for(i=0;i<numl;i++){
-			
 			etai[i]=1.0 + etain[i];
 			etaq[i]=etaqn[i];
 			etau[i]=etaun[i];
-			etav[i]=etavn[i];
-
-			/*etai[i]=etai[i]+etain[i];
-			etaq[i]=etaq[i]+etaqn[i];
-			etau[i]=etau[i]+etaun[i];
-			etav[i]=etav[i]+etavn[i];*/				
-			
+			etav[i]=etavn[i];			
 		}
 		for(i=0;i<numl;i++){
 
 			rhoq[i]=rhoqn[i];
 			rhou[i]=rhoun[i];
-			rhov[i]=rhovn[i];
-
-			/*rhoq[i]=rhoq[i]+rhoqn[i];
-			rhou[i]=rhou[i]+rhoun[i];
-			rhov[i]=rhov[i]+rhovn[i];*/				
+			rhov[i]=rhovn[i];	
 			
 		}
 		
@@ -396,27 +348,13 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 			if(filter){
 				direct_convolution_double(GMAC, nlambda, G, nlambda);
 			}
-			/*REAL Ic;
-			if(spectra[0]>spectra[nlambda - 1])
-				Ic = spectra[0];
-			else				
-				Ic = spectra[nlambda - 1];
-			for (i = 0; i < nlambda; i++)
-				spectra[i] = Ic - spectra[i];
-			direct_convolution(spectra, nlambda, GMAC, nlambda); 
-			for (i = 0; i < nlambda; i++)
-				spectra[i] = Ic - spectra[i];
-			
-			//convolucion QUV
-			for (i = 1; i < NPARMS; i++)
-				direct_convolution(spectra + nlambda * i, nlambda, GMAC, nlambda); 		
-			*/
+
 			// FOR USE CIRCULAR CONVOLUTION 
 			for (i = 0; i < NPARMS; i++)
 				convCircular(spectra + nlambda * i, GMAC, nlambda,spectra + nlambda * i);				
 		}
 
-   }//end if(MC > 0.0001)
+   }
     
 
 
@@ -453,26 +391,13 @@ int mil_sinrf(Cuantic *cuantic,Init_Model *initModel,PRECISION * wlines,PRECISIO
 				Ic = spectra[0];
 			else				
 				Ic = spectra[nlambda - 1];
-
-			/*for (i = 0; i < nlambda; i++)
-				spectra[i] = Ic - spectra[i];
-
-			direct_convolution(spectra, nlambda, G, nlambda); 
-
-			for (i = 0; i < nlambda; i++)
-				spectra[i] = Ic - spectra[i];*/
 			
 			direct_convolution_ic(spectra, nlambda, G, nlambda,Ic);
 
 			//convolucion QUV
 			for (i = 1; i < NPARMS; i++){
-				direct_convolution(spectra + nlambda * i, nlambda, G, nlambda); 
-				//convolve(spectra + nlambda * i, nlambda, G, nlambda,spectra + nlambda * i,1); 
+				direct_convolution(spectra + nlambda * i, nlambda, G, nlambda);  
 			}
-
-			// FOR USE CIRCULAR CONVOLUTION 
-			/*for (i = 0; i < NPARMS; i++)
-				convCircular(spectra + nlambda * i, nlambda, G, nlambda,spectra + nlambda * i); */
 			
 		}
 	}
@@ -494,9 +419,6 @@ int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REA
 {
 	REAL *uu,*F,*H;
 	int i,j;
-
-
-
 	//component
 	for(i=0;i<n_pi;i++){
 
@@ -517,7 +439,6 @@ int funcionComponentFor_sinrf(REAL *u,int n_pi,int numl,REAL *wex,REAL *nuxB,REA
 		for(j=0;j<numl;j++){
 			shi_x[j]=(shi_x[j]+(wex[i]*F[j]*2));
 		}
-
 
 	}//end for 
 	uuGlobal=uuGlobal+n_pi;
