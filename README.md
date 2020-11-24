@@ -3,7 +3,6 @@
 
 ## Description 
 
-xx
 
 This repository contains an implementacion of MILOS in C and will get you a copy of the project up and running on your local machine for development and testing purposes. An extended user manual can be found [here](p-milos_manual.pdf). But in this page you can find a quick overview about how to install the necessary libraries, the types of files used and how to use the programs (sequential and parallel). 
 
