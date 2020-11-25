@@ -1351,6 +1351,7 @@ int main(int argc, char **argv)
 		free(vSpectraSplit_L);
 		free(vSpectraAdjustedSplit_L);
 		free(vSpectraAjustedTotal_L);
+		MPI_Barrier(MPI_COMM_WORLD);
 	}
 
 
