@@ -1235,14 +1235,23 @@ int main(int argc, char **argv)
 					}
 				}
 
-				MPI_Igatherv(resultsInitModel_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], mpiInitModel, resultsInitModelTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], mpiInitModel, root, MPI_COMM_WORLD,&vMpiRequestInitModel[indexInputFits]);
+				/*MPI_Igatherv(resultsInitModel_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], mpiInitModel, resultsInitModelTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], mpiInitModel, root, MPI_COMM_WORLD,&vMpiRequestInitModel[indexInputFits]);
 				MPI_Igatherv(vChisqrf_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_FLOAT, chisqrfTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestChisqr[indexInputFits]);		
 				MPI_Igatherv(vNumIter_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_INT, vNumIterTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_INT, root, MPI_COMM_WORLD,&vMpiRequestIter[indexInputFits]);		
 				
 				if(configCrontrolFile.SaveSynthesisAdjusted)
 					MPI_Igatherv(vSpectraAdjustedSplit_L[indexInputFits], sendcountsSpectro_L[indexInputFits][idProc], MPI_FLOAT, vSpectraAjustedTotal_L[indexInputFits], sendcountsSpectro_L[indexInputFits], displsSpectro_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD,&vMpiRequestSpectraAd[indexInputFits]);		
 				local_elapsed_execution = MPI_Wtime() - local_start_execution;
-				MPI_Ireduce(&local_elapsed_execution, &vElapsed_execution[indexInputFits], 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD,&vMpiRequestReduceExecution[indexInputFits]);
+				MPI_Ireduce(&local_elapsed_execution, &vElapsed_execution[indexInputFits], 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD,&vMpiRequestReduceExecution[indexInputFits]);*/
+
+				MPI_Gatherv(resultsInitModel_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], mpiInitModel, resultsInitModelTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], mpiInitModel, root, MPI_COMM_WORLD);
+				MPI_Gatherv(vChisqrf_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_FLOAT, chisqrfTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD);		
+				MPI_Gatherv(vNumIter_L[indexInputFits], sendcountsPixels_L[indexInputFits][idProc], MPI_INT, vNumIterTotal_L[indexInputFits], sendcountsPixels_L[indexInputFits], displsPixels_L[indexInputFits], MPI_INT, root, MPI_COMM_WORLD);		
+				
+				if(configCrontrolFile.SaveSynthesisAdjusted)
+					MPI_Gatherv(vSpectraAdjustedSplit_L[indexInputFits], sendcountsSpectro_L[indexInputFits][idProc], MPI_FLOAT, vSpectraAjustedTotal_L[indexInputFits], sendcountsSpectro_L[indexInputFits], displsSpectro_L[indexInputFits], MPI_FLOAT, root, MPI_COMM_WORLD);		
+				local_elapsed_execution = MPI_Wtime() - local_start_execution;
+				MPI_Reduce(&local_elapsed_execution, &vElapsed_execution[indexInputFits], 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD);
 
 			}
 		}
@@ -1251,12 +1260,12 @@ int main(int argc, char **argv)
 		if(idProc==root){
 			int indexInputFits = 0;
 			do{
-				MPI_Wait(&vMpiRequestInitModel[indexInputFits],MPI_STATUS_IGNORE);
+				/*MPI_Wait(&vMpiRequestInitModel[indexInputFits],MPI_STATUS_IGNORE);
 				MPI_Wait(&vMpiRequestChisqr[indexInputFits],MPI_STATUS_IGNORE);
 				MPI_Wait(&vMpiRequestIter[indexInputFits],MPI_STATUS_IGNORE);
 				MPI_Wait(&vMpiRequestReduceExecution[indexInputFits],MPI_STATUS_IGNORE);
 				if(configCrontrolFile.SaveSynthesisAdjusted)
-					MPI_Wait(&vMpiRequestSpectraAd[indexInputFits],MPI_STATUS_IGNORE);
+					MPI_Wait(&vMpiRequestSpectraAd[indexInputFits],MPI_STATUS_IGNORE);*/
 
 				double timeWriteImage;
 				clock_t t;
@@ -1351,7 +1360,7 @@ int main(int argc, char **argv)
 		free(vSpectraSplit_L);
 		free(vSpectraAdjustedSplit_L);
 		free(vSpectraAjustedTotal_L);
-		MPI_Barrier(MPI_COMM_WORLD);
+		//MPI_Barrier(MPI_COMM_WORLD);
 	}
 
 
