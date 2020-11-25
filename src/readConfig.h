@@ -24,3 +24,4 @@ char * get_basefilename (const char * fname);
 int checkInitialModel (Init_Model * INIT_MODEL);
 
 char * mySubString (char* input, int offset, int len, char* dest);
+

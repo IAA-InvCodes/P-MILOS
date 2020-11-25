@@ -524,6 +524,33 @@ int main(int argc, char **argv)
 	MPI_Barrier(MPI_COMM_WORLD);
 	// ROOT PROCESS READ IMAGE FROM FILE TO KNOW LIST OF FILES
 	if(idProc==root){
+		char auxObservedProfiles1 [256];
+		char auxObservedProfiles2 [256];
+		strcpy(auxObservedProfiles1,configCrontrolFile.ObservedProfiles);
+		strcpy(auxObservedProfiles2,configCrontrolFile.ObservedProfiles);
+		char * dirNameObservedProfiles = dirname(auxObservedProfiles1);
+		char * fileNameObservedProfiles = basename(auxObservedProfiles2);
+
+		char newObservedProfiles [256];
+		if(strcmp(dirNameObservedProfiles,".")!=0){
+			strcpy(newObservedProfiles,dirNameObservedProfiles);
+			strcat(newObservedProfiles,"/");
+			if(configCrontrolFile.outputPrefix[0]!='\0')
+				strcat(newObservedProfiles,configCrontrolFile.outputPrefix);
+			strcat(newObservedProfiles,fileNameObservedProfiles);
+		}
+		else{
+			if(configCrontrolFile.outputPrefix[0]!='\0'){
+				strcpy(newObservedProfiles,configCrontrolFile.outputPrefix);
+				strcat(newObservedProfiles,fileNameObservedProfiles);
+			}
+			else{
+				strcpy(newObservedProfiles,fileNameObservedProfiles);
+			}
+		}
+
+		
+
 		if(configCrontrolFile.loopInversion){
 			if(configCrontrolFile.invertDirectory){ // read all directory 
 
@@ -540,14 +567,29 @@ int main(int argc, char **argv)
         			perror("scandir");
 				else{
 					if(numFileDirectory>2){
-						numberOfFileSpectra=numFileDirectory-2;
+
+						numberOfFileSpectra=0;
+						for(i=0;i<numFileDirectory;i++){
+							char auxPathName[256];
+							strcpy(auxPathName,dname);
+							strcat(auxPathName,"/");
+							strcat(auxPathName,namelist[i]->d_name);
+							if(!isDirectory(auxPathName) && strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0 && strcmp(namelist[i]->d_name,"_mod")!=0){
+								numberOfFileSpectra++;
+							}
+						}
+						
 						vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						vOutputNameSynthesisAdjusted = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 						int numberFiles[numberOfFileSpectra];
 						int indexNumberFiles = 0;
-						for(i=2;i<numFileDirectory;i++){
-							if(strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0){
+						for(i=0;i<numFileDirectory;i++){
+							char auxPathName[256];
+							strcpy(auxPathName,dname);
+							strcat(auxPathName,"/");
+							strcat(auxPathName,namelist[i]->d_name);							
+							if(!isDirectory(auxPathName) && strcmp(namelist[i]->d_name,".")!=0 && strcmp(namelist[i]->d_name,"..")!=0 && strcmp(namelist[i]->d_name,"_mod")!=0){
 								char pathAux [256];
 								strcpy(pathAux,dname);
 								strcat(pathAux,"/");
@@ -560,6 +602,7 @@ int main(int argc, char **argv)
 									numberFiles[indexNumberFiles++] = numAux;
 								}
 							}
+							
 						}	
 
 						for(i=0;i<numberOfFileSpectra;i++){
@@ -573,22 +616,24 @@ int main(int argc, char **argv)
 							strcat(vInputFileSpectra[i].name, strIndex);
 							strcat(vInputFileSpectra[i].name, FITS_FILE);
 							// FILE NAME FOR OUTPUT MODELS 
-							strcpy(vOutputNameModels[i].name, configCrontrolFile.ObservedProfiles);
+							//strcpy(vOutputNameModels[i].name, configCrontrolFile.ObservedProfiles);
+							strcpy(vOutputNameModels[i].name,newObservedProfiles);
 							strcat(vOutputNameModels[i].name, strIndex);
 							strcat(vOutputNameModels[i].name, "_mod");
-							if(configCrontrolFile.outputPrefix[0]!='\0'){
+							/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 								strcat(vOutputNameModels[i].name, "_");
 								strcat(vOutputNameModels[i].name, configCrontrolFile.outputPrefix);
-							}
+							}*/
 							strcat(vOutputNameModels[i].name,FITS_FILE);
 							// FILE NAME FOR ADJUSTED SYNTHESIS 
-							strcpy(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.ObservedProfiles);
+							//strcpy(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.ObservedProfiles);
+							strcpy(vOutputNameSynthesisAdjusted[i].name,newObservedProfiles);
 							strcat(vOutputNameSynthesisAdjusted[i].name, strIndex);
 							strcat(vOutputNameSynthesisAdjusted[i].name, "_stokes");
-							if(configCrontrolFile.outputPrefix[0]!='\0'){
+							/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 								strcat(vOutputNameSynthesisAdjusted[i].name, "_");
 								strcat(vOutputNameSynthesisAdjusted[i].name, configCrontrolFile.outputPrefix);
-							}
+							}*/
 							strcat(vOutputNameSynthesisAdjusted[i].name,FITS_FILE);
 						}
 					}
@@ -616,13 +661,15 @@ int main(int argc, char **argv)
 						strcpy(pathAux,dname);
 						strcat(pathAux,"/");
 						strcat(pathAux,namelist[i]->d_name);
-						char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
-						if(subString!=NULL){
-							char numChar [80];
-							mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
-							int numAux = atoi(numChar);
-							if(numAux>maxNumber)
-								maxNumber  = numAux;
+						if(!isDirectory(pathAux)){
+							char * subString = strstr(pathAux,configCrontrolFile.ObservedProfiles);
+							if(subString!=NULL){
+								char numChar [80];
+								mySubString(get_basefilename(namelist[i]->d_name),strlen(bname),strlen(get_basefilename(namelist[i]->d_name))-strlen(bname),numChar);
+								int numAux = atoi(numChar);
+								if(numAux>maxNumber)
+									maxNumber  = numAux;
+							}
 						}
 					}
 				}
@@ -646,22 +693,24 @@ int main(int argc, char **argv)
 						strcat(vInputFileSpectra[indexName].name, strIndex);
 						strcat(vInputFileSpectra[indexName].name, FITS_FILE);
 						// FILE NAME FOR OUTPUT MODELS 
-						strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+						//strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+						strcpy(vOutputNameModels[indexName].name,newObservedProfiles);
 						strcat(vOutputNameModels[indexName].name, strIndex);
 						strcat(vOutputNameModels[indexName].name, "_mod");
-						if(configCrontrolFile.outputPrefix[0]!='\0'){
+						/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 							strcat(vOutputNameModels[indexName].name, "_");
 							strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
-						}
+						}*/
 						strcat(vOutputNameModels[indexName].name,FITS_FILE);
 						// FILE NAME FOR ADJUSTED SYNTHESIS 
-						strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+						//strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+						strcpy(vOutputNameSynthesisAdjusted[indexName].name, newObservedProfiles);
 						strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
 						strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
-						if(configCrontrolFile.outputPrefix[0]!='\0'){
+						/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 							strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
 							strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
-						}
+						}*/
 						strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
 						indexName++;	
 					}
@@ -690,6 +739,7 @@ int main(int argc, char **argv)
 			else
 			{
 				
+
 				numberOfFileSpectra = (configCrontrolFile.t2 - configCrontrolFile.t1)+1;
 				vInputFileSpectra = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
 				vOutputNameModels = (nameFile *) malloc(numberOfFileSpectra*sizeof(nameFile));
@@ -708,22 +758,24 @@ int main(int argc, char **argv)
 					strcat(vInputFileSpectra[indexName].name,strIndex);
 					strcat(vInputFileSpectra[indexName].name,FITS_FILE);
 					// FILE NAME FOR OUTPUT MODELS 
-					strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+					//strcpy(vOutputNameModels[indexName].name, configCrontrolFile.ObservedProfiles);
+					strcpy(vOutputNameModels[indexName].name, newObservedProfiles);
 					strcat(vOutputNameModels[indexName].name, strIndex);
 					strcat(vOutputNameModels[indexName].name, "_mod");
-					if(configCrontrolFile.outputPrefix[0]!='\0'){
+					/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 						strcat(vOutputNameModels[indexName].name, "_");
 						strcat(vOutputNameModels[indexName].name, configCrontrolFile.outputPrefix);
-					}
+					}*/
 					strcat(vOutputNameModels[indexName].name,FITS_FILE);
 					// FILE NAME FOR ADJUSTED SYNTHESIS 
-					strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+					//strcpy(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.ObservedProfiles);
+					strcpy(vOutputNameSynthesisAdjusted[indexName].name, newObservedProfiles);
 					strcat(vOutputNameSynthesisAdjusted[indexName].name, strIndex);
 					strcat(vOutputNameSynthesisAdjusted[indexName].name, "_stokes");
-					if(configCrontrolFile.outputPrefix[0]!='\0'){
+					/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 						strcat(vOutputNameSynthesisAdjusted[indexName].name, "_");
 						strcat(vOutputNameSynthesisAdjusted[indexName].name, configCrontrolFile.outputPrefix);
-					}
+					}*/
 					strcat(vOutputNameSynthesisAdjusted[indexName].name,FITS_FILE);
 					indexName++;
 				}
@@ -1978,7 +2030,7 @@ int main(int argc, char **argv)
 								//strcat(pathAux,dir->d_name);
 								strcat(pathAux,namelist[i]->d_name);
 								//stat(pathAux,&filestat);
-								if(!checkNameInLista(listFileNamesReaded,pathAux)){
+								if(!isDirectory(pathAux) && !checkNameInLista(listFileNamesReaded,pathAux)){
 									insert_in_linked_list(&listFileNamesReaded,pathAux);
 									fileNew = 1;
 									strcpy(newestFileName,pathAux);
@@ -2248,21 +2300,51 @@ int main(int argc, char **argv)
 						
 						char outputNameModelsLoop[256];
 						char outputNameSynthesisAdjustedLoop[256];
+						char auxObservedProfiles1 [256];
+						char auxObservedProfiles2 [256];
+						strcpy(auxObservedProfiles1,newestFileName);
+						strcpy(auxObservedProfiles2,newestFileName);
+						char * dirNameObservedProfiles = dirname(auxObservedProfiles1);
+						char * fileNameObservedProfiles = basename(auxObservedProfiles2);
+						if(strcmp(dirNameObservedProfiles,".")!=0){
+							strcpy(outputNameModelsLoop,dirNameObservedProfiles);
+							strcat(outputNameModelsLoop,"/");
+							strcpy(outputNameSynthesisAdjustedLoop,dirNameObservedProfiles);
+							strcat(outputNameSynthesisAdjustedLoop,"/");
+							if(configCrontrolFile.outputPrefix[0]!='\0'){
+								strcat(outputNameModelsLoop,configCrontrolFile.outputPrefix);
+								strcat(outputNameSynthesisAdjustedLoop,configCrontrolFile.outputPrefix);
+							}
+							strcat(outputNameModelsLoop,fileNameObservedProfiles);
+							strcat(outputNameSynthesisAdjustedLoop,fileNameObservedProfiles);
+						}
+						else{
+							if(configCrontrolFile.outputPrefix[0]!='\0'){
+								strcpy(outputNameModelsLoop,configCrontrolFile.outputPrefix);
+								strcat(outputNameModelsLoop,fileNameObservedProfiles);
+								strcpy(outputNameSynthesisAdjustedLoop,configCrontrolFile.outputPrefix);
+								strcat(outputNameSynthesisAdjustedLoop,fileNameObservedProfiles);								
+							}
+							else{
+								strcpy(outputNameModelsLoop,fileNameObservedProfiles);
+								strcpy(outputNameSynthesisAdjustedLoop,fileNameObservedProfiles);
+							}
+						}
 
-						strcpy(outputNameModelsLoop,get_basefilename(newestFileName));
+						//strcpy(outputNameModelsLoop,get_basefilename(newestFileName));
 						strcat(outputNameModelsLoop, "_mod");
-						if(configCrontrolFile.outputPrefix[0]!='\0'){
+						/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 							strcat(outputNameModelsLoop, "_");
 							strcat(outputNameModelsLoop, configCrontrolFile.outputPrefix);
-						}
+						}*/
 						strcat(outputNameModelsLoop,FITS_FILE);						
 
-						strcpy(outputNameSynthesisAdjustedLoop,get_basefilename(newestFileName));
+						//strcpy(outputNameSynthesisAdjustedLoop,get_basefilename(newestFileName));
 						strcat(outputNameSynthesisAdjustedLoop, "_stokes");
-						if(configCrontrolFile.outputPrefix[0]!='\0'){
+						/*if(configCrontrolFile.outputPrefix[0]!='\0'){
 							strcat(outputNameSynthesisAdjustedLoop, "_");
 							strcat(outputNameSynthesisAdjustedLoop, configCrontrolFile.outputPrefix);
-						}
+						}*/
 						strcat(outputNameSynthesisAdjustedLoop,FITS_FILE);
 
 						double timeWriteImage;

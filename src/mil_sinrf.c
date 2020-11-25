@@ -23,9 +23,9 @@ extern REAL *etain,*etaqn,*etaun,*etavn,*rhoqn,*rhoun,*rhovn;
 extern REAL *etai,*etaq,*etau,*etav,*rhoq,*rhou,*rhov;
 extern REAL *parcial1,*parcial2,*parcial3;
 extern REAL *nubB,*nupB,*nurB;
-REAL **uuGlobalInicial;
-REAL **HGlobalInicial;
-REAL **FGlobalInicial;
+extern REAL **uuGlobalInicial;
+extern REAL **HGlobalInicial;
+extern REAL **FGlobalInicial;
 extern int FGlobal,HGlobal,uuGlobal;
 extern PRECISION *GMAC; // VECTOR WITH GAUSSIAN CREATED FOR CONVOLUTION 
 extern PRECISION *G;

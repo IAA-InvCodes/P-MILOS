@@ -12,5 +12,10 @@
         "limits": "cpp",
         "streambuf": "cpp",
         "random": "c"
+    },
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#0C2968",
+        "titleBar.activeBackground": "#113991",
+        "titleBar.activeForeground": "#FBFCFF"
     }
 }
