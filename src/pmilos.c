@@ -986,6 +986,24 @@ int main(int argc, char **argv)
 
 	double * vElapsed_execution = calloc(numFilesPerProcessParallel,sizeof(double));
 	int indexInputFits;
+
+	if(numFilesPerProcess>=1){
+		vInputFileSpectraLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
+		vOutputNameModelsLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
+		vOutputNameSynthesisAdjustedLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
+		
+		if( root == idProc){
+			MPI_Scatterv(vInputFileSpectra, sendcountsNameInputFiles, displsNameInputFiles, mpiName, vInputFileSpectraLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
+			MPI_Scatterv(vOutputNameModels, sendcountsNameInputFiles, displsNameInputFiles, mpiName, vOutputNameModelsLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
+			MPI_Scatterv(vOutputNameSynthesisAdjusted, sendcountsNameInputFiles, displsNameInputFiles, mpiName, vOutputNameSynthesisAdjustedLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
+		}
+		else{
+			MPI_Scatterv(NULL, NULL,NULL, mpiName, vInputFileSpectraLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
+			MPI_Scatterv(NULL, NULL,NULL, mpiName, vOutputNameModelsLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
+			MPI_Scatterv(NULL, NULL,NULL, mpiName, vOutputNameSynthesisAdjustedLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+	}
 	if(numFilesPerProcessParallel){
 		// FIRST SCATTER ALL PIXELS BETWEEN ALL PROCESS
 		clock_t t = clock();
@@ -1339,7 +1357,7 @@ int main(int argc, char **argv)
 	if(numFilesPerProcess>=1){ // ONE IMAGE PER PROCESSOR
 		Init_Model *vModels;
 
-		vInputFileSpectraLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
+		/*vInputFileSpectraLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
 		vOutputNameModelsLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
 		vOutputNameSynthesisAdjustedLocal = (nameFile *) malloc(sendcountsNameInputFiles[idProc]*sizeof(nameFile));
 		
@@ -1353,7 +1371,7 @@ int main(int argc, char **argv)
 			MPI_Scatterv(NULL, NULL,NULL, mpiName, vOutputNameModelsLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
 			MPI_Scatterv(NULL, NULL,NULL, mpiName, vOutputNameSynthesisAdjustedLocal, sendcountsNameInputFiles[idProc], mpiName, root, MPI_COMM_WORLD);
 		}
-		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD);*/
 
 		//  PROCESS INVERSION OVER EACH FILE ON THE CURRENT PROCESSOR 
 		int indexInputFits;
