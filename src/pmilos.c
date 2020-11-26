@@ -532,7 +532,14 @@ int main(int argc, char **argv)
 		char * fileNameObservedProfiles = basename(auxObservedProfiles2);
 
 		char newObservedProfiles [256];
-		if(strcmp(dirNameObservedProfiles,".")!=0){
+		if(configCrontrolFile.outputPrefix[0]!='\0'){
+			strcpy(newObservedProfiles,configCrontrolFile.outputPrefix);
+			strcat(newObservedProfiles,fileNameObservedProfiles);
+		}
+		else{
+			strcpy(newObservedProfiles,fileNameObservedProfiles);
+		}
+		/*if(strcmp(dirNameObservedProfiles,".")!=0){
 			strcpy(newObservedProfiles,dirNameObservedProfiles);
 			strcat(newObservedProfiles,"/");
 			if(configCrontrolFile.outputPrefix[0]!='\0')
@@ -547,7 +554,7 @@ int main(int argc, char **argv)
 			else{
 				strcpy(newObservedProfiles,fileNameObservedProfiles);
 			}
-		}
+		}*/
 
 		
 
@@ -2306,7 +2313,7 @@ int main(int argc, char **argv)
 						strcpy(auxObservedProfiles2,newestFileName);
 						char * dirNameObservedProfiles = dirname(auxObservedProfiles1);
 						char * fileNameObservedProfiles = basename(auxObservedProfiles2);
-						if(strcmp(dirNameObservedProfiles,".")!=0){
+						/*if(strcmp(dirNameObservedProfiles,".")!=0){
 							strcpy(outputNameModelsLoop,dirNameObservedProfiles);
 							strcat(outputNameModelsLoop,"/");
 							strcpy(outputNameSynthesisAdjustedLoop,dirNameObservedProfiles);
@@ -2329,6 +2336,17 @@ int main(int argc, char **argv)
 								strcpy(outputNameModelsLoop,fileNameObservedProfiles);
 								strcpy(outputNameSynthesisAdjustedLoop,fileNameObservedProfiles);
 							}
+						}*/
+
+						if(configCrontrolFile.outputPrefix[0]!='\0'){
+							strcpy(outputNameModelsLoop,configCrontrolFile.outputPrefix);
+							strcat(outputNameModelsLoop,fileNameObservedProfiles);
+							strcpy(outputNameSynthesisAdjustedLoop,configCrontrolFile.outputPrefix);
+							strcat(outputNameSynthesisAdjustedLoop,fileNameObservedProfiles);								
+						}
+						else{
+							strcpy(outputNameModelsLoop,fileNameObservedProfiles);
+							strcpy(outputNameSynthesisAdjustedLoop,fileNameObservedProfiles);
 						}
 
 						//strcpy(outputNameModelsLoop,get_basefilename(newestFileName));
