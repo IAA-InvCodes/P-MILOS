@@ -539,6 +539,8 @@ int main(int argc, char **argv)
 		else{
 			strcpy(newObservedProfiles,fileNameObservedProfiles);
 		}
+		printf("\n new observed profiles %s\n",newObservedProfiles);
+		
 		/*if(strcmp(dirNameObservedProfiles,".")!=0){
 			strcpy(newObservedProfiles,dirNameObservedProfiles);
 			strcat(newObservedProfiles,"/");
