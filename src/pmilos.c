@@ -700,7 +700,7 @@ int main(int argc, char **argv)
 						if(i>=0 && i<10){
 							sprintf(strIndex, "00%d", i);
 						}
-						else if(i>=0 && i<10){
+						else if(i>=10 && i<100){
 							sprintf(strIndex, "0%d", i);
 						}
 						else 
@@ -768,7 +768,7 @@ int main(int argc, char **argv)
 					if(i>=0 && i<10){
 						sprintf(strIndex, "00%d", i);
 					}
-					else if(i>=0 && i<10){
+					else if(i>=10 && i<100){
 						sprintf(strIndex, "0%d", i);
 					}
 					else 
