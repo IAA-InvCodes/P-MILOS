@@ -616,9 +616,13 @@ int main(int argc, char **argv)
 						for(i=0;i<numberOfFileSpectra;i++){
 							char strIndex[5];
 							if(numberFiles[i]>=0 && numberFiles[i]<10)
+								sprintf(strIndex, "00%d", numberFiles[i]);
+							else if(numberFiles[i]>=10 && numberFiles[i]<100){
 								sprintf(strIndex, "0%d", numberFiles[i]);
-							else
-								sprintf(strIndex, "%d", numberFiles[i]);								
+							}
+							else{
+								sprintf(strIndex, "%d", numberFiles[i]);
+							}
 							
 							strcpy(vInputFileSpectra[i].name, configCrontrolFile.ObservedProfiles);
 							strcat(vInputFileSpectra[i].name, strIndex);
@@ -693,9 +697,13 @@ int main(int argc, char **argv)
 					int indexName =0;
 					for(i=configCrontrolFile.t1;i<=maxNumber;i++){
 						char strIndex[5];
-						if(i>=0 && i<10)
+						if(i>=0 && i<10){
+							sprintf(strIndex, "00%d", i);
+						}
+						else if(i>=0 && i<10){
 							sprintf(strIndex, "0%d", i);
-						else
+						}
+						else 
 							sprintf(strIndex, "%d", i);
 						strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
 						strcat(vInputFileSpectra[indexName].name, strIndex);
@@ -757,9 +765,13 @@ int main(int argc, char **argv)
 
 				for(i=configCrontrolFile.t1;i<=configCrontrolFile.t2;i++){
 					char strIndex[5];
-					if(i>=0 && i<10)
+					if(i>=0 && i<10){
+						sprintf(strIndex, "00%d", i);
+					}
+					else if(i>=0 && i<10){
 						sprintf(strIndex, "0%d", i);
-					else
+					}
+					else 
 						sprintf(strIndex, "%d", i);
 					// FILE NAMES FOR INPUT IMAGES
 					strcpy(vInputFileSpectra[indexName].name, configCrontrolFile.ObservedProfiles);
