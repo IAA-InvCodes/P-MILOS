@@ -2,7 +2,7 @@
 
 Authors: Manuel Cabrera, Juan P. Cobos, Luis Bellot Rubio (IAA-CSIC).
 
-For questions, contact Luis Bellot (lbellot@iaa.es)
+For questions, please contact Luis Bellot (lbellot@iaa.es)
 
 This development has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 824135 (SOLARNET).
 
@@ -53,22 +53,22 @@ sudo apt-get update -y
 sudo apt-get install libgsl*
 ```
 
-### Input/output files (SIR-like format)
+### Input/output files
 
 #### Profile files (.per)
 
-Files with extension .per contain a set of Stokes profiles. They are used as input when inverting one pixel and as output when syntehsizing the profiles from a  given model atmosphere. They have the same format as SIR profile files. 
+ASCII files with extension .per contain a set of Stokes profiles. They have the same format as SIR profile files. They are used as input when inverting one pixel and as output when synthesizing the profiles from a given model atmosphere. 
 
-They have 6 columns:
+Profile files have one row per wavelength position and 6 columns containing:
 
-* The first column gives the index of the spectral line. It will be searched for in the atomic parameter file. 
-* The second column is the wavelength offset with respect to the central wavelength (in mA). The last four columns give the values of Stokes I, Q, U and V.
-* Value of I
-* Value of Q
-* Value of U
-* Value of V
+* The index of the spectral line in the atomic parameter file
+* The wavelength offset with respect to the central wavelength (in mA) 
+* The value of Stokes I
+* The value of Stokes Q
+* The value of Stokes U
+* The value of Stokes V
 
-This is an example of one line: 
+This is an example of a profile file containing the Stokes parameters of spectral line number 1 in 30 wavelength positions, from -350 to + 665 mA:
 
 ```
 1	-350.000000	9.836711e-01	6.600326e-04	4.649822e-04	-3.694108e-03
@@ -104,18 +104,18 @@ This is an example of one line:
 ```
 
 
-#### .fits 
+#### Profile files (.fits) 
 
-* Spectro 
 
-The **fits** files used for pass to the program the spectro image must contain four dimensions: *number_rows*X*number_cols*number_of_wavelengths*X*number_stokes*X* . The order or these parameters cannot change and for identify each one the header of **fits** file must contain the type of each dimension with this correspondence:
+P-MILOS can be fed with data cubes containing the Stokes profiles observed over the whole field of view. This is the usual way of inverting data from narrow-band filter imagers such as CRISP. 
 
-  - Number of Rows: include CTYPE with the value **'HPLN-TAN'**
-  - Number of Cols: include CTYPE with the value **'HPLT-TAN'**
-  - Number of Wavelenghts: include CTYPE with the value **'WAVE-GRI'**
-  - Number of Stokes: include CTYPE with the value **'STOKES  '**
+The data cubes must be written in FITS format, with one cube containing one spectral scan. They must have four dimensions corresponding to the number of rows, the number of columns, the number of observed wavelengths, and the number of Stokes parameters. These dimensions can appear in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4. P-MILOS follows the SOLARNET standard:
 
-An example can be this:
+  -  **HPLN-TAN** indicates a spatial coordinate dimension
+  - **WAVE-GRI** indicates a wavelength dimension
+  - **STOKES  '** indicates the Stokes parameter dimension
+
+The following example corresponds to a data cube with the x spatial coordinate in the first dimension, the y coordinate in the second dimension, wavelength in the third dimension and the polarization in the fourth dimension. 
 
 ```
 CTYPE1  = 'HPLN-TAN' 
@@ -123,6 +123,7 @@ CTYPE2  = 'HPLT-TAN'
 CTYPE3  = 'WAVE-GRI'
 CTYPE4  = 'STOKES  ' 
 ```
+
 
 * Wavelengths
 
