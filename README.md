@@ -8,9 +8,9 @@ This work has received funding from the European Union's Horizon 2020 research a
 ## Description 
 
 
-This repository contains P-MILOS, a parallel implementation of the MILOS inversion code written in C.  P-MILOS is capable of inverting full Stokes spectropolarimetric data cubes in real time using one-component Milne-Eddington model atmospheres. PMILOS is very fast, reaching speeds of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications. These numbers refer to the inversion of the 4 Stokes profiles sampled at 30 wavelength points, convolved wih the instrumental PSF, assuming 9 free parameters, on a AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
+This repository contains P-MILOS, a parallel Milne-Eddington inversion code written in C.  P-MILOS is capable of inverting full Stokes spectropolarimetric measurements of photospheric lines in real time. PMILOS is very fast, reaching speeds of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications. These numbers refer to the inversion of all four Stokes profiles of the Fe I 617.3 nm line sampled at 30 wavelength positions, convolved wih the instrumental PSF, assuming 9 free parameters, on an AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
 
-In this page we provide a quick overview of how to install the required libraries, how to compile and execute the code, and the input/output files. An extended user manual can be found [here](p-milos_manual.pdf). 
+In this page we provide a quick overview of the required libraries, how to compile and execute the code, and the input/output files needed by the code. An extended user manual of P-MILOS can be found [here](p-milos_manual.pdf). 
 
 
 ## Requeriments 
@@ -105,12 +105,12 @@ It is also possible to run the code on different machines simultaneously using l
 ```
 mpiexec -f hostnames -np 600 ./pmilos run/pmilos.minit
 ```
-Note that proper ssh keys must be installed on every machine, so that they can establish connections among each other without prompting the user for a password.  
+Note that proper ssh keys must be installed on every machine, so that connections can be established between them without typing the user's password.  For more details, refer to the P-MILOS manual.
 
 
 ## Input/output files
 
-In the following we give a very brief description of the input files used to provide the code with the observed profiles, the wavelength grid and the initial model atmosphere. A full description can be found in the manual. 
+In the following we give a very brief description of the input files rquired by the code. They are used to store the observed profiles, the wavelength grid and the initial model atmosphere. A full description can be found in the P-MILOS manual. 
 
 #### Profile files (.per)
 
