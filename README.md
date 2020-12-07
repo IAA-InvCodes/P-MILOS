@@ -1,16 +1,18 @@
 # P-MILOS
 
-Authors: Manuel Cabrera, Juan P. Cobos, Luis Bellot Rubio (IAA-CSIC). For questions, please contact Luis Bellot (lbellot@iaa.es)
+Authors: Manuel Cabrera, Juan P. Cobos, Luis Bellot Rubio (IAA-CSIC). 
 
 This work has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 824135 (SOLARNET).
 
+For questions, please contact Luis Bellot (lbellot@iaa.es)
 
-## Description 
+
+## Introduction 
 
 
-This repository contains P-MILOS, a parallel Milne-Eddington inversion code written in C.  P-MILOS is capable of inverting full Stokes spectropolarimetric measurements of photospheric lines in real time. PMILOS is very fast, reaching speeds of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications. These numbers refer to the inversion of all four Stokes profiles of the Fe I 617.3 nm line sampled at 30 wavelength positions, convolved wih the instrumental PSF, assuming 9 free parameters, on an AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
+This repository contains P-MILOS, a state-of-the-art parallel Milne-Eddington inversion code written in C.  The code is capable of inverting full Stokes spectropolarimetric measurements of photospheric lines in real time using one-component Milne-Eddington atmospheres. P-MILOS is very fast, reaching speeds of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications (multiple cores). These numbers refer to the inversion of the four Stokes profiles of a spectral line sampled at 30 wavelength positions, convolved wih the instrumental PSF, assuming 9 free parameters, on an AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
 
-In this page we provide a quick overview of the required libraries, how to compile and execute the code, and the input/output files needed by the code. An extended user manual of P-MILOS can be found [here](p-milos_manual.pdf). 
+In this page we explain how to install and run the code. We also provide a brief overview of the input/output files. A complete user manual can be found [here](p-milos_manual.pdf). 
 
 
 ## Requeriments 
