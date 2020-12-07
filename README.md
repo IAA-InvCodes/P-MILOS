@@ -9,44 +9,46 @@ This development has received funding from the European Union's Horizon 2020 res
 ## Description 
 
 
-This repository contains P-MILOS, a parallel implementacion of the MILOS inversion code using OpenMPI.  P-MILOS is capable of inverting full Stokes spectropolarimetric data cubes in real time, providing the one-component Milne-Eddington model atmosphere that best fit the observations. In this page we provide a quick overview about how to install the required libraries, how to compile the code, the input/output files, and how to execute the code sequentially and in parallel. An extended user manual can be found [here](p-milos_manual.pdf). 
+This repository contains P-MILOS, a parallel implementation of the MILOS inversion code written in C and usign OpenMPI.  P-MILOS is capable of inverting full Stokes spectropolarimetric data cubes in real time, providing one-component Milne-Eddington model atmospheres that fit the observations. It is very fast, reaching a speed of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications. These numbers refer to the inversion of the 4 Stokes profiles sampled at 30 wavelength points, convolved wih the instrumental PSF, assuming 9 free parameters, on a AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
+
+In this page we provide a quick overview of how to install the required libraries, how to compile and execute the code, and the input/output files. An extended user manual can be found [here](p-milos_manual.pdf). 
 
 
 ## Requeriments 
 
 ### Libraries
 
-The following programs and libraries must be installed in your system to run P-MILOS: 
+To run P-MILOS, the following libraries must be installed in your system: 
 
-- [OpenMPI](https://www.open-mpi.org/) (Oldest version tested 1.4-4)
-- [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/) (Oldest version tested 3.3.4.0)
-- [FFTW](http://www.fftw.org/)  (Oldest version tested 3.3.3)
-- [GSL](https://www.gnu.org/software/gsl/) (Oldest version tested 1.13-3)
+- [OpenMPI](https://www.open-mpi.org/) (oldest version tested 1.4-4)
+- [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/) (oldest version tested 3.3.4.0)
+- [FFTW](http://www.fftw.org/)  (oldest version tested 3.3.3)
+- [GSL](https://www.gnu.org/software/gsl/) (oldest version tested 1.13-3)
   
-There are many different ways to install the libraries depending on your operating system.  On Ubuntu 18.04, these are the commands we used. 
+  There are many different ways to install the libraries depending on your operating system.  In Ubuntu 18.04, these are the commands we used: 
 
-OpenMPI: 
+OpenMPI 
 
 ```
 sudo apt-get update -y 
 sudo apt-get install openmpi-bin
 ```
 
-CFITSIO:
+CFITSIO
 
 ```
 sudo apt-get update -y 
 sudo apt-get install libcfitsio*
 ```
 
-FFTW:
+FFTW
 
 ```
 sudo apt-get update -y 
 sudo apt-get install libfftw3-*
 ```
 
-GSL:
+GSL
 
 ```
 sudo apt-get update -y 
@@ -55,9 +57,9 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code must be compiled on the target machine. To do this, you must use the command 'make' from the same directory where the source code is located. Thus, the first thing to do is change to the directory P-MILOS. The code is compiled in single precision by default, but you can use double precision by specifying the following variable 'use_double=yes' when you run make.
+The code must be compiled on the target machine. To do this, you must use the command 'make' from the directory where the source code is located. Thus, the first thing to do is to locate the directory P-MILOS. The code is compiled in single precision by default, but double precision can be used by specifying the variable 'use_double=yes' when the command make is run. Note that double precision does not bring any improvement in the accuracy or speed of the inversions, and should be reserved to testing the code only.
 
-The other options available are used to choose the version of the code to be compiled (sequential or parallel) and whether or not to clean up the generated object code and executables:
+Other options are available to choose the version of the code to be compiled (sequential or parallel) and whether or not to clean the generated objects and executables:
 
 * Compile and create executable **milos** 
 ```
@@ -79,41 +81,43 @@ make clean
 ## Execution
 
 
-### milos
+### Sequential code: milos
 
-The sequential program must be controlled with a configuration file of type **.mtrol** . The format is nearly the same as that of the corresponding SIR file. Here, the extension "mtrol" stands for Milne-Eddington control file. You can find an example of this type of file [pmilos.mtrol](run/pmilos.mtrol) in the run directory. We refer you to the PDF documentation for a detailed description of all the parameters it contains. 
+The inversion process is controlled with a  **.mtrol** file which specifies the inversion conditions (observed profiles, atomic parameter file, stray-light profile file, PSF file, wavelength file, initial model atmosphere, parameters to be inverted, maximum number of iterations, etc). The format is nearly the same as that of the **.trol** files used by SIR. Here, the extension **mtrol** stands for "Milne-Eddington control file". You can find an example in the run directory [pmilos.mtrol](run/pmilos.mtrol). The user manual provides a detailed description of this file and its various parameters.
 
-The program must be executed by passing the control file as a parameter:
+The sequential code must be executed by passing the control file as a parameter:
 
 ```
 ./milos run/pmilos.mtrol
 ```
 
-### pmilos
+### Parallel code: pmilos
 
-To run the parallel code we need both an **.mtrol** file and an **.init** file, much in the same way as in the case of SIR parallel. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
+To run the parallel code we need both an **.mtrol** file and an **.init** file,  as in the case of the SIR-parallel code. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
 
-The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one should specify the number of processors to be used with the *-np* option, as in the following example:
+The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one can specify the number of processors to be used with the *-np* option, as in the following example:
 
 ```
 mpiexec -np 16 ./pmilos run/pmilos.minit
 ```
 
-It is also possible to run the code on different machines simultaneously using local Ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*, and the code run as follows:
+It is also possible to run the code on different machines simultaneously using local ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
 
 ```
 mpiexec -f hostnames -np 600 ./pmilos run/pmilos.minit
 ```
-Note that ssh keys must be installed on every machine, so that they can establish connections among each other without prompting the user for a password.  
+Note that proper ssh keys must be installed on every machine, so that they can establish connections among each other without prompting the user for a password.  
 
 
 ## Input/output files
 
+In the following we give a very brief description of the input files used to provide the code with the observed profiles, the wavelength grid and the initial model atmosphere. A full description can be found in the manual. 
+
 #### Profile files (.per)
 
-ASCII files with extension .per contain a set of Stokes profiles. They have the same format as SIR profile files. They are used as input when inverting one pixel and as output when synthesizing the profiles from a given model atmosphere. 
+The Stokes profiles observed in one pixel are stored in ASCII files with extension **.per**. They have the same format as SIR profile files. They are used as input when inverting one pixel and as output when synthesizing the profiles from a given model atmosphere. 
 
-Profile files have one row per wavelength position and 6 columns containing:
+Profile files have one row per wavelength sample and 6 columns containing:
 
 * The index of the spectral line in the atomic parameter file
 * The wavelength offset with respect to the central wavelength (in mA) 
@@ -122,7 +126,7 @@ Profile files have one row per wavelength position and 6 columns containing:
 * The value of Stokes U
 * The value of Stokes V
 
-This is an example of a profile file containing the Stokes parameters of spectral line number 1 in 30 wavelength positions, from -350 to + 665 mA:
+This is an example of a file containing the Stokes parameters of spectral line number 1 in 30 wavelength positions, from -350 to + 665 mA:
 
 ```
 1	-350.000000	9.836711e-01	6.600326e-04	4.649822e-04	-3.694108e-03
@@ -161,15 +165,15 @@ This is an example of a profile file containing the Stokes parameters of spectra
 #### Profile files (.fits) 
 
 
-P-MILOS can be fed with data cubes containing the Stokes profiles observed over the whole field of view. This is the usual way of inverting data from narrow-band filter imagers such as CRISP. 
+P-MILOS can be fed with data cubes containing the Stokes profiles observed over the entire field of view. This is the usual way to invert measurements from narrow-band filter imagers such as CRISP. 
 
-The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the number of rows, the number of columns, the number of observed wavelengths, and the number of Stokes parameters. These dimensions can appear in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4. P-MILOS follows the SOLARNET standard:
+The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The array thus has (n_x, n_y, n_lambdas, n_stokes) elements. The four dimensions can appear in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4, according to the SOLARNET standard:
 
   -  **HPLN-TAN** indicates a spatial coordinate dimension
-  - **WAVE-GRI** indicates a wavelength dimension
-  - **STOKES  '** indicates the Stokes parameter dimension
+  - **WAVE-GRI** indicates the wavelength axis
+  - **STOKES  '** indicates the Stokes parameter axis
 
-The following example corresponds to a data cube with the x-spatial coordinate in the first dimension, the y-coordinate in the second dimension, the wavelength in the third dimension and the polarization in the fourth dimension. 
+The following example corresponds to a data cube with the x-spatial coordinate in the first dimension, the y-spatial coordinate in the second dimension, the wavelength axis in the third dimension and the polarization axis in the fourth dimension. 
 
 ```
 CTYPE1  = 'HPLN-TAN' 
@@ -178,12 +182,14 @@ CTYPE3  = 'WAVE-GRI'
 CTYPE4  = 'STOKES  ' 
 ```
 
+When the FITS data cube does not have a header, the array is assumed to be ordered as (n_x,n_y,n_lambdas,n_stokes).
 
-#### Wavelength grid (.grid)
+
+#### Wavelength grid file (.grid)
 
 The wavelength grid file specifies the spectral line and the wavelength positions in which it was observed (inversion mode), or the wavelength positions in which the profiles must be calculated (synthesis mode).  The line is identified by means of an index that must be present in the atomic parameter file. The wavelength range is given using three numbers: the initial wavelength, the wavelength step, and the final wavelength (all in mA). 
 
-The wavelength grid file is an ASCII file and has the same format as the equivalent SIR file. Here is an example:
+This file is written in ASCII and has the same format as the **.grid** SIR files. Here is an example:
 
 ```
 Line indices            :   Initial lambda     Step     Final lambda
@@ -191,14 +197,14 @@ Line indices            :   Initial lambda     Step     Final lambda
 -----------------------------------------------------------------------
 1                       :        -350,            35,           665
 ```
-This example corresponds to the file  [malla.grid](run/malla.grid). 
+This example corresponds to the file [malla.grid](run/malla.grid) in the *run* directory.
 
 
-#### Wavelength grid (.fits)
+#### Wavelength grid file (.fits)
 
-Different pixels in the observed field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). In that case, the wavelength grids can be specified by means of 4-dimension array written in FITS format. The four dimensions are (line index, x,y, lambda). The first dimension indicates the line index in the atomic parameter file. For each pixel (x,y), the array of actual observed wavelengths must be given. 
+Different pixels in the field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). In that case, the wavelength grids can be specified by means of 4-dimension array written in FITS format. The four dimensions are (line_index, x,y, lambda). The first dimension indicates the line index in the atomic parameter file. For each pixel (x,y), the array of actual observed wavelengths must be given. 
 
-If all pixels use the same wavelength grid, the FITS file should contain a single, 2D array with dimensions (line index, wavelength).  The first dimension contains the line index and the second the array of observed wavelengths.
+If all pixels use the same wavelength grid, the FITS file should contain a single, 2D array of (1, n_lambdas) elements. The first dimension contains the observed line index (only one line can be inverted at a time with P-MILOS) and the second the array of observed wavelengths.
 
 #### Model atmosphere file (.mod)
 
@@ -206,29 +212,29 @@ This is an ASCII file containing the parameters of a Milne-Eddington model atmos
 
 1. To specify the model atmosphere in a spectral synthesis  
 2. To specify the initial model atmosphere in an inversion 
-3. To store the best-fit model atmosphere resulting from the inversion of a profile stored in a .per file. 
+3. To store the best-fit model atmosphere resulting from the inversion of a profile provided as a .per file. 
 
-The format of a model atmosphere file is as follows:
+The following is an example of a model atmosphere file:
 
 ```
-eta_0:          14
-magnetic field: 1200
-LOS velocity:   0
-Doppler width:  0.07
-damping:        0.05
-gamma:          130
-phi:            25
-S_0:            0.25
-S_1:            0.75
-v_mac:          1
-filling factor: 1
+eta_0                :14.
+magnetic field [G]   :1200.
+LOS velocity [km/s]  :0.5
+Doppler width [A]    :0.07
+damping              :0.05
+gamma [deg]          :130.
+phi   [deg]          :25.
+S_0                  :0.25
+S_1                  :0.75
+v_mac [km/s]         :1.
+filling factor       :1
 ```
-This file is different from the equivalent SIR file because Milne-Eddington atmospheres can be described with only 11 parameters. The units of the parameters are: G (magnetic field strength), km/s (LOS velocity and v_mac), and degrees (inclination gamma and azimuth phi). The rest of parameters are unitless 
+This file is different from the equivalent SIR file because Milne-Eddington atmospheres can be described with only 11 parameters. The units of the parameters are: Gauss (magnetic field strength), km/s (LOS velocity and v_mac), Angstrom (Doppler width), and degrees (inclination gamma and azimuth phi). The rest of parameters do not have units. 
 
 
 #### Model atmospheres (.fits) 
 
-When full data cubes are inverted, the resulting model atmospheres are stored in FITS format as 3-dimension arrays with (n_rows, n_columns, 13) elements. The first two dimensions give the spatial coordinate of the pixel (x,y). The third dimension  contains the eleven parameters of the model, plus the number of interations used by the code to find the solution and the chisqr-value of the fit. Therefore, the 13 elements stored in the third dimension of the file will be: 
+When full data cubes are inverted, the resulting model atmospheres are stored in FITS format as 3-dimension arrays with (n_x, n_y, 13) elements. The first two dimensions give the spatial coordinates (x,y). The third dimension  contains the eleven parameters of the model, plus the number of interations used by the code to find the solution and the chisqr-value of the fit. Therefore, the 13 elements stored in the third dimension are: 
 
   1. eta0 = line-to-continuum absorption coefficient ratio         
   2. B = magnetic field strength       [Gauss]
@@ -244,52 +250,3 @@ When full data cubes are inverted, the resulting model atmospheres are stored in
   12. Number of iterations required 
   13. chisqr value of the fit
 
-
-
-
-
-## Instalation
-
-In order to deploy the application, it must first be compiled on the target machine. To do this, you must use the command line option 'make' from same directory where the source code is located. So, the first thing is to position ourselves in the P-MILOS. The code is compiled by default using single precision, but if you want you can compile the code using double precision by specifying the following variable 'use_double=yes' when you run make.
-
-The other options are to choose which version of the code to compile (sequential or parallel), or whether to clean up the generated object code and executables. 
-
-* Compile and create executable **milos** 
-```
-make milos
-```
-* Compile and create executable **pmilos**
-```
-make pmilos
-```
-* Compile and create both: **milos** and **pmilos**
-```
-make 
-```
-* Clean objects files and executable files. 
-```
-make clean
-```
-
-## Deployment
-
-
-### milos
-
-The sequential program must be controlled with a configuration file of type **.mtrol** . Inside the run folder, you can find an example of this type of file [pmilos.mtrol](run/pmilos.mtrol). We refer you to the pdf documentation to know in detail how each parameter works. 
-
-The program must be executed by passing the configuration file as a parameter:
-
-```
-./milos run/pmilos.mtrol
-```
-
-### pmilos
-
-For the parallel program the execution is a bit different. In this case the file that we must pass as a parameter to the executable will be of type **.init** . As for the **.trol** file, we leave you an example inside the run folder [pmilos.minit](run/pmilos.minit)
-
-The program must be executed using the command of **mpirun** or **mpiexec**. a simple use of parallelization on the local machine, would be to specify the number of processes with the *-np* option:
-
-```
-mpiexec -np 12 ./pmilos run/pmilos.minit
-```
