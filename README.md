@@ -109,13 +109,13 @@ This is an example of a profile file containing the Stokes parameters of spectra
 
 P-MILOS can be fed with data cubes containing the Stokes profiles observed over the whole field of view. This is the usual way of inverting data from narrow-band filter imagers such as CRISP. 
 
-The data cubes must be written in FITS format, with one cube containing one spectral scan. They must have four dimensions corresponding to the number of rows, the number of columns, the number of observed wavelengths, and the number of Stokes parameters. These dimensions can appear in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4. P-MILOS follows the SOLARNET standard:
+The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the number of rows, the number of columns, the number of observed wavelengths, and the number of Stokes parameters. These dimensions can appear in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4. P-MILOS follows the SOLARNET standard:
 
   -  **HPLN-TAN** indicates a spatial coordinate dimension
   - **WAVE-GRI** indicates a wavelength dimension
   - **STOKES  '** indicates the Stokes parameter dimension
 
-The following example corresponds to a data cube with the x spatial coordinate in the first dimension, the y coordinate in the second dimension, wavelength in the third dimension and the polarization in the fourth dimension. 
+The following example corresponds to a data cube with the x-spatial coordinate in the first dimension, the y-coordinate in the second dimension, the wavelength in the third dimension and the polarization in the fourth dimension. 
 
 ```
 CTYPE1  = 'HPLN-TAN' 
@@ -125,7 +125,27 @@ CTYPE4  = 'STOKES  '
 ```
 
 
-* Wavelengths
+#### Wavelength grid (.grid)
+
+This file specifies the spectral line and the wavelength positions in which it was observed (in inversion mode), or the wavelength positions in which the profiles must be calculated (in synthesis mode).  The line is specified with an index that must be present in the atomic parameter file. The wavelength range is specified with three numbers: the initial wavelength, the wavelength step, and the final wavelength (all in mA). 
+
+The wavelength grid file is an ASCII file and has the same format as the equivalent SIR file. Here is an example:
+
+```
+Line indices            :   Initial lambda     Step     Final lambda
+(in this order)                    (mA)          (mA)         (mA) 
+-----------------------------------------------------------------------
+1                       :        -350,            35,           665
+```
+This file can be found in  [malla.grid](run/malla.grid). 
+
+
+
+
+
+
+
+#### Wavelength grid (.fits)
 
 If the observed spectra of all pixels use the same wavelength grid, the FITS file must contain a single, 2D array with dimension number of wavelength-points×2. The first column must contain the index with which the spectral line is identified according to the atomic parameter file.
 
