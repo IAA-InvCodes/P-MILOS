@@ -26,7 +26,7 @@ To run P-MILOS, the following libraries must be installed in your system:
 - [FFTW](http://www.fftw.org/)  (oldest version tested 3.3.3)
 - [GSL](https://www.gnu.org/software/gsl/) (oldest version tested 1.13-3)
   
-  There are many different ways to install the libraries depending on your operating system.  In Ubuntu 18.04, these are the commands we used: 
+There are many different ways to install the libraries depending on the operating system.  In Ubuntu 18.04, we used the following commands:  
 
 OpenMPI 
 
@@ -58,11 +58,13 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code must be compiled on the target machine. To do this, you must use the command 'make' from the directory where the source code is located. Thus, the first thing to do is to locate the directory P-MILOS. The code is compiled in single precision by default, but double precision can be used by specifying the variable 'use_double=yes' when the command make is run. Note that double precision does not bring any improvement in the accuracy or speed of the inversions, and should be reserved to testing the code only.
+The code needs to be compiled on the target machine. To do this, you must run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum speed possible. This is particularly important for real-time inversions. 
 
-Other options are available to choose the version of the code to be compiled (sequential or parallel) and whether or not to clean the generated objects and executables:
+The code is compiled in single precision by default, but double precision can be enforced by adding the variable 'use_double=yes' to the make command.  Note that double precision does not bring any improvement in the accuracy or speed of the inversions, and should be reserved for testing purposes only.
 
-* Compile and create executable **milos** 
+Other options are available to compile the two versions of the code and to clean the generated objects and executables: 
+
+* Compile and create executable **milos**  
 ```
 make milos
 ```
@@ -74,7 +76,7 @@ make pmilos
 ```
 make 
 ```
-* Clean objects files and executable files. 
+* Clean objects files and executable files
 ```
 make clean
 ```
@@ -94,7 +96,7 @@ The sequential code must be executed by passing the control file as a parameter:
 
 ### Parallel code: pmilos
 
-To run the parallel code we need both an **.mtrol** file and an **.init** file,  as in the case of the SIR-parallel code. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
+To run the parallel code we need both an **.mtrol** file and an **.init** file,  as in the case of SIR-PARALLEL. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
 
 The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one can specify the number of processors to be used with the *-np* option, as in the following example:
 
