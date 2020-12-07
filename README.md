@@ -53,7 +53,61 @@ sudo apt-get update -y
 sudo apt-get install libgsl*
 ```
 
-### Input/output files
+## Compilation
+
+The code must be compiled on the target machine. To do this, you must use the command 'make' from the same directory where the source code is located. Thus, the first thing to do is change to the directory P-MILOS. The code is compiled in single precision by default, but you can use double precision by specifying the following variable 'use_double=yes' when you run make.
+
+The other options available are used to choose the version of the code to be compiled (sequential or parallel) and whether or not to clean up the generated object code and executables:
+
+* Compile and create executable **milos** 
+```
+make milos
+```
+* Compile and create executable **pmilos**
+```
+make pmilos
+```
+* Compile and create both: **milos** and **pmilos**
+```
+make 
+```
+* Clean objects files and executable files. 
+```
+make clean
+```
+
+## Execution
+
+
+### milos
+
+The sequential program must be controlled with a configuration file of type **.mtrol** . The format is nearly the same as that of the corresponding SIR file. Here, the extension "mtrol" stands for Milne-Eddington control file. You can find an example of this type of file [pmilos.mtrol](run/pmilos.mtrol) in the run directory. We refer you to the PDF documentation for a detailed description of all the parameters it contains. 
+
+The program must be executed by passing the control file as a parameter:
+
+```
+./milos run/pmilos.mtrol
+```
+
+### pmilos
+
+To run the parallel code we need both an **.mtrol** file and an **.init** file, much in the same way as in the case of SIR parallel. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
+
+The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one should specify the number of processors to be used with the *-np* option, as in the following example:
+
+```
+mpiexec -np 16 ./pmilos run/pmilos.minit
+```
+
+It is also possible to run the code on different machines simultaneously using local Ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*, and the code run as follows:
+
+```
+mpiexec -f hostnames -np 600 ./pmilos run/pmilos.minit
+```
+Note that ssh keys must be installed on every machine, so that they can establish connections among each other without prompting the user for a password.  
+
+
+## Input/output files
 
 #### Profile files (.per)
 
@@ -127,7 +181,7 @@ CTYPE4  = 'STOKES  '
 
 #### Wavelength grid (.grid)
 
-This file specifies the spectral line and the wavelength positions in which it was observed (in inversion mode), or the wavelength positions in which the profiles must be calculated (in synthesis mode).  The line is specified with an index that must be present in the atomic parameter file. The wavelength range is specified with three numbers: the initial wavelength, the wavelength step, and the final wavelength (all in mA). 
+The wavelength grid file specifies the spectral line and the wavelength positions in which it was observed (inversion mode), or the wavelength positions in which the profiles must be calculated (synthesis mode).  The line is identified by means of an index that must be present in the atomic parameter file. The wavelength range is given using three numbers: the initial wavelength, the wavelength step, and the final wavelength (all in mA). 
 
 The wavelength grid file is an ASCII file and has the same format as the equivalent SIR file. Here is an example:
 
@@ -137,60 +191,24 @@ Line indices            :   Initial lambda     Step     Final lambda
 -----------------------------------------------------------------------
 1                       :        -350,            35,           665
 ```
-This file can be found in  [malla.grid](run/malla.grid). 
-
-
-
-
-
+This example corresponds to the file  [malla.grid](run/malla.grid). 
 
 
 #### Wavelength grid (.fits)
 
-If the observed spectra of all pixels use the same wavelength grid, the FITS file must contain a single, 2D array with dimension number of wavelength-points×2. The first column must contain the index with which the spectral line is identified according to the atomic parameter file.
+Different pixels in the observed field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). In that case, the wavelength grids can be specified by means of 4-dimension array written in FITS format. The four dimensions are (line index, x,y, lambda). The first dimension indicates the line index in the atomic parameter file. For each pixel (x,y), the array of actual observed wavelengths must be given. 
 
-* Output Models 
+If all pixels use the same wavelength grid, the FITS file should contain a single, 2D array with dimensions (line index, wavelength).  The first dimension contains the line index and the second the array of observed wavelengths.
 
-For save the output models of invert one image, the program use FITS. The data is saved in FLOAT precision and the dimensiones of image will be: numberOfRows X numberOfCols X 13. The number 13 comes from the eleven parameters of the model, the number of interations used by the algorithm to found the solution in that pixel and the value of Chisqr calculated for the result model of that pixel respect the input profile. Therefor, the order of the third dimension of the file will be: 
+#### Model atmosphere file (.mod)
 
-  1. eta0 = line-to-continuum absorption coefficient ratio         
-  2. B = magnetic field strength       [Gauss]
-  3. vlos = line-of-sight velocity     [km/s]         
-  4. dopp = Doppler width              [Angstroms]
-  5. aa = damping parameter
-  6. gm = magnetic field inclination   [deg]
-  7. az = magnetic field azimuth       [deg]
-  8. S0 = source function constant
-  9. S1 = source function gradient
-  10. mac = macroturbulent velocity     [km/s]
-  11. alpha = filling factor of the magnetic component [0->1]
-  12. Number of iterations needed. 
-  13. Value of Chisqr. 
+This is an ASCII file containing the parameters of a Milne-Eddington model atmosphere. It is used in three situations:
 
-#### .grid
+1. To specify the model atmosphere in a spectral synthesis  
+2. To specify the initial model atmosphere in an inversion 
+3. To store the best-fit model atmosphere resulting from the inversion of a profile stored in a .per file. 
 
-This is the file where you can specify the number of line from your file with spectral lines to use and the range of wavelenghts to use. This range will be specify with an initial lambda, a step between each wavelenght and the final lambda of the range. 
-
-Look this example:
-
-```
-Line indices            :   Initial lambda     Step     Final lambda
-(in this order)                    (mA)          (mA)         (mA) 
------------------------------------------------------------------------
-1                       :        -350,            35,           665
-```
-In the file [malla.grid](run/malla.grid) you can find an extended example. 
-
-
-#### .mod 
-
-These files will be used for three purposes:
-
-  1. For specify the initial model of a synthesis.  
-  2. For specify the initial model of a inversion. 
-  3. For save output model when we are doing the inversion of a profile stored in a .per file. 
-
-The order of parameters in the file must be always the same. This is an example: 
+The format of a model atmosphere file is as follows:
 
 ```
 eta_0:          14
@@ -205,6 +223,29 @@ S_1:            0.75
 v_mac:          1
 filling factor: 1
 ```
+This file is different from the equivalent SIR file because Milne-Eddington atmospheres can be described with only 11 parameters. The units of the parameters are: G (magnetic field strength), km/s (LOS velocity and v_mac), and degrees (inclination gamma and azimuth phi). The rest of parameters are unitless 
+
+
+#### Model atmospheres (.fits) 
+
+When full data cubes are inverted, the resulting model atmospheres are stored in FITS format as 3-dimension arrays with (n_rows, n_columns, 13) elements. The first two dimensions give the spatial coordinate of the pixel (x,y). The third dimension  contains the eleven parameters of the model, plus the number of interations used by the code to find the solution and the chisqr-value of the fit. Therefore, the 13 elements stored in the third dimension of the file will be: 
+
+  1. eta0 = line-to-continuum absorption coefficient ratio         
+  2. B = magnetic field strength       [Gauss]
+  3. vlos = line-of-sight velocity       [km/s]         
+  4. dopp = Doppler width               [Angstroms]
+  5. aa = damping parameter
+  6. gm = magnetic field inclination [deg]
+  7. az = magnetic field azimuth      [deg]
+  8. S0 = source function constant  
+  9. S1 = source function gradient
+  10. mac = macroturbulent velocity  [km/s]
+  11. alpha = filling factor of the magnetic component [0->1]
+  12. Number of iterations required 
+  13. chisqr value of the fit
+
+
+
 
 
 ## Instalation
