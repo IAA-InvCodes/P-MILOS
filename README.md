@@ -1,6 +1,7 @@
 # P-MILOS
 
-Authors: Manuel Cabrera, Juan P. Cobos, Luis Bellot Rubio (IAA-CSIC)
+Authors: Manuel Cabrera, Juan P. Cobos, Luis Bellot Rubio (IAA-CSIC).
+
 For questions, contact Luis Bellot (lbellot@iaa.es)
 
 This development has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 824135 (SOLARNET).
@@ -8,21 +9,21 @@ This development has received funding from the European Union's Horizon 2020 res
 ## Description 
 
 
-This repository contains a parallel implementacion of MILOS and will get you a copy of the code on your machine. An extended user manual can be found [here](p-milos_manual.pdf). In this page we provide a quick overview about how to install the required libraries, how to compile the code, the required input/output files, and how to run the code (sequential and parallel). 
+This repository contains P-MILOS, a parallel implementacion of the MILOS inversion code using OpenMPI.  P-MILOS is capable of inverting full Stokes spectropolarimetric data cubes in real time, providing the one-component Milne-Eddington model atmosphere that best fit the observations. In this page we provide a quick overview about how to install the required libraries, how to compile the code, the input/output files, and how to execute the code sequentially and in parallel. An extended user manual can be found [here](p-milos_manual.pdf). 
 
 
 ## Requeriments 
 
 ### Libraries
 
-The following libraries and tools must be installed in your system: 
+The following programs and libraries must be installed in your system to run P-MILOS: 
 
-- [OpenMPI](https://www.open-mpi.org/) (Minor version tested 1.4-4)
-- [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/) (Minor version tested 3.3.4.0)
-- [FFTW](http://www.fftw.org/)  (Minot version tested 3.3.3)
-- [GSL](https://www.gnu.org/software/gsl/) (Minor version tested 1.13-3)
+- [OpenMPI](https://www.open-mpi.org/) (Oldest version tested 1.4-4)
+- [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/) (Oldest version tested 3.3.4.0)
+- [FFTW](http://www.fftw.org/)  (Oldest version tested 3.3.3)
+- [GSL](https://www.gnu.org/software/gsl/) (Oldest version tested 1.13-3)
   
-There are many differents ways to install them depending of OS what we are using. In our case we have been using Ubuntu 18.04 as OS, and these are the command to install each library, if you are in the same situation. For other OS, it's in your hands install the specific libraries.
+There are many different ways to install the libraries depending on your operating system.  On Ubuntu 18.04, these are the commands we used. 
 
 OpenMPI: 
 
@@ -52,15 +53,16 @@ sudo apt-get update -y
 sudo apt-get install libgsl*
 ```
 
-### Files format
+### Input/output files (SIR-like format)
 
-#### .per
+#### Profile files (.per)
 
-It's used to specify one profile. We will use it and input for inversion one pixel and as output for synthesis of one model.
-It contains 6 columns:
+Files with extension .per contain a set of Stokes profiles. They are used as input when inverting one pixel and as output when syntehsizing the profiles from a  given model atmosphere. They have the same format as SIR profile files. 
 
-* The first is the index of the spectral line used in the spectral lines file.
-* The second is the offset of wavelenght respect the central wavelenght. 
+They have 6 columns:
+
+* The first column gives the index of the spectral line. It will be searched for in the atomic parameter file. 
+* The second column is the wavelength offset with respect to the central wavelength (in mA). The last four columns give the values of Stokes I, Q, U and V.
 * Value of I
 * Value of Q
 * Value of U
