@@ -72,7 +72,7 @@ make milos.x
 ```
 make pmilos.x
 ```
-* Compile and create both: **milos.x** and **pmilos.x**
+* Compile and create both executables **milos.x** and **pmilos.x**
 ```
 make 
 ```
@@ -84,7 +84,7 @@ make clean
 ## Execution
 
 
-### Sequential code: milos
+### Sequential code: milos.x 
 
 The inversion process is controlled with a  **.mtrol** file which specifies the inversion conditions (observed profiles, atomic parameter file, stray-light profile file, PSF file, wavelength file, initial model atmosphere, parameters to be inverted, maximum number of iterations, etc). The format is nearly the same as that of the **.trol** files used by SIR. Here, the extension **mtrol** stands for "Milne-Eddington control file". You can find an example in the run directory [pmilos.mtrol](run/pmilos.mtrol). The user manual provides a detailed description of this file and its various parameters.
 
@@ -94,7 +94,7 @@ The sequential code must be executed by passing the control file as a parameter:
 ./milos.x ./run/pmilos.mtrol
 ```
 
-### Parallel code: pmilos
+### Parallel code: pmilos.x
 
 To run the parallel code we need both an **.mtrol** file and an **.init** file,  as in the case of SIR-PARALLEL. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
 
