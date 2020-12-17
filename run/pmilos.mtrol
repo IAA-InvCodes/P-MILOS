@@ -1,11 +1,11 @@
-Number of cycles          (*):1          	! 0=synth, n=max iter, -1=classic
-Observed profiles         (*):data/2014.09.28_09_18_00_t0 		!    
+Number of cycles          (*):50          	! 0=synth,n=max iter,-1=classic
+Observed profiles         (*):data/2014.09.28_09:18:00_xtalk_t 		!    
 Stray light file             :		 	! (none=no stray light)
-PSF file                     :    		! file or FWHM of gaussian in mA
-Wavelength grid file      (*):run/wavelength.grid ! 
-Atomic parameters file    (*):run/LINES      	! 
-Abundance file		     : 			! not used
-Initial guess model 1     (*):run/guess.mod 	!
+PSF file                     :CRISP_6173_1mA.psf! file or Gaussian FWHM in mA
+Wavelength grid file      (*):wavelength.grid 	! 
+Atomic parameters file    (*):LINES      	! 
+Abundance file		     : 			! not used with ME models
+Initial guess model 1     (*):guess.mod 	!
 Initial guess model 2        :			! not implemented
 Weight for Stokes I          :1               	! (DEFAULT=1; 0=not inverted)
 Weight for Stokes Q          :1                 ! (DEFAULT=1; 0=not inverted)
@@ -23,7 +23,7 @@ Nodes for lambda_doppler 1   :1			! (0 or blank=no, 1=yes)
 Nodes for damping 1	     :1			! (0 or blank=no, 1=yes)
 Invert macroturbulence 1     :0                	! (0 or blank=no, 1=yes)
 Nodes for S_0 2     	     :                  ! not used 
-Nodes for S_1 2  	     :             	! not used                      
+Nodes for S_1 2  	     :             	! not used                     
 Nodes for eta0 2             :                  ! not used 
 Nodes for magnetic field 2   :			! not used 
 Nodes for LOS velocity 2     :              	! not used 
@@ -35,8 +35,8 @@ Invert macroturbulence 2?    :                  ! not used
 Invert filling factor?       :                  ! not used 
 Invert stray light factor?   :0                 ! (0 or blank=no, 1=yes)
 mu=cos (theta)               :                  ! (DEFAULT mu=1, mu<0 => West)
-Estimated S/N for I          :1000             ! 
+Estimated S/N for I          :1000              ! 
 Continuum contrast           :            	! Not used 
 Initial diagonal element     :0.1               ! (DEFAULT value: 1.e-1)
-Use FFT for convolutions     :                  ! (0 or blank=direct conv; 1=FFT)
-Diagonal element acceleration:1                  ! (0 or blank=no, 1=yes)
+Use FFT for convolutions     :                  ! (0, blank=direct conv;1=FFT)
+Diagonal element acceleration:1                 ! (0 or blank=no, 1=yes)

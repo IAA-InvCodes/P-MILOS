@@ -58,7 +58,7 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achieve maximum performance. This is particularly important when it comes to inverting data streams in real time. 
+The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achieve maximum performance. This is particularly important when the objective is to invert data streams in real time. 
 
 For AMD processors, please edit the makefile and change the compilation option -xHost to -march=core-avx2.
 
@@ -76,7 +76,7 @@ make milos.x
 ```
 make pmilos.x
 ```
-* Clean objects files and executable files
+* Clean object files and executables
 ```
 make clean
 ```
@@ -88,10 +88,10 @@ make clean
 
 The inversion process is controlled with a  **.mtrol** file which specifies the inversion conditions (observed profiles, atomic parameter file, stray-light profile file, PSF file, wavelength file, initial model atmosphere, parameters to be inverted, maximum number of iterations, etc). The format is nearly the same as that of the **.trol** files used by SIR. Here, the extension **mtrol** stands for "Milne-Eddington control file". You can find an example in the run directory: [pmilos.mtrol](run/pmilos.mtrol). The user manual provides a detailed description of this file and its various parameters.
 
-The sequential code must be executed by passing the control file as a parameter:
+The sequential code must be executed by passing the control file as a parameter. From the run directory, type 
 
 ```
-./milos.x ./run/pmilos.mtrol
+../milos.x pmilos.mtrol
 ```
 
 ### Parallel code: pmilos.x
@@ -101,20 +101,20 @@ To run the parallel code we need both an **.mtrol** file and an **.init** file, 
 The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one can specify the number of processors to be used with the *-np* option, as in the following example with 16 processors:
 
 ```
-mpiexec -np 16 ./pmilos.x ./run/pmilos.minit
+mpiexec -np 16 ../pmilos.x pmilos.minit
 ```
 
-It is also possible to run the code on different machines simultaneously over ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
+It is also possible to run the code on different machines simultaneously over Ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
 
 ```
-mpiexec -f hostnames -np 600 ./pmilos.x ./run/pmilos.minit
+mpiexec -f hostnames -np 600 ../pmilos.x pmilos.minit
 ```
 Note that ssh keys must be properly installed on every machine, so that connections can be established between them without prompting the user for a password.  For more details, refer to the P-MILOS manual.
 
 
 ## Input/output files
 
-Below we briefly describe the most important input/output files required by the code. A complete description of these and other files is given in the manual. 
+Below we briefly describe the most important I/O files used by the code. A complete description of these and other files is given in the manual. 
 
 #### Profile file (.fits) 
 
@@ -220,21 +220,22 @@ Files with extension **.mod** are ASCII file containing the parameters of a Miln
 2. To store the best-fit model atmosphere resulting from the inversion of a profile provided as a **.per** file. 
 3. To specify the model atmosphere in a spectral synthesis  
 
-The following is an example of a model atmosphere file:
+The following is an example of a model atmosphere file that can be used for the Fe I 6173 A line in the quiet Sun:
 
 ```
-eta_0                :14.
-magnetic field [G]   :1200.
-LOS velocity [km/s]  :0.5
-Doppler width [A]    :0.07
-damping              :0.05
-gamma [deg]          :130.
-phi   [deg]          :25.
-S_0                  :0.25
-S_1                  :0.75
-v_mac [km/s]         :1.
+eta_0                :13.0
+magnetic field [G]   :500.
+LOS velocity [km/s]  :0.2
+Doppler width [A]    :0.035
+damping              :0.19
+gamma [deg]          :30.
+phi   [deg]          :30.
+S_0                  :0.26
+S_1                  :0.74
+v_mac [km/s]         :0.
 filling factor       :1
 ```
+
 This file is different from the equivalent SIR file because Milne-Eddington atmospheres can be described with only 11 parameters. The units of the parameters are: Gauss (magnetic field strength), km/s (LOS velocity and macroturbulent velocity v_mac), Angstrom (Doppler width), and degrees (inclination gamma and azimuth phi). The rest of parameters do not have units. 
 
 
@@ -256,5 +257,5 @@ When full data cubes are inverted, the resulting model atmospheres are stored in
   12. Number of iterations required 
   13. chisqr value of the fit
   
-  The file name of the output models is constructed from the name of the Stokes profiles cube, adding the string '_mod.fits'. For example, if the observed profiles are stored in the cube *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save on disk space, the user may decide not to write the best-fit profiles, setting the corresponding option in the .minit file.
+  The file name of the output models is constructed from the name of the Stokes profiles cube, adding the string '_mod.fits' and any prefix indicated in the .minit file (this prefix may also serve to set the directory where the output is written). For example, if the observed profiles are stored in the cube *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save on disk space, the user may decide not to write the best-fit profiles, setting the corresponding option in the .minit file.
 
