@@ -256,5 +256,5 @@ When full data cubes are inverted, the resulting model atmospheres are stored in
   12. Number of iterations required 
   13. chisqr value of the fit
   
-  The file name of the output models is constructed from the name of the Stokes profiles data cube, adding the string '_mod' before the extension '.fits'. For example, if the observed profiles are stored in *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save disk space, the user may decide not to write the resulting best-fit profiles setting the corresponding option in the .minit file.
+  The file name of the output models is constructed from the name of the Stokes profiles cube, adding the string '_mod.fits'. For example, if the observed profiles are stored in the cube *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save on disk space, the user may decide not to write the resulting best-fit profiles setting the corresponding option in the .minit file.
 
