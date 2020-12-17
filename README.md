@@ -109,7 +109,7 @@ It is also possible to run the code on different machines simultaneously over et
 ```
 mpiexec -f hostnames -np 600 ./pmilos.x ./run/pmilos.minit
 ```
-Note that proper ssh keys must be installed on every machine, so that connections can be established between them without prompting for the user's password.  For more details, refer to the P-MILOS manual.
+Note that ssh keys must be properly installed on every machine, so that connections can be established between them without prompting the user for a password.  For more details, refer to the P-MILOS manual.
 
 
 ## Input/output files
@@ -120,7 +120,7 @@ Below we briefly describe the most important input/output files required by the 
 
 P-MILOS can be fed with cubes containing the Stokes profiles observed in the entire field of view. This is the usual way of inverting measurements from narrow-band filter imagers such as SST/CRISP. 
 
-The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The number of elements in each dimension is n_x, n_y, n_lambdas, and n_stokes, respectively. The cube can be arranged in any order, but the FITS header must contain the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4 to specify how the cube is ordered, according to the SOLARNET standard:
+The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The number of elements in each dimension is n_x, n_y, n_lambdas, and n_stokes, respectively. The cube can be arranged in any order, but the FITS header must contain the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4 to specify each dimension according to the SOLARNET standard:
 
   -  **HPLN-TAN** indicates a spatial coordinate axis
   - **WAVE-GRI** indicates the wavelength axis
@@ -137,9 +137,9 @@ CTYPE4  = 'STOKES  '
 
 When the FITS data cube does not have a header, the array is assumed to be ordered as (n_x,n_y,n_lambdas,n_stokes).
 
-Individual spectral scans within a time sequence must be stored in separate FITS files numbered sequentially using a common name plus the string "_tnnn.fits", where nnn is the spectral scan number padded with zeros. This makes it easy to locate any time step within the sequence. An example is given below: 
+Individual spectral scans within a time sequence must be stored in separate FITS files numbered sequentially using a common name plus the string "_tnnn.fits", where nnn is the spectral scan number padded with zeros (three digits). This makes it easy to locate any time step within the sequence. No gaps are allowed. An example is given below: 
 
-2014.09.28_09:18:00_xtalk_t000.fits, 2014.09.28_09:18:00_xtalk_t001.fits, 2014.09.28_09:18:00_xtalk_t002.fits, .... , 2014.09.28_09:18:00_xtalk_t031.fits, 2014.09.28_09:18:00_xtalk_t033.fits .... 
+2014.09.28_09:18:00_xtalk_t000.fits, 2014.09.28_09:18:00_xtalk_t001.fits, 2014.09.28_09:18:00_xtalk_t002.fits, .... , 2014.09.28_09:18:00_xtalk_t031.fits, 2014.09.28_09:18:00_xtalk_t032.fits .... 
 
 
 #### Profile files (.per)
