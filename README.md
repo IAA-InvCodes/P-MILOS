@@ -116,7 +116,7 @@ Note that proper ssh keys must be installed on every machine, so that connection
 
 Below we describe some of the input/output files used by the code. A complete description of these and other files is given in the P-MILOS manual. 
 
-#### Profile files (.fits) 
+#### Profile file (.fits) 
 
 P-MILOS can be fed with cubes containing the Stokes profiles observed in the entire field of view. This is the usual way of inverting measurements from narrow-band filter imagers such as SST/CRISP. 
 
@@ -208,17 +208,17 @@ This example corresponds to the file [malla.grid](run/malla.grid) in the *run* d
 
 #### Wavelength grid file (.fits)
 
-Different pixels in the field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). In that case, the wavelength grid changes across the field of view and can be specified as a 4-dimension array written in FITS format. The four dimensions are (line_index, x,y, lambda). The first dimension indicates the line index in the atomic parameter file. Only one line can be inverted at a time with P-MILOS, so the number of elements in the first dimension is one. For each pixel (x,y), the array of actual observed wavelengths must be given. 
+Different pixels in the field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). A wavelength grid varying across the field of view can be specified as a 4-dimension array written in FITS format. The four dimensions are (line_index, x,y, lambda). The first dimension contains the index of the line in the atomic parameter file. Only one line can be inverted at a time with P-MILOS, so the number of elements in the first dimension is always one. For each pixel (x,y), the array of observed wavelengths must be given. 
 
-If all pixels use the same wavelength grid, the FITS file should contain a single, 2D array with (1, n_lambdas) elements. Again, the first dimension contains the observed line index and the second the array of observed wavelengths.
+If all pixels use the same wavelength grid, the FITS file should contain a single, 2D array of (1, n_lambdas) elements. Again, the first dimension contains the line index and the second the array of observed wavelengths.
 
 #### Model atmosphere file (.mod)
 
 Files with extension **.mod** are ASCII file containing the parameters of a Milne-Eddington model atmosphere. They are used in three situations:
 
-1. To specify the model atmosphere in a spectral synthesis  
-2. To specify the initial model atmosphere in an inversion 
-3. To store the best-fit model atmosphere resulting from the inversion of a profile provided as a **.per** file. 
+1. To specify the initial model atmosphere in an inversion 
+2. To store the best-fit model atmosphere resulting from the inversion of a profile provided as a **.per** file. 
+3. To specify the model atmosphere in a spectral synthesis  
 
 The following is an example of a model atmosphere file:
 
@@ -240,7 +240,7 @@ This file is different from the equivalent SIR file because Milne-Eddington atmo
 
 #### Model atmospheres (.fits) 
 
-When full data cubes are inverted, the resulting model atmospheres are stored in FITS format as 3-dimension arrays with (n_x, n_y, 13) elements. The first two dimensions give the spatial coordinates (x,y). The third dimension contains the eleven parameters of the model, plus the number of interations used by the code to find the solution and the chisqr-value of the fit. Therefore, the 13 elements stored in the third dimension are: 
+When full data cubes are inverted, the resulting model atmospheres are stored in FITS format as 3-dimension arrays of (n_x, n_y, 13) elements. The first two dimensions give the spatial coordinates (x,y). The third dimension contains the eleven parameters of the model, plus the number of interations used by the code to find the solution and the chisqr-value of the fit. Therefore, the 13 elements stored in the third dimension are: 
 
   1. eta0 = line-to-continuum absorption coefficient ratio         
   2. B = magnetic field strength       [Gauss]
@@ -256,5 +256,5 @@ When full data cubes are inverted, the resulting model atmospheres are stored in
   12. Number of iterations required 
   13. chisqr value of the fit
   
-  The file name of the output models is constructed from the name of the Stokes profiles cube, adding the string '_mod.fits'. For example, if the observed profiles are stored in the cube *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save on disk space, the user may decide not to write the resulting best-fit profiles setting the corresponding option in the .minit file.
+  The file name of the output models is constructed from the name of the Stokes profiles cube, adding the string '_mod.fits'. For example, if the observed profiles are stored in the cube *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save on disk space, the user may decide not to write the best-fit profiles, setting the corresponding option in the .minit file.
 
