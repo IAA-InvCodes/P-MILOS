@@ -4,7 +4,7 @@ Authors: Manuel Cabrera, Juan P. Cobos, Luis Bellot Rubio (IAA-CSIC).
 
 This work has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 824135 (SOLARNET).
 
-For questions, please contact Luis Bellot (lbellot@iaa.es)
+For questions, please contact Luis Bellot (lbellot@iaa.es).
 
 
 ## Introduction 
