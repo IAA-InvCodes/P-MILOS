@@ -19,7 +19,7 @@ In this page we explain how to install and run the code. We also provide a brief
 
 ### Libraries
 
-To run P-MILOS, the following libraries must be installed in your system: 
+To run P-MILOS, the following libraries must be present in your system: 
 
 - [OpenMPI](https://www.open-mpi.org/) (oldest version tested 1.4-4)
 - [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/) (oldest version tested 3.3.4.0)
@@ -58,11 +58,11 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code needs to be compiled on the target machine. To do this, you must run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum possible speed. This is particularly important for inverting data in real time. 
+The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum possible speed. This is particularly important for inverting data in real time. 
 
-The code is compiled in single precision by default, but double precision can be enforced by adding the variable 'use_double=yes' to the make command.  Note that double precision does not bring any improvement in the accuracy or speed of the inversions, and should be reserved for testing purposes only.
+For AMD processors, please edit the makefile and change the compilation option -xHost by -march=core-avx2.
 
-Other options are available to compile the two versions of the code and to clean the generated objects and executables: 
+The commands that can be used are the following:
 
 * Compile and create executable **milos.x**  
 ```
@@ -96,7 +96,7 @@ The sequential code must be executed by passing the control file as a parameter:
 
 ### Parallel code: pmilos.x
 
-To run the parallel code we need both an **.mtrol** file and an **.init** file,  as in the case of SIR-parallel. The init file is used to specify the time steps to invert, as well as other parameters. An example can be found in the run directory: [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
+To run the parallel code we need both an **.mtrol** file and an **.init** file,  as in the case of SIR-parallel. The init file is used to specify the time steps to invert, along with other parameters. An example can be found in the run directory: [pmilos.minit](run/pmilos.minit). The manual describes in more detail the format and parameters of this file.
 
 The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one can specify the number of processors to be used with the *-np* option, as in the following example with 16 processors:
 
@@ -114,7 +114,7 @@ Note that proper ssh keys must be installed on every machine, so that connection
 
 ## Input/output files
 
-In the following we give a brief description of the files used to store Stokes profiles, model atmospheres, and the wavelength grid. A full description of these and other input/output files can be found in the P-MILOS manual. 
+Below we describe some of the input/output files used by the code. A complete description of these and other files is given in the P-MILOS manual. 
 
 #### Profile files (.fits) 
 
@@ -256,5 +256,5 @@ When full data cubes are inverted, the resulting model atmospheres are stored in
   12. Number of iterations required 
   13. chisqr value of the fit
   
-  The file name of the output models is constructed from the name of the Stokes profiles data cube, adding the string '_mod' before the extension '.fits'. For example, if the observed profiles are stored in the cube 2014.09.28_09:18:00_xtalk_t006.fits, the model atmospheres resulting from the inversion will be written in the file 2014.09.28_09:18:00_xtalk_t006_mod.fits and the best-fit profiles in 2014.09.28_09:18:00_xtalk_t006_stokes.fits. To save hard-disk space, the user may decide not to write the resulting best-fit profiles (in the .minit file).
+  The file name of the output models is constructed from the name of the Stokes profiles data cube, adding the string '_mod' before the extension '.fits'. For example, if the observed profiles are stored in *2014.09.28_09:18:00_xtalk_t006.fits*, the atmospheres resulting from the inversion will be written in  *2014.09.28_09:18:00_xtalk_t006_mod.fits* and the best-fit profiles in *2014.09.28_09:18:00_xtalk_t006_stokes.fits.* To save disk space, the user may decide not to write the resulting best-fit profiles setting the corresponding option in the .minit file.
 
