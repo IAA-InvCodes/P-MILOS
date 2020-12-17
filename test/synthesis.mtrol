@@ -1,11 +1,11 @@
-Number of cycles          (*):0          	! 0=synth, n=max iter, -1=classic
-Observed profiles         (*):test/obs.per 		!    
-Stray light file             :test/straylight.fits 	! (none=no stray light)
-PSF file                     :    		! file or FWHM of gaussian in mA
-Wavelength grid file      (*):test/malla.grid 	! 
-Atomic parameters file    (*):test/LINES      	! 
+Number of cycles          (*):0          	! 0=synth,n=max iter,-1=classic
+Observed profiles         (*):obs.per 		!    
+Stray light file             :straylight.fits 	! (none=no stray light)
+PSF file                     :    		! file or Gaussian FWHM in mA
+Wavelength grid file      (*):malla.grid 	! 
+Atomic parameters file    (*):LINES      	! 
 Abundance file		     : 			! not used
-Initial guess model 1     (*):test/obs.mod 	!
+Initial guess model 1     (*):obs.mod 	!
 Initial guess model 2        :			! not implemented
 Weight for Stokes I          :1               	! (DEFAULT=1; 0=not inverted)
 Weight for Stokes Q          :1                 ! (DEFAULT=1; 0=not inverted)
@@ -35,8 +35,8 @@ Invert macroturbulence 2?    :                  ! not used
 Invert filling factor?       :                  ! not used 
 Invert stray light factor?   :1                 ! (0 or blank=no, 1=yes)
 mu=cos (theta)               :                  ! (DEFAULT mu=1, mu<0 => West)
-Estimated S/N for I          :1000             ! 
+Estimated S/N for I          :1000              ! 
 Continuum contrast           :            	! Not used 
 Initial diagonal element     :0.1               ! (DEFAULT value: 1.e-1)
-Use FFT for convolutions     :                  ! (0 or blank=direct conv; 1=FFT)
+Use FFT for convolutions     :                  ! (0, blank=direct conv;1=FFT)
 Diagonal element acceleration:                  ! (0 or blank=no, 1=yes)
