@@ -114,13 +114,11 @@ Note that proper ssh keys must be installed on every machine, so that connection
 
 ## Input/output files
 
-In the following we give a very brief description of the input files required by the code. They are used to store Stokes profiles, the wavelength grid, and model atmospheres. A full description can be found in the P-MILOS manual. 
-
+In the following we give a brief description of the files used to store Stokes profiles, model atmospheres, and the wavelength grid. A full description of these and other input/output files can be found in the P-MILOS manual. 
 
 #### Profile files (.fits) 
 
-
-P-MILOS can be fed with data cubes containing all the Stokes profiles observed in the field of view. This is the usual way of inverting measurements from narrow-band filter imagers such as SST/CRISP. 
+P-MILOS can be fed with cubes containing the Stokes profiles observed in the entire field of view. This is the usual way of inverting measurements from narrow-band filter imagers such as SST/CRISP. 
 
 The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The number of elements in each dimension is n_x, n_y, n_lambdas, and n_stokes, respectively. The four dimensions of the cube can be arranged in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4, according to the SOLARNET standard:
 
@@ -138,6 +136,10 @@ CTYPE4  = 'STOKES  '
 ```
 
 When the FITS data cube does not have a header, the array is assumed to be ordered as (n_x,n_y,n_lambdas,n_stokes).
+
+Individual spectral scans within a time sequence must be stored in separate FITS files numbered sequentially using a common name plus the string "_tnnn.fits", where nnn is the spectral scan number padded with zeros. This makes it easy to locate any time step within the sequence. An example is given below: 
+
+2014.09.28_09:18:00_xtalk_t000.fits, 2014.09.28_09:18:00_xtalk_t001.fits, 2014.09.28_09:18:00_xtalk_t002.fits, .... , 2014.09.28_09:18:00_xtalk_t031.fits, 2014.09.28_09:18:00_xtalk_t033.fits .... 
 
 
 #### Profile files (.per)
