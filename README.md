@@ -114,15 +114,15 @@ Note that proper ssh keys must be installed on every machine, so that connection
 
 ## Input/output files
 
-Below we describe some of the input/output files used by the code. A complete description of these and other files is given in the P-MILOS manual. 
+Below we briefly describe the most important input/output files required by the code. A complete description of these and other files is given in the manual. 
 
 #### Profile file (.fits) 
 
 P-MILOS can be fed with cubes containing the Stokes profiles observed in the entire field of view. This is the usual way of inverting measurements from narrow-band filter imagers such as SST/CRISP. 
 
-The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The number of elements in each dimension is n_x, n_y, n_lambdas, and n_stokes, respectively. The four dimensions of the cube can be arranged in any order. The exact order is specified in the FITS header by means of the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4, according to the SOLARNET standard:
+The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The number of elements in each dimension is n_x, n_y, n_lambdas, and n_stokes, respectively. The cube can be arranged in any order, but the FITS header must contain the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4 to specify how the cube is ordered, according to the SOLARNET standard:
 
-  -  **HPLN-TAN** indicates a spatial coordinate dimension
+  -  **HPLN-TAN** indicates a spatial coordinate axis
   - **WAVE-GRI** indicates the wavelength axis
   - **STOKES  '** indicates the Stokes parameter axis
 
