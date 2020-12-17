@@ -58,12 +58,16 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum possible speed. This is particularly important for inverting data in real time. 
+The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achieve maximum performance. This is particularly important when it comes to inverting data streams in real time. 
 
-For AMD processors, please edit the makefile and change the compilation option -xHost by -march=core-avx2.
+For AMD processors, please edit the makefile and change the compilation option -xHost to -march=core-avx2.
 
 The commands that can be used are the following:
 
+* Compile and create executables **milos.x** and **pmilos.x**
+```
+make 
+```
 * Compile and create executable **milos.x**  
 ```
 make milos.x
@@ -71,10 +75,6 @@ make milos.x
 * Compile and create executable **pmilos.x**
 ```
 make pmilos.x
-```
-* Compile and create both executables **milos.x** and **pmilos.x**
-```
-make 
 ```
 * Clean objects files and executable files
 ```
