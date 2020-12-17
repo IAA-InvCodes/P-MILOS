@@ -2,7 +2,7 @@ Number of cycles          (*):1          	! 0=synth, n=max iter, -1=classic
 Observed profiles         (*):data/2014.09.28_09_18_00_t0 		!    
 Stray light file             :		 	! (none=no stray light)
 PSF file                     :    		! file or FWHM of gaussian in mA
-Wavelength grid file      (*):run/malla.grid 	! 
+Wavelength grid file      (*):run/wavelength.grid ! 
 Atomic parameters file    (*):run/LINES      	! 
 Abundance file		     : 			! not used
 Initial guess model 1     (*):run/guess.mod 	!

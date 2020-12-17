@@ -10,7 +10,7 @@ For questions, please contact Luis Bellot (lbellot@iaa.es)
 ## Introduction 
 
 
-This repository contains P-MILOS, a state-of-the-art parallel Milne-Eddington inversion code written in C.  The code is capable of inverting full Stokes spectropolarimetric measurements of photospheric lines in real time using one-component Milne-Eddington atmospheres. P-MILOS is very fast, reaching speeds of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications (multiple cores). These numbers refer to the inversion of the four Stokes profiles of a spectral line sampled at 30 wavelength positions, convolved wih the instrumental PSF, assuming 9 free parameters, on an AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
+This repository contains P-MILOS, a state-of-the-art parallel Milne-Eddington inversion code written in C.  The code is capable of inverting full Stokes spectropolarimetric measurements of photospheric lines in real time using one-component Milne-Eddington atmospheres. P-MILOS is very fast, reaching speeds of up to 2400 pixels per seconds in sequential applications (one core) and 2000 pixels per second per core in parallel applications (multiple cores). These numbers refer to the inversion of the four Stokes profiles of a spectral line sampled at 30 wavelength positions, convolved wih the instrumental PSF, assuming 9 free parameters, with a maximum of 50 iterations, on an AMD EPYC 7742 2.25GHz 128-core server working at 100% of its capacity.
 
 In this page we explain how to install and run the code. We also provide a brief overview of the input/output files. A complete user manual can be found [here](p-milos_manual.pdf). 
 
@@ -58,21 +58,21 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code needs to be compiled on the target machine. To do this, you must run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum speed possible. This is particularly important for real-time inversions. 
+The code needs to be compiled on the target machine. To do this, you must run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum speed possible. This is particularly important for inverting data in real time. 
 
 The code is compiled in single precision by default, but double precision can be enforced by adding the variable 'use_double=yes' to the make command.  Note that double precision does not bring any improvement in the accuracy or speed of the inversions, and should be reserved for testing purposes only.
 
 Other options are available to compile the two versions of the code and to clean the generated objects and executables: 
 
-* Compile and create executable **milos**  
+* Compile and create executable **milos.x**  
 ```
-make milos
+make milos.x
 ```
-* Compile and create executable **pmilos**
+* Compile and create executable **pmilos.x**
 ```
-make pmilos
+make pmilos.x
 ```
-* Compile and create both: **milos** and **pmilos**
+* Compile and create both: **milos.x** and **pmilos.x**
 ```
 make 
 ```
@@ -91,7 +91,7 @@ The inversion process is controlled with a  **.mtrol** file which specifies the 
 The sequential code must be executed by passing the control file as a parameter:
 
 ```
-./milos run/pmilos.mtrol
+./milos.x ./run/pmilos.mtrol
 ```
 
 ### Parallel code: pmilos
@@ -101,13 +101,13 @@ To run the parallel code we need both an **.mtrol** file and an **.init** file, 
 The parallel code must be executed using the command **mpirun** or **mpiexec**.  In the local machine, one can specify the number of processors to be used with the *-np* option, as in the following example:
 
 ```
-mpiexec -np 16 ./pmilos run/pmilos.minit
+mpiexec -np 16 ./pmilos.x ./run/pmilos.minit
 ```
 
-It is also possible to run the code on different machines simultaneously using local ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
+It is also possible to run the code on different machines simultaneously over ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
 
 ```
-mpiexec -f hostnames -np 600 ./pmilos run/pmilos.minit
+mpiexec -f hostnames -np 600 ./pmilos.x ./run/pmilos.minit
 ```
 Note that proper ssh keys must be installed on every machine, so that connections can be established between them without typing the user's password.  For more details, refer to the P-MILOS manual.
 

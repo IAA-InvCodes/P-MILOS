@@ -5,7 +5,7 @@ CC=mpicc
 
 CFLAGS=
 ifeq ($(comp),icc)
-	CFLAGS+=-ipo -xHost -no-multibyte-chars -qopt-dynamic-align -ansi-alias -fno-alias -parallel -fma -ipp -align
+	CFLAGS+=-ipo -xHost -mp1 -no-fma -no-multibyte-chars -qopt-dynamic-align -ansi-alias -fno-alias -parallel -ipp -align
 endif
 ifeq ($(comp),gcc)
 	CFLAGS+=-march=native
@@ -34,15 +34,15 @@ DEPENCOMMON=$(SRCDIR)/calculosCompartidos.o $(SRCDIR)/fgauss.o $(SRCDIR)/fvoigt.
 DEPEN_SEQ=$(SRCDIR)/milos.o 
 DEPEN_PAR=$(SRCDIR)/pmilos.o 
 LDLIBS= -lm -lcfitsio -lnsl -lgsl -lgslcblas -lfftw3 -ldl -lpthread 
-BIN= milos pmilos 
+BIN= milos.x pmilos.x 
 
 
 all: $(BIN)
 
-milos: $(DEPENCOMMON) $(DEPEN_SEQ)
+milos.x: $(DEPENCOMMON) $(DEPEN_SEQ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
-pmilos: $(DEPENCOMMON) $(DEPEN_PAR)
+pmilos.x: $(DEPENCOMMON) $(DEPEN_PAR)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDLIBS)
 
 clean:
