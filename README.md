@@ -58,7 +58,7 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code needs to be compiled on the target machine. To do this, you must run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum speed possible. This is particularly important for inverting data in real time. 
+The code needs to be compiled on the target machine. To do this, you must run the command 'make' in the directory where the source code is located. We strongly recommend you to use the latest version of the Intel C compiler, to achive the maximum possible speed. This is particularly important for inverting data in real time. 
 
 The code is compiled in single precision by default, but double precision can be enforced by adding the variable 'use_double=yes' to the make command.  Note that double precision does not bring any improvement in the accuracy or speed of the inversions, and should be reserved for testing purposes only.
 
