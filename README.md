@@ -60,19 +60,21 @@ sudo apt-get install libgsl*
 
 The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the distribution is located. We strongly recommend you to use the latest version of the Intel C compiler, to achieve maximum performance. This is particularly important when the objective is to invert data streams in real time. 
 
-For AMD processors, please edit the makefile and change the compilation option -xHost to -march=core-avx2.
+For AMD processors, please edit the makefile and change the compilation option -xHost to -march=core-avx2. 
 
-* Compile and create executables **milos.x** and **pmilos.x**
-```
-make 
-```
-* Compile and create executable **milos.x**  
+Be warned that the use of the AVX-2 or AVX-512 instruction sets increases the code speed at the expense of less consistent floating-point results. For some pixels, this may lead to a different number of iterations performed. 
+
+* Compile sequential code and create executable **milos.x**  
 ```
 make milos.x
 ```
-* Compile and create executable **pmilos.x**
+* Compile parallel code and create executable **pmilos.x**
 ```
 make pmilos.x
+```
+* Compile and create executables **milos.x** and **pmilos.x**
+```
+make 
 ```
 * Clean object files and executables
 ```
@@ -102,7 +104,7 @@ The parallel code must be executed using the command **mpirun** or **mpiexec**. 
 mpiexec -np 16 ../pmilos.x pmilos.minit
 ```
 
-It is also possible to run the code on different machines simultaneously over Ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
+It is also possible to run the code on different machines simultaneously over local ethernet. In that case, the names of the machines or their IP addresses must be specified in a file *hostnames* using the option *-f*. The code should be run as follows:
 
 ```
 mpiexec -f hostnames -np 600 ../pmilos.x pmilos.minit
@@ -208,7 +210,8 @@ This example corresponds to the file [malla.grid](run/malla.grid) in the *run* d
 
 Different pixels in the field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). A wavelength grid varying across the field of view can be specified as a 4-dimension array written in FITS format. The four dimensions are (line_index, x,y, lambda). The first dimension contains the index of the line in the atomic parameter file. Only one line can be inverted at a time with P-MILOS, so the number of elements in the first dimension is always one. For each pixel (x,y), the array of observed wavelengths must be given. 
 
-If all pixels use the same wavelength grid, the FITS file should contain a single, 2D array of (1, n_lambdas) elements. Again, the first dimension contains the line index and the second the array of observed wavelengths.
+If all pixels use the same wavelength grid, the FITS file should contain a 2-dimesion array with (1, n_lambdas) elements. Again, the first dimension contains the line index and the second the observed wavelengths.
+
 
 #### Model atmosphere file (.mod)
 
