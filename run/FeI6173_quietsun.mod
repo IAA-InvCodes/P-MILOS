@@ -8,4 +8,4 @@ phi   [deg]          :30.
 S_0                  :0.26
 S_1                  :0.74
 v_mac [km/s]         :0.
-filling factor       :1
+filling factor       :1.
