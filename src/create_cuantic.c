@@ -239,7 +239,7 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 		printf("\nNumber of Sigma components:\t\t %lf",cuantic->N_SIG);
 		printf("\nLower level lande factor:\t\t %lf",cuantic->GL);
 		printf("\nUpper level lande factor:\t\t %lf",cuantic->GU);
-		printf("\nEffective lande factor:\t\t\t   %lf",cuantic->GEFF);
+		printf("\nEffective lande factor:\t\t\t %lf",cuantic->GEFF);
 		printf("\nShifts principal component:\t\t");
 		for(i=0;i<cuantic->N_PI;i++){
 			if(i<(cuantic->N_PI-1) )
@@ -282,7 +282,7 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 			else
 				printf(" %lf ",cuantic->WER[i]);
 		}
-		printf("\nRelative line strength:\t\t\t %lf",cuantic->FO);
+		printf("\nRelative line strength:\t\t %lf",cuantic->FO);
 		printf("\n------------------------------------------------\n");	
 	}
 
