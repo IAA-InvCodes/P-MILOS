@@ -110,15 +110,15 @@ PRECISION readFileCuanticLines(const char * inputLineFile, PRECISION * cuanticDa
 	cuanticDat[6] = JUPI;
 	
 	if(printLog){
-		printf("\n--------------------------------------------------------------------------------");
-		printf("\n QUANTUM NUMBERS READ FROM FILE, FOR CENTRAL WAVELENGTH %lf: \n",lambdaLine);
+		printf("\n--------------------------------------------------------------------------------------");
+		printf("\n QUANTUM NUMBERS FOR CENTRAL WAVELENGTH %lf: \n",lambdaLine);
 		printf("\n\tSLOI: %fd",cuanticDat[1]);
 		printf("\n\tLLOI: %fd",cuanticDat[2]);
 		printf("\n\tJLOI: %fd",cuanticDat[3]);
 		printf("\n\tSUPI: %fd",cuanticDat[4]);
 		printf("\n\tLUPI: %fd",cuanticDat[5]);
 		printf("\n\tJUPI: %fd",cuanticDat[6]);
-		printf("\n--------------------------------------------------------------------------------\n");
+		printf("\n--------------------------------------------------------------------------------------\n");
 		
 	}
 	if(!found)
@@ -322,7 +322,7 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 	}
 
 	if(printLog){	
-		printf("\nMALLA GRID --- indexline %d , initial lambda: %lf, step: %lf, finallambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
+		printf("\nWavelength grid - line index: %d, initial lambda: %lf, step: %lf, final lambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
 	}
 
 	if(dataRead)
