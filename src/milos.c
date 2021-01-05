@@ -268,19 +268,23 @@ int main(int argc, char **argv)
 		
 		if(configCrontrolFile.FWHM > 0){
 			G = fgauss_WL(FWHM,vLambda[1]-vLambda[0],vLambda[0],vLambda[nlambda/2],nlambda,&sizeG);
-			char nameAux [4096];
-			char obsAux [4096];
-			if(configCrontrolFile.ObservedProfiles[0]!='\0'){
-				strcpy(obsAux,configCrontrolFile.ObservedProfiles);
-				strcpy(nameAux,dirname(obsAux));
-			}
-			else{
-				strcpy(obsAux,configCrontrolFile.InitialGuessModel);
-				strcpy(nameAux,dirname(obsAux));		
-			}
-			strcat(nameAux,"/gaussian.psf");
-			FILE *fptr = fopen(nameAux, "w");
+			//char nameAux [4096];
+			//char obsAux [4096];
+			//if(configCrontrolFile.ObservedProfiles[0]!='\0'){
+			//	strcpy(obsAux,configCrontrolFile.ObservedProfiles);
+			//	strcpy(nameAux,dirname(obsAux));
+			//}
+			//else{
+			//	strcpy(obsAux,configCrontrolFile.InitialGuessModel);
+			//	strcpy(nameAux,dirname(obsAux));		
+			//}
+			//strcat(nameAux,"/gaussian.psf");
+			//FILE *fptr = fopen(nameAux, "w");
+
+			FILE *fptr = fopen("gaussian.psf", "w");
+
 			if(fptr!=NULL){
+			        printf("Gaussian PSF will be saved to file gaussian.psf"); 
 				int kk;
 				for (kk = 0; kk < nlambda; kk++)
 				{
@@ -289,7 +293,8 @@ int main(int argc, char **argv)
 				fclose(fptr);
 			}
 			else{
-				printf("\n ERROR !!! The output file cannot be opened: %s",nameAux);
+			  //	printf("\n ERROR !!! The output file cannot be opened: %s",nameAux);
+				printf("\n ERROR !!! The output file cannot be opened: gaussian.psf);
 			}			
 		}else{
 			// read the number of lines 
