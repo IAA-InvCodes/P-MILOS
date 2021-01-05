@@ -14,11 +14,11 @@
 
 
 /**
- * Read Cuantic data from a file with the Cuantic Lines. 
+ * Read atomic data from the atomic parameter file 
  * @param inputLineFile
  * @param cuanticDat
  * @param line2Read
- * @return Returns the value of central wavelength if the line is found or 0 in other case. 
+ * @return Returns the value of central wavelength if the line is found or 0 otherwise 
  * 
  * */
 PRECISION readFileCuanticLines(const char * inputLineFile, PRECISION * cuanticDat, int line2Read, int printLog){
@@ -466,7 +466,7 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	rfscanf = sscanf(LINE,"%99[^:]:%s%99[^!]!",name, trolConfig->StrayLightFile,comment);
 	if(rfscanf ==0 || rfscanf == EOF){
 		printf("Error reading the file of parameters, param Stray light file. Please verify it. \n");
-		printf("\n ******* THIS IS THE NAME OF THE FILE RECEVIED : %s \n", fileParameters);
+		printf("\n ******* THIS IS THE NAME OF THE FILE RECEIVED : %s \n", fileParameters);
 		return 0;		
 	}
 	if(printLog) printf("%s", LINE);
@@ -484,7 +484,7 @@ int readTrolFile(char * fileParameters,  ConfigControl * trolConfig, int printLo
 	// first check if the input string is a valid file. 
 	if(access(trolConfig->PSFFile,F_OK) == -1) { // is not a file
 		double fwhm = atof(trolConfig->PSFFile);
-		if(fwhm!=0){ // if it's cero then it isn't a correct value for fwhm and we will not use psf 
+		if(fwhm!=0){ // if it's zero then it isn't a correct value for fwhm and we will not use psf 
 			
 			trolConfig->FWHM = fwhm;
 			trolConfig->ConvolveWithPSF = 1;
