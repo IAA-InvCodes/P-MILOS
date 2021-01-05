@@ -1,4 +1,3 @@
-
 // PMILOS v2.0 (2020)
 // Parallel Milne-Eddington inversion code 
 // (based on IDL code by D. Orozco & J.C. del Toro Iniesta)
@@ -246,7 +245,7 @@ int main(int argc, char **argv)
 	if(configCrontrolFile.useMallaGrid){ // read lambda from grid file
 		if(idProc==root){
 		        printf("------------------------------------------------------------------------------------\n");
-			printf("\nWavelength file read: %s\n",configCrontrolFile.MallaGrid);
+			printf("\nReading wavelength file: %s\n",configCrontrolFile.MallaGrid);
 		        // printf("\n------------------------------------------------------------------------------------");
 		}
 		indexLine = readMallaGrid(configCrontrolFile.MallaGrid, &initialLambda, &step, &finalLambda, (idProc==root));      
@@ -267,7 +266,7 @@ int main(int argc, char **argv)
 		if(idProc==root){
 			printf("\nNumber of wavelengths in the wavelength grid: %d\n",nlambda);
 			// printf("\n-------------------------------------------------------------------------------\n");
-			printf("\nAtomic parameter file read: %s\n",configCrontrolFile.AtomicParametersFile);		
+			printf("\nReading atomic parameter files: %s\n",configCrontrolFile.AtomicParametersFile);		
 		}
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(configCrontrolFile.AtomicParametersFile,dat,indexLine,(idProc==root));
 		if(configCrontrolFile.CentralWaveLenght==0){
@@ -283,11 +282,11 @@ int main(int argc, char **argv)
 	else{
 		if(idProc==root){
 		        printf("------------------------------------------------------------------------------------\n");
-			printf("\nWavelength file read: %s\n",configCrontrolFile.WavelengthFile);
+			printf("\nReading wavelength file: %s\n",configCrontrolFile.WavelengthFile);
 		}
 		vGlobalLambda = readFitsLambdaToArray(configCrontrolFile.WavelengthFile,&indexLine,&nlambda);
 		if(vGlobalLambda==NULL){
-			printf("\n WAVELENGTH FILE HAS NOT BEEN READ PROPERLY, please check it.\n");
+			printf("\n WAVELENGTH FILE WAS NOT READ PROPERLY, please check it.\n");
 			free(vGlobalLambda);
 			exit(EXIT_FAILURE);
 		}
@@ -296,7 +295,7 @@ int main(int argc, char **argv)
 			printf("\nNumber of wavelengths in the wavelength file: %d\n",nlambda);
 			//printf("\n-------------------------------------------------------------------------------\n");
 			//printf("\n-------------------------------------------------------------------------------");
-			printf("\nAtomic parameter file read: %s\n",configCrontrolFile.AtomicParametersFile);			
+			printf("\nReading atomic parameter file: %s\n",configCrontrolFile.AtomicParametersFile);			
 		}
 		configCrontrolFile.CentralWaveLenght = readFileCuanticLines(configCrontrolFile.AtomicParametersFile,dat,indexLine,(idProc==root));
 		if(configCrontrolFile.CentralWaveLenght==0){
@@ -355,9 +354,9 @@ int main(int argc, char **argv)
 			vMask=readFitsMaskFile (configCrontrolFile.MaskFile,&numRowsMask,&numColsMask);
 		}
 		if(vMask==NULL){
-			printf("\n-------------------------------------------------------------------------------");
-			printf("\n Mask file not found or its dimensions are incorrect. Mask will not be used. ");
-			printf("\n-------------------------------------------------------------------------------\n");
+			printf("\n-----------------------------------------------------------------------");
+			printf("\nMask file not found or incorrect dimensions. Mask will not be used.    ");
+			printf("\n---------------------------------------------------------------------\n");
 		}
 		else{
 			// readsub set of VMAS
