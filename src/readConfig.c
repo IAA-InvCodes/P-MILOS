@@ -323,7 +323,7 @@ int readMallaGrid(const char * fileMallaGrid, PRECISION * initialLambda, PRECISI
 
 	if(printLog){	
 	  printf("\nWavelength grid");
-	  printf("\nLine index: %d, initial lambda: %lf, step: %lf, final lambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
+	  printf("\nLine: %d, initial lambda: %lf, step: %lf, final lambda: %lf\n",indexLine,*initialLambda,*step,*finalLambda);
 	}
 
 	if(dataRead)
