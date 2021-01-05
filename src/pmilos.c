@@ -434,7 +434,8 @@ int main(int argc, char **argv)
 				fclose(fptr);
 			}
 			else{
-				printf("\n ERROR !!! The output PSF file cannot be opened: %s",nameAux);
+			  //    printf("\n ERROR !!! The output PSF file cannot be opened: %s",nameAux);
+				printf("\n ERROR !!! The output PSF file cannot be opened: gaussian.psf");
 			}			
 		}
 		else if(access(nameInputFilePSF,F_OK) != -1){
