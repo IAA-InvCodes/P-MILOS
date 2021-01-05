@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 			FILE *fptr = fopen("gaussian.psf", "w");
 
 			if(fptr!=NULL){
-			        printf("Gaussian PSF will be saved to file gaussian.psf"); 
+			        printf("\n Gaussian PSF will be saved to file gaussian.psf"); 
 				int kk;
 				for (kk = 0; kk < nlambda; kk++)
 				{
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 			}
 			else{
 			  //	printf("\n ERROR !!! The output file cannot be opened: %s",nameAux);
-				printf("\n ERROR !!! The output file cannot be opened: gaussian.psf);
+				printf("\n ERROR !!! The output file cannot be opened: gaussian.psf");
 			}			
 		}else{
 			// read the number of lines 
