@@ -1,4 +1,3 @@
-//
 // MILOS v2.0 (2020)
 // Milne-Eddington inversion code (based on IDL MILOS code by D. Orozco)
 // Manuel Cabrera, Juan P. Cobos, Luis Bellot (IAA-CSIC)
