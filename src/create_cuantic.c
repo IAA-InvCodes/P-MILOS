@@ -234,7 +234,8 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 	cuantic->FO = fos;
 
 	if(log){
-		printf("\n\n--------------    QUANTUM NUMBERS  --------------");
+
+		printf("\n\n--------------  ZEEMAN COMPONENTS  ---------------");
 		printf("\nNumber of Pi components:\t\t %lf",cuantic->N_PI);
 		printf("\nNumber of Sigma components:\t\t %lf",cuantic->N_SIG);
 		printf("\nLower level lande factor:\t\t %lf",cuantic->GL);
@@ -250,39 +251,39 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 		printf("\nShifts blue component:\t\t\t");
 		for(i=0;i<cuantic->N_SIG;i++){
 			if(i<(cuantic->N_SIG-1) )
-				printf(" %lf\t",cuantic->NUB[i]);
+				printf("%lf\t",cuantic->NUB[i]);
 			else
-				printf(" %lf ",cuantic->NUB[i]);
+				printf("%lf ",cuantic->NUB[i]);
 		}
-		printf("\nShifts red component:\t\t\t ");
+		printf("\nShifts red component:\t\t\t");
 		for(i=0;i<cuantic->N_SIG;i++){
 			if(i<(cuantic->N_SIG-1) )
 				printf(" %lf\t",cuantic->NUR[i]);
 			else
 				printf(" %lf ",cuantic->NUR[i]);
 		}
-		printf("\nStrength principal component:\t\t ");
+		printf("\nStrength principal component:\t\t");
 		for(i=0;i<cuantic->N_PI;i++){
 			if(i<(cuantic->N_PI-1) )
 				printf(" %lf\t",cuantic->WEP[i]);
 			else
 				printf(" %lf ",cuantic->WEP[i]);
 		}
-		printf("\nStrength blue component:\t\t ");
+		printf("\nStrength blue component:\t\t");
 		for(i=0;i<cuantic->N_SIG;i++){
 			if(i<(cuantic->N_SIG-1) )
 				printf(" %lf\t",cuantic->WEB[i]);
 			else
 				printf(" %lf ",cuantic->WEB[i]);
 		}
-		printf("\nStrength red component:\t\t\t ");
+		printf("\nStrength red component:\t\t\t");
 		for(i=0;i<cuantic->N_SIG;i++){
 			if(i<(cuantic->N_SIG-1) )
 				printf(" %lf\t",cuantic->WER[i]);
 			else
 				printf(" %lf ",cuantic->WER[i]);
 		}
-		printf("\nRelative line strength:\t\t\t  %lf",cuantic->FO);
+		printf("\nRelative line strength:\t\t\t %lf",cuantic->FO);
 		printf("\n--------------------------------------------------\n");	
 	}
 
