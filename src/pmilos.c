@@ -425,7 +425,7 @@ int main(int argc, char **argv)
 			//FILE *fptr = fopen(nameAux, "w");
 
 			if(idProc==root){
-			  printf("Gaussian PSF will be saved to file gaussian.psf \n"); 
+			  printf("\n Gaussian PSF will be saved to file gaussian.psf \n"); 
 
 			  FILE *fptr = fopen("gaussian.psf", "w");
 			  if(fptr!=NULL){
