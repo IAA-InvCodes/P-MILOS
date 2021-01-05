@@ -425,7 +425,7 @@ int main(int argc, char **argv)
 			//FILE *fptr = fopen(nameAux, "w");
 
 			if(idProc==root){
-			  printf("\n Gaussian PSF will be saved to file gaussian.psf \n"); 
+			  printf("\nGaussian PSF will be saved to file gaussian.psf \n"); 
 
 			  FILE *fptr = fopen("gaussian.psf", "w");
 			  if(fptr!=NULL){
@@ -437,8 +437,8 @@ int main(int argc, char **argv)
 				fclose(fptr);
 			  }
 			  else{
-			  //    printf("\n ERROR !!! The output PSF file cannot be opened: %s",nameAux);
-				printf("\n ERROR !!! The output PSF file cannot be opened: gaussian.psf");
+			  //    printf("\nERROR !!! The output PSF file cannot be opened: %s",nameAux);
+				printf("\nERROR !!! The output PSF file cannot be opened: gaussian.psf");
 			  }
 			}
 		}
