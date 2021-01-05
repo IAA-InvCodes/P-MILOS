@@ -1,17 +1,8 @@
-
-//    _______             _______ _________ _        _______  _______
-//   (  ____ \           (       )\__   __/( \      (  ___  )(  ____ \
-//   | (    \/           | () () |   ) (   | (      | (   ) || (    \/
-//   | |         _____   | || || |   | |   | |      | |   | || (_____
-//   | |        (_____)  | |(_)| |   | |   | |      | |   | |(_____  )
-//   | |                 | |   | |   | |   | |      | |   | |      ) |
-//   | (____/\           | )   ( |___) (___| (____/\| (___) |/\____) |
-//   (_______/           |/     \|\_______/(_______/(_______)\_______)
 //
-//
-// CMILOS v1.0 (2020)
-// RTE INVERSION C code (based on the ILD code MILOS by D. Orozco)
-// Manuel (IAA-CSIC)
+// MILOS v2.0 (2020)
+// Milne-Eddington inversion code (based on IDL MILOS code by D. Orozco)
+// Manuel Cabrera, Juan P. Cobos, Luis Bellot (IAA-CSIC)
+// For questions, please contact lbellot@iaa.es
 //
 
 /*
@@ -272,7 +263,7 @@ int main(int argc, char **argv)
 	outSpectraBwMAC = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * numln);		
 	planBackwardMAC = fftw_plan_dft_1d(numln, inSpectraBwMAC, outSpectraBwMAC, FFT_BACKWARD, FFTW_MEASURE );
 
-	// ********************************************* IF PSF HAS BEEN SELECTEC IN TROL READ PSF FILE OR CREATE GAUSSIAN FILTER ***********//
+	// ********************************************* IF PSF HAS BEEN SELECTED IN TROL READ PSF FILE OR CREATE GAUSSIAN FILTER ***********//
 	if(configCrontrolFile.ConvolveWithPSF){
 		
 		if(configCrontrolFile.FWHM > 0){
@@ -287,7 +278,7 @@ int main(int argc, char **argv)
 				strcpy(obsAux,configCrontrolFile.InitialGuessModel);
 				strcpy(nameAux,dirname(obsAux));		
 			}
-			strcat(nameAux,"/raizperfiles.psf");
+			strcat(nameAux,"/gaussian.psf");
 			FILE *fptr = fopen(nameAux, "w");
 			if(fptr!=NULL){
 				int kk;
@@ -298,7 +289,7 @@ int main(int argc, char **argv)
 				fclose(fptr);
 			}
 			else{
-				printf("\n ERROR !!! The output file can not be open: %s",nameAux);
+				printf("\n ERROR !!! The output file cannot be opened: %s",nameAux);
 			}			
 		}else{
 			// read the number of lines 
