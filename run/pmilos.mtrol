@@ -1,7 +1,7 @@
-Number of cycles          (*):50          	! 0=synth,n=max iter,-1=classic
-Observed profiles         (*):data/2014.09.28_09:18:00_xtalk_t 		!    
+Number of cycles          (*):50		! 0=synth,n=max iter,-1=classic
+Observed profiles         (*):data/2014.09.28_09:18:00_xtalk_t    !    
 Stray light file             :		 	! (none=no stray light)
-PSF file                     :CRISP_6173_1mA.psf! file or Gaussian FWHM in mA
+PSF file                     :CRISP_6173_1mA.psf   !file or Gaussian FWHM in mA
 Wavelength grid file      (*):wavelength.grid 	! 
 Atomic parameters file    (*):LINES      	! 
 Abundance file		     : 			! not used with ME models
