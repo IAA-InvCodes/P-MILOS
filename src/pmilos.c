@@ -410,18 +410,21 @@ int main(int argc, char **argv)
 
 		if(configCrontrolFile.FWHM > 0){
 			G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
-			char nameAux [4096];
-			char obsAux [4096];
-			if(configCrontrolFile.ObservedProfiles[0]!='\0'){
-				strcpy(obsAux,configCrontrolFile.ObservedProfiles);
-				strcpy(nameAux,dirname(obsAux));
-			}
-			else{
-				strcpy(obsAux,configCrontrolFile.InitialGuessModel);
-				strcpy(nameAux,dirname(obsAux));		
-			}
-			strcat(nameAux,"/gaussian.psf");
-			FILE *fptr = fopen(nameAux, "w");
+			//char nameAux [4096];
+			//char obsAux [4096];
+			//if(configCrontrolFile.ObservedProfiles[0]!='\0'){
+			//	strcpy(obsAux,configCrontrolFile.ObservedProfiles);
+			//	strcpy(nameAux,dirname(obsAux));
+			//}
+			//else{
+			//	strcpy(obsAux,configCrontrolFile.InitialGuessModel);
+			//	strcpy(nameAux,dirname(obsAux));		
+			//}
+			//strcat(nameAux,"/gaussian.psf");
+
+			//FILE *fptr = fopen(nameAux, "w");
+
+			FILE *fptr = fopen("gaussian.psf", "w");
 			if(fptr!=NULL){
 				int kk;
 				for (kk = 0; kk < nlambda; kk++)
