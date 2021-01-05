@@ -1240,7 +1240,7 @@ int main(int argc, char **argv)
 			PRECISION timeTotalExecution = ((PRECISION)t)/CLOCKS_PER_SEC; // in seconds 
 			//printf("\n-----------------------------------------------------------");
 			printf("\nTOTAL TIME TO READ AND SCATTER CUBES: %6.2f s",timeTotalExecution);
-			printf("\n----------------------------------------------------------------------------------\n");
+			printf("\n----------------------------------------------------------------------------------------\n");
 		}
 	}
 	AllocateMemoryDerivedSynthesis(nlambda);
