@@ -234,7 +234,7 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 	cuantic->FO = fos;
 
 	if(log){
-		printf("\n\n------------    QUANTUM NUMBERS  --------------");
+		printf("\n\n--------------    QUANTUM NUMBERS  --------------");
 		printf("\nNumber of Pi components:\t\t %lf",cuantic->N_PI);
 		printf("\nNumber of Sigma components:\t\t %lf",cuantic->N_SIG);
 		printf("\nLower level lande factor:\t\t %lf",cuantic->GL);
@@ -247,7 +247,7 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 			else
 				printf(" %lf ",cuantic->NUP[i]);
 		}
-		printf("\nShifts blue component:\t\t\t ");
+		printf("\nShifts blue component:\t\t\t");
 		for(i=0;i<cuantic->N_SIG;i++){
 			if(i<(cuantic->N_SIG-1) )
 				printf(" %lf\t",cuantic->NUB[i]);
@@ -282,8 +282,8 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 			else
 				printf(" %lf ",cuantic->WER[i]);
 		}
-		printf("\nRelative line strength:\t\t %lf",cuantic->FO);
-		printf("\n------------------------------------------------\n");	
+		printf("\nRelative line strength:\t\t\t  %lf",cuantic->FO);
+		printf("\n--------------------------------------------------\n");	
 	}
 
 	free(m1);
