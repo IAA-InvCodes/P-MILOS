@@ -424,21 +424,23 @@ int main(int argc, char **argv)
 
 			//FILE *fptr = fopen(nameAux, "w");
 
-			printf("Gaussian PSF will be saved to file gaussian.psf \n"); 
+			if(idProc==root){
+			  printf("Gaussian PSF will be saved to file gaussian.psf \n"); 
 
-			FILE *fptr = fopen("gaussian.psf", "w");
-			if(fptr!=NULL){
+			  FILE *fptr = fopen("gaussian.psf", "w");
+			  if(fptr!=NULL){
 				int kk;
 				for (kk = 0; kk < nlambda; kk++)
 				{
 					fprintf(fptr,"\t%f\t%e\n", (vGlobalLambda[kk]-configCrontrolFile.CentralWaveLenght)*1000, G[kk]);
 				}
 				fclose(fptr);
-			}
-			else{
+			  }
+			  else{
 			  //    printf("\n ERROR !!! The output PSF file cannot be opened: %s",nameAux);
 				printf("\n ERROR !!! The output PSF file cannot be opened: gaussian.psf");
-			}			
+			  }
+			}
 		}
 		else if(access(nameInputFilePSF,F_OK) != -1){
 			// read the number of lines 
