@@ -1,3 +1,4 @@
+
 // PMILOS v2.0 (2020)
 // Parallel Milne-Eddington inversion code 
 // (based on IDL code by D. Orozco & J.C. del Toro Iniesta)
@@ -195,7 +196,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	
-	// check if type of file is FITS, in other case exit 
+	// check if type of file is FITS, else exit 
 	if(strcmp(configCrontrolFile.typeInputStokes,"fits")!=0){
 		if(idProc==root)
 			printf("\nERROR. The profiles must be given in FITS format.\n");
@@ -208,7 +209,7 @@ int main(int argc, char **argv)
 			if(strcmp(file_ext(configCrontrolFile.ObservedProfiles),FITS_FILE)!=0){ 
 				if(idProc==root){
 					printf("\n-----------------------------------------------------------\n");
-					printf("\nERROR. With no time series, a FITS file is expected in 'Observed Profiles'\n");
+					printf("\nERROR. A FITS file is expected in 'Observed Profiles'\n");
 					printf("\n-----------------------------------------------------------\n");
 				}
 				exit(EXIT_FAILURE);	
@@ -224,7 +225,7 @@ int main(int argc, char **argv)
 	}
 	checkInitialModel(&INITIAL_MODEL);
 	if(INITIAL_MODEL.alfa<1 && access(configCrontrolFile.StrayLightFile,F_OK)){
-		printf("\nERROR. Filling factor in initial model is less than 1 and straylight file %s does not exist\n",configCrontrolFile.StrayLightFile);
+		printf("\nERROR. Filling factor is less than 1 and straylight file %s does not exist\n",configCrontrolFile.StrayLightFile);
 		exit(EXIT_FAILURE);
 	}
 
@@ -239,7 +240,7 @@ int main(int argc, char **argv)
   	evec = gsl_matrix_alloc (NTERMS, NTERMS);
 	workspace = gsl_eigen_symmv_alloc (NTERMS);
 
-	/***************** READ WAVELENGHT FROM GRID OR FITS ********************************/
+	/***************** READ WAVELENGTH FROM GRID OR FITS ********************************/
 	PRECISION * vGlobalLambda, *vOffsetsLambda;
 
 	if(configCrontrolFile.useMallaGrid){ // read lambda from grid file
@@ -258,7 +259,7 @@ int main(int argc, char **argv)
 		for(i=1;i<nlambda;i++){
 			vOffsetsLambda[i] = vOffsetsLambda[i-1]+step;
 		}
-		// pass to armstrong 
+		// pass to amstrong 
 		initialLambda = initialLambda/1000;
 		step = step/1000;
 		finalLambda = finalLambda/1000;
@@ -404,11 +405,34 @@ int main(int argc, char **argv)
 	outSpectraBwMAC = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * nlambda);		
 	planBackwardMAC = fftw_plan_dft_1d(nlambda, inSpectraBwMAC, outSpectraBwMAC, FFT_BACKWARD, FFTW_MEASURE    );
 
-	// ********************************************* IF PSF HAS BEEN SELECTEC IN TROL READ PSF FILE OR CREATE GAUSSIAN FILTER ***********//
+	// ******************************* IF PSF HAS BEEN SPECIFIED IN CONTROL FILE,  READ PSF FILE OR CREATE GAUSSIAN FILTER ***********//
 	if(configCrontrolFile.ConvolveWithPSF){
 
 		if(configCrontrolFile.FWHM > 0){
 			G = fgauss_WL(FWHM,vGlobalLambda[1]-vGlobalLambda[0],vGlobalLambda[0],vGlobalLambda[nlambda/2],nlambda,&sizeG);
+			char nameAux [4096];
+			char obsAux [4096];
+			if(configCrontrolFile.ObservedProfiles[0]!='\0'){
+				strcpy(obsAux,configCrontrolFile.ObservedProfiles);
+				strcpy(nameAux,dirname(obsAux));
+			}
+			else{
+				strcpy(obsAux,configCrontrolFile.InitialGuessModel);
+				strcpy(nameAux,dirname(obsAux));		
+			}
+			strcat(nameAux,"/gaussian.psf");
+			FILE *fptr = fopen(nameAux, "w");
+			if(fptr!=NULL){
+				int kk;
+				for (kk = 0; kk < nlambda; kk++)
+				{
+					fprintf(fptr,"\t%f\t%e\n", (vGlobalLambda[kk]-configCrontrolFile.CentralWaveLenght)*1000, G[kk]);
+				}
+				fclose(fptr);
+			}
+			else{
+				printf("\n ERROR !!! The output PSF file cannot be opened: %s",nameAux);
+			}			
 		}
 		else if(access(nameInputFilePSF,F_OK) != -1){
 			// read the number of lines 
@@ -437,7 +461,7 @@ int main(int argc, char **argv)
 				deltaLambda = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
 				PSF = calloc(N_SAMPLES_PSF,sizeof(PRECISION));
 				readPSFFile(deltaLambda,PSF,nameInputFilePSF,configCrontrolFile.CentralWaveLenght);
-				// CHECK if values of deltaLambda are in the same range of vLambda. For do that we truncate to 4 decimal places 
+				// CHECK if values of deltaLambda are in the same range of vLambda. To do that we truncate to 4 decimal places 
 				if( (trunc(vOffsetsLambda[0])) < (trunc(deltaLambda[0]))  || (trunc(vOffsetsLambda[nlambda-1])) > (trunc(deltaLambda[N_SAMPLES_PSF-1])) ){
 					if(idProc==root){
 						printf("\n\n ERROR: The wavelength range in the PSF file is smaller than the range in the grid file [%lf,%lf] [%lf,%lf]  \n\n",deltaLambda[0],vOffsetsLambda[0],deltaLambda[N_SAMPLES_PSF-1],vOffsetsLambda[nlambda-1]);
