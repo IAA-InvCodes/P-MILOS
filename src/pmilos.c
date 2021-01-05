@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 	if(configCrontrolFile.useMallaGrid){ // read lambda from grid file
 		if(idProc==root){
 		        printf("------------------------------------------------------------------------------------\n");
-			printf("\nReading wavelength file: %s\n",configCrontrolFile.MallaGrid);
+			printf("\nReading wavelength grid file: %s\n",configCrontrolFile.MallaGrid);
 		        // printf("\n------------------------------------------------------------------------------------");
 		}
 		indexLine = readMallaGrid(configCrontrolFile.MallaGrid, &initialLambda, &step, &finalLambda, (idProc==root));      
