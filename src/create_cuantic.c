@@ -235,7 +235,7 @@ int Cuanten(Cuantic *cuantic, PRECISION sl, PRECISION ll, PRECISION jl, PRECISIO
 
 	if(log){
 
-		printf("\n\n--------------  ZEEMAN COMPONENTS  ---------------");
+		printf("\n--------------  ZEEMAN COMPONENTS  ---------------");
 		printf("\nNumber of pi components:\t\t %lf",cuantic->N_PI);
 		printf("\nNumber of sigma components:\t\t %lf",cuantic->N_SIG);
 		printf("\nLower level Lande factor:\t\t %lf",cuantic->GL);
