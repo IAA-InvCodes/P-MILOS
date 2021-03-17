@@ -136,7 +136,7 @@ CTYPE3  = 'HPLN-TAN'
 CTYPE4  = 'HPLT-TAN  ' 
 ```
 
-When the FITS data cube does not have a header, the array is assumed to be ordered as (n_x,n_y,n_lambdas,n_stokes).
+When the FITS data cube does not have a header, the array is assumed to be ordered as (n_lambdas, n_stokes, n_x, n_y).
 
 Individual spectral scans within a time sequence must be stored in separate FITS files numbered sequentially using a common name plus the string "_tnnn.fits", where nnn is the spectral scan number padded with zeros (three digits). This makes it easy to locate any time step within the sequence. No gaps are allowed. An example is given below: 
 
