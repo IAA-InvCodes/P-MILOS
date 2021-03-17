@@ -120,19 +120,20 @@ Below we briefly describe the most important I/O files used by the code. A compl
 
 P-MILOS can be fed with cubes containing the Stokes profiles observed in the entire field of view. This is the usual way of inverting measurements from narrow-band filter imagers such as SST/CRISP. 
 
-The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the two spatial coordinates (x, y), the wavelength axis, and the polarization axis. The number of elements in each dimension is n_x, n_y, n_lambdas, and n_stokes, respectively. The cube can be arranged in any order, but the FITS header must contain the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4 to specify each dimension according to the SOLARNET standard:
+The data cubes must be written as 4-dimension arrays in FITS format, with one cube containing one spectral scan. The four dimensions correspond to the wavelength axis, the polarization axis, and two spatial coordinates (x, y). The number of elements in each dimension is n_lambdas, n_stokes, n_x, and n_y, respectively. The cube can be arranged in any order, but the FITS header must contain the keywords CTYPE1, CTYPE2, CTYPE3 and CTYPE4 to specify each dimension according to the SOLARNET standard:
 
-  -  **HPLN-TAN** indicates a spatial coordinate axis
+  -  **HPLN-TAN** indicates a spatial coordinate axis 
+  -  **HPLT-TAN** indicates a spatial coordinate axis
   - **WAVE-GRI** indicates the wavelength axis
   - **STOKES  '** indicates the Stokes parameter axis
 
-The example below corresponds to a data cube with the x-spatial coordinate in the first dimension, the y-spatial coordinate in the second dimension, the wavelength axis in the third dimension and the polarization axis in the fourth dimension. 
+The example below corresponds to a data cube with the wavelength grid in the first dimension, the polarization axis in the second dimension, the x-spatial coordinate in the third dimension, and the y-spatial coordinate in the fourth dimension. 
 
 ```
-CTYPE1  = 'HPLN-TAN' 
-CTYPE2  = 'HPLT-TAN' 
-CTYPE3  = 'WAVE-GRI'
-CTYPE4  = 'STOKES  ' 
+CTYPE1  = 'WAVE-GRI' 
+CTYPE2  = 'STOKES  ' 
+CTYPE3  = 'HPLN-TAN'
+CTYPE4  = 'HPLT-TAN  ' 
 ```
 
 When the FITS data cube does not have a header, the array is assumed to be ordered as (n_x,n_y,n_lambdas,n_stokes).
