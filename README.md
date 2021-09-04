@@ -58,7 +58,7 @@ sudo apt-get install libgsl*
 
 ## Compilation
 
-The code needs to be compiled on the target machine. To do this, run the command 'make' in the directory where the distribution is located. We strongly recommend you to use the latest version of the Intel C compiler, to achieve maximum performance. This is particularly important when the objective is to invert data streams in real time. 
+The code has to be compiled on the target machine. To do this, run the command 'make' in the directory where the distribution is located. We strongly recommend you to use the latest version of the Intel C compiler, to achieve maximum performance. This is particularly important when the objective is to invert data streams in real time. 
 
 For AMD processors, please edit the makefile and change the compilation option -xHost to -march=core-avx2. 
 
@@ -211,16 +211,16 @@ This example corresponds to the file [malla.grid](run/malla.grid) in the *run* d
 
 Different pixels in the field of view may have different wavelength grids (due, for example, to the telecentric or collimated setups of narrow-band filter imagers). A wavelength grid varying across the field of view can be specified as a 4-dimension array written in FITS format. The four dimensions are (line_index, x,y, lambda). The first dimension contains the index of the line in the atomic parameter file. Only one line can be inverted at a time with P-MILOS, so the number of elements in the first dimension is always one. For each pixel (x,y), the array of observed wavelengths must be given. 
 
-If all pixels use the same wavelength grid, the FITS file should contain a 2-dimesion array with (1, n_lambdas) elements. Again, the first dimension contains the line index and the second the observed wavelengths.
+If all pixels use the same wavelength grid, the FITS file should contain a 2-dimension array with (1, n_lambdas) elements. Again, the first dimension contains the line index and the second the observed wavelengths.
 
 
 #### Model atmosphere file (.mod)
 
 Files with extension **.mod** are ASCII file containing the parameters of a Milne-Eddington model atmosphere. They are used in three situations:
 
-1. To specify the initial model atmosphere in an inversion 
-2. To store the best-fit model atmosphere resulting from the inversion of a profile provided as a **.per** file. 
-3. To specify the model atmosphere in a spectral synthesis  
+1. To specify the model atmosphere in a spectral synthesis
+2. To specify the initial model atmosphere in an inversion 
+3. To store the best-fit model atmosphere resulting from the inversion of a profile provided as a **.per** file. 
 
 The following is an example of a model atmosphere file that can be used for the Fe I 6173 A line in the quiet Sun:
 
